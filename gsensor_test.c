@@ -1,0 +1,173 @@
+/*
+ * Copyright (C) 2008 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define LOG_TAG "Sensors"
+
+#include <hardware/sensors.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <dirent.h>
+#include <math.h>
+#include <poll.h>
+#include <pthread.h>
+
+#include <linux/input.h>
+#include "gsensor_test.h"
+#include "../../hardware/rk29/sensor/st/mma8452_kernel.h"              // 声明驱动为 HAL 提供的功能接口. 应该用更加抽象的文件名.
+#include "common.h"
+
+
+#define EVENT_TYPE_ACCEL_X          ABS_X
+#define EVENT_TYPE_ACCEL_Y          ABS_Z
+#define EVENT_TYPE_ACCEL_Z          ABS_Y
+#define ACCELERATION_RATIO_ANDROID_TO_HW        (9.80665f / 1000000)
+
+#define  CTL_DEV_PATH    "/dev/mma8452_daemon"
+
+float g_x = 0;
+float g_y = 0;
+float g_z = 0;
+int openInput(const char* inputName)
+{
+    int fd = -1;
+    const char *dirname = "/dev/input";
+    char devname[512];
+    char *filename;
+    DIR *dir;
+    struct dirent *de;
+
+    //return getInput(inputName);
+
+    dir = opendir(dirname);
+    if(dir == NULL)
+        return -1;
+    strcpy(devname, dirname);
+    filename = devname + strlen(devname);
+    *filename++ = '/';
+    while((de = readdir(dir))) {
+        if(de->d_name[0] == '.' &&
+                (de->d_name[1] == '\0' ||
+                        (de->d_name[1] == '.' && de->d_name[2] == '\0')))
+            continue;
+        strcpy(filename, de->d_name);
+        fd = open(devname, O_RDONLY);
+        if (fd>=0) {
+            char name[80];
+            if (ioctl(fd, EVIOCGNAME(sizeof(name) - 1), &name) < 1) {
+                name[0] = '\0';
+            }
+            if (!strcmp(name, inputName)) {
+                break;
+            } else {
+                close(fd);
+                fd = -1;
+            }
+        }
+    }
+    closedir(dir);
+   
+    return fd;
+}
+
+ int readEvents(int fd)
+ {
+
+	struct input_event  event;
+
+	ssize_t n = read(fd, &event,sizeof(struct input_event));
+	if (n < 0)
+	{
+		printf("gsensor read fail!\n");
+	 	return n;
+	}
+
+
+
+	 int type = event.type;
+	//printf("type:%d\n",type);
+	 if (type == EV_ABS)
+	 {		 // #define EV_ABS 0x03
+	     processEvent(event.code, event.value);
+	   
+	 }
+	
+ 
+     return 0;
+ }
+ 
+int  processEvent(int code, int value)
+{
+
+	float v;
+	switch (code) 
+	{
+	case EVENT_TYPE_ACCEL_X:
+		g_x = value * ACCELERATION_RATIO_ANDROID_TO_HW;
+		//printf("x:%f\n",v);
+		break;
+	case EVENT_TYPE_ACCEL_Y:
+		g_y = value * ACCELERATION_RATIO_ANDROID_TO_HW;
+		//printf("y:%f\n",v);
+		break;
+	case EVENT_TYPE_ACCEL_Z:
+		g_z = value * ACCELERATION_RATIO_ANDROID_TO_HW;
+		//printf("z:%f\n",v);
+		break;
+	}
+
+	return 0;
+ }
+
+ void* gsensor_test(void *argv)
+ {
+ 	struct gsensor_msg *g_msg =  (struct gsensor_msg *)argv;
+ 	
+	int ret;
+ 	int fd = openInput("gsensor");
+	if(fd < 0)
+	{
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
+		g_msg->result = -1;
+		return argv;
+	}
+	int fd_dev = open(CTL_DEV_PATH, O_RDONLY);
+        if(fd_dev<0)
+        {
+         	printf("opne gsensor demon fail\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
+		g_msg->result = -1;
+		return argv;
+		
+        }
+        ret = ioctl(fd_dev, MMA_IOCTL_START);
+        if(ret < 0)
+        {
+                printf("start sensor fail\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
+		g_msg->result = -1;
+		return argv;
+        }
+	for(;;)
+	{
+		readEvents(fd);
+		//ui_print_xy_rgba(0,g_msg->y,0,0,0,255,"                                         \n");
+		ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor test success!x:%f y:%f z:%f\n",
+			g_x,g_y,g_z);
+	}
+
+	return argv;
+ }
+ 
