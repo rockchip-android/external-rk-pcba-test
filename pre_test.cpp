@@ -551,6 +551,7 @@ main(int argc, char **argv)
 	//while(1);
 	gui_start();
 	//prompt_and_wait();
+	stopCameraTest();
 	printf("pcba test over!\n");
 	return 0;
 }
