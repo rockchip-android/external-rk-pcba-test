@@ -545,7 +545,10 @@ main(int argc, char **argv)
 		pthread_join(rtc_tid,(void**)&rtc_res); 
 		rtc_msg = (struct rtc_msg *)(rtc_res);
 		if(rtc_msg->result >= 0)
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",rtc_msg->date);
+			ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",rtc_msg->date);
+		else
+			ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"rtc test fail\n");
+		
 	}
 #endif
 	//while(1);
