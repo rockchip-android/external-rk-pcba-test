@@ -35,7 +35,6 @@ int  rtc_xopen(int flags)
 		printf("open %s\n",major_rtc);
 	}
 
-
 	return rtc;
 }
 
@@ -57,7 +56,7 @@ int  rtc_read_tm(struct tm *ptm, int fd)
 	return ret;
 }
 
-static time_t read_rtc()
+static int  read_rtc(time_t *time_p)
 {
 	struct tm tm_time;
 	int fd;
@@ -77,20 +76,23 @@ static time_t read_rtc()
 	if(ret < 0)
 		return ret;
 	else
-		return  mktime(&tm_time);
+		*time_p = mktime(&tm_time);
+
+	return 0;
 }
 
 int get_system_time(char *dt)
 {    
 	int fd;
 	time_t t;
+	int ret;
 	
 	#if 1
 	time_t timep;
-	struct tm *p;
-	timep = read_rtc();
-	if(timep <= 0)
-		return timep;
+	struct tm *p; 
+	ret = read_rtc(&timep);
+	if(ret <  0)
+		return ret;
 	else
 		p = localtime(&timep);    
 	sprintf(dt,"%04d-%02d-%02d %02d:%02d:%02d",(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec); 
@@ -185,7 +187,9 @@ void* rtc_test(void *argc)
 	{
 		t = get_system_time(rtc_msg->date);
 		if(t < 0)
+		{
 			rtc_msg->result = -1;
+		}
 		else
 		{
 			if((t - tv.tv_sec > 10))

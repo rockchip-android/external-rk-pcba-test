@@ -95,6 +95,7 @@ extern "C" int start_manual_test_item(int x,int y)
 		//	item->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
+			ui_print_xy_rgba(item->x,item->y,0,255,255,255,"%s\n",item->name);
 			item->func(item->argc);
 			break;
 		}
@@ -545,12 +546,16 @@ main(int argc, char **argv)
 		pthread_join(rtc_tid,(void**)&rtc_res); 
 		rtc_msg = (struct rtc_msg *)(rtc_res);
 		if(rtc_msg->result >= 0)
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",rtc_msg->date);
+			ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",rtc_msg->date);
+		else
+			ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"rtc test fail\n");
+		
 	}
 #endif
 	//while(1);
 	gui_start();
 	//prompt_and_wait();
+	stopCameraTest();
 	printf("pcba test over!\n");
 	return 0;
 }
