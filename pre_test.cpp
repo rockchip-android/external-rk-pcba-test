@@ -95,6 +95,7 @@ extern "C" int start_manual_test_item(int x,int y)
 		//	item->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
+			ui_print_xy_rgba(item->x,item->y,0,255,255,255,"%s\n",item->name);
 			item->func(item->argc);
 			break;
 		}
