@@ -91,9 +91,10 @@ void* wlan_test(void* argv)
   	memset(results, 0, SCAN_RESULT_LENGTH);
 	//fread(results, 1, SCAN_RESULT_LENGTH, fp);
 	fgets(results,50,fp);
+        results[49] = '\0';
 	//fgets(wlan_msg->ssid,50,fp); //we assume tha a AP's name is less of 50 charactes
 	
-	//LOG("%s.\n", results);
+	LOG("%s.\n", results);
 	
 	//LOG("end.\n");
 	strcpy_without_space_ahead(wlan_msg->ssid,results);

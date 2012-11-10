@@ -489,7 +489,7 @@ main(int argc, char **argv)
 	else
 	{
 		wlan_msg->result = -1;
-		wlan_msg->ssid = (char *)malloc(sizeof(char));
+		wlan_msg->ssid = (char *)malloc(100*sizeof(char));
 		wlan_msg->y = cur_p_y++;
 		wlan_err = pthread_create(&wlan_tid, NULL, wlan_test,wlan_msg); //
 		if(wlan_err != 0)
