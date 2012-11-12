@@ -39,8 +39,8 @@ extern "C" {
 
 struct manual_item m_item[] = {
 		/*name,  	x, 	y, 	w,	h,	argc, 	func*/
-		{"Codec",	0,	3,	40,	3,	NULL,	NULL},
-		{"KEY",		0,	6,	40,	3,	NULL,	NULL},
+		{"Codec",	0,	3,	40,	5,	NULL,	NULL},
+		{"KEY",		0,	9,	40,	5,	NULL,	NULL},
 		{NULL,		0,	0,	0,	0,	NULL,	NULL}, //end of item
 	};
 
@@ -95,7 +95,7 @@ extern "C" int start_manual_test_item(int x,int y)
 		//	item->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
-			ui_print_xy_rgba(item->x,item->y,0,255,255,255,"%s\n",item->name);
+			ui_print_xy_rgba(item->x,item->y,255,255,0,255,"%s\n",item->name);
 			item->func(item->argc);
 			break;
 		}
