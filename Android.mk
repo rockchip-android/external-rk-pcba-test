@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
     codec_test.c		\
     wlan_test.c			\
     sdcard_test.c		\
+    udisk_test.c        \
     gsensor_test.c 
 
 

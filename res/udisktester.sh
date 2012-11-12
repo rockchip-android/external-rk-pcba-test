@@ -1,39 +1,45 @@
-#!/bin/sh
+#!/sbin/sh
 
-source send_cmd_pipe.sh
+#RESULT_FILE="/data/udisk_capacity.txt"
+#LOG_FILE="/data/udisk.log"
+#source send_cmd_pipe.sh
 
-while true; do
+#while true; do
     for nr in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
         udisk="/dev/block/sd$nr"
         udiskp=$udisk"1"
         part=$udisk
     
+        #echo "searching disk ..." >> LOG_FILE
         while true; do
             while true; do
                 if [ -b "$udisk" ]; then
-                    sleep 1
+                    busybox sleep 1
                     if [ -b "$udisk" ]; then
                         echo "udisk insert"
                         break;
                     fi
                 else
-                    sleep 1
+                    busybox sleep 1
                 fi
             done
             
             if [ ! -d "/tmp/udisk" ]; then
-                mkdir -p /tmp/udisk
+                busybox mkdir -p /tmp/udisk
             fi
             
-            mount -t vfat $udisk /tmp/udisk
+            #echo "mounting disk ..." >> LOG_FILE
+            busybox mount -t vfat $udisk /tmp/udisk
             if [ $? -ne 0 ]; then
-                mount -t vfat $udiskp /tmp/udisk
+                busybox mount -t vfat $udiskp /tmp/udisk
                 if [ $? -ne 0 ]; then
-                    SEND_CMD_PIPE_FAIL $3
-                    sleep 3
+                    echo "udisk mount failed" >> LOG_FILE
+                    exit 1
+                    #SEND_CMD_PIPE_FAIL $3
+                    #busybox sleep 3
                     # goto for nr in ...
                     # detect next plugin, the devno will changed
-                    continue 2
+                    #continue 2
                 else
                     part=$udiskp
                 fi
@@ -42,20 +48,24 @@ while true; do
             break
         done
     
-        capacity=`df | busybox grep /tmp/udisk | busybox awk '{printf $2$3}'`
-        echo "$part: $capacity"
+        capacity=`busybox df | busybox grep /tmp/udisk | busybox awk '{printf $3}'`
+        #echo "$part: $capacity" >> LOG_FILE
         
-        SEND_CMD_PIPE_OK_EX $3 $capacity
+        busybox umount /tmp/udisk
+        #SEND_CMD_PIPE_OK_EX $3 $capacity
+
+        echo $3 $capacity > /data/udisk_capacity.txt
+        break
     
-        while true; do
-            if [ -b "$udisk" ]; then
-                echo "please remove udisk"
-                sleep 1
-            else
-                echo "udisk removed"
-                break
-            fi
-        done
+#        while true; do
+#            if [ -b "$udisk" ]; then
+#                echo "please remove udisk"
+#                busybox sleep 1
+#            else
+#                echo "udisk removed"
+#                break
+#            fi
+#        done
     done
-done
+#done
 

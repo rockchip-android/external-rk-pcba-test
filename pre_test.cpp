@@ -29,6 +29,7 @@ extern "C" {
 	#include "wlan_test.h"
 	#include "gsensor_test.h"
 	#include "sdcard_test.h"
+	#include "udisk_test.h"
 	#include "common.h"
 	#include "gui/gui.h"
 	#include "extra-functions.h"
@@ -151,6 +152,11 @@ pthread_t sd_tid;
 char *sd_res;
 struct sd_msg *sd_msg;
 int sd_err = -1;
+
+pthread_t udisk_tid;  
+char *udisk_res;
+struct udisk_msg *udisk_msg;
+int udisk_err = -1;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -533,6 +539,24 @@ main(int argc, char **argv)
 		   
 		}  
 	}
+
+	udisk_msg = (struct udisk_msg *)malloc(sizeof(struct udisk_msg));
+	if(!udisk_msg)
+	{
+		printf("malloc for sd_msg fail!\n");
+		udisk_err = -1;
+	}
+	else
+	{
+		udisk_msg->result = -1;
+		udisk_err = pthread_create(&udisk_tid, NULL, udisk_test,udisk_msg); //
+		if(udisk_err != 0)
+		{  
+		   printf("create sdcard test thread error: %s/n",strerror(udisk_err));  
+		   
+		}  
+	}
+
 
 	if(!screen_err)
 	{
