@@ -407,6 +407,9 @@ int main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
+	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
+	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
+
     
 	if (gui_init())
 	{
