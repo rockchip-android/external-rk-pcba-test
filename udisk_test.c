@@ -41,7 +41,7 @@ void * udisk_test(void * argv)
 	fgets(results,50,fp);
 	
 	cap = strtod(results,NULL);
-    printf("capacity : %s\n", cap);
+    printf("capacity : %s\n", results);
 	if(cap > 0)
 		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk test success:%2fG\n",cap*1.0/1024/1024);
     else
