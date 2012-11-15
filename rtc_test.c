@@ -9,7 +9,9 @@
 #include <linux/rtc.h>
 
 #include <stdlib.h>
+#include "common.h"
 #include "rtc_test.h"
+#include "script.h"
 
 int  rtc_xopen(int flags)
 {
@@ -145,18 +147,27 @@ int set_system_time(struct timeval *tv)
 
 void* rtc_test(void *argc)
 {
-	char dt[30]={"20120926.132600"};
-	struct rtc_msg *rtc_msg = (struct rtc_msg*)argc;
+	char dt[32]={"20120926.132600"};
 	int ret;
 	struct tm tm;
 	struct timeval tv;
-	char *s = rtc_msg->date;
-	int day = atoi(s);
+	char *s;
+	int day ;
 	int hour;
 	time_t t;
 	
 	
 	struct timespec ts;
+
+	s = malloc(32);
+	 if(script_fetch("rtc", "module_args", (int *)dt, 8) == 0)
+	 {
+	 	//printf("%s>>>args:%s\n",__func__,s);
+                strncpy(s, dt, 32);
+         }
+
+	//printf("%s>>>%s\n",__func__,s);
+	day = atoi(s);
 
 	while (*s && *s != '.')
 		s++;
@@ -181,14 +192,16 @@ void* rtc_test(void *argc)
 	ret = set_system_time(&tv);
 	if(ret < 0)
 	{
-		rtc_msg->result = -1;
+		//rtc_msg->result = -1;
+		ret = -1;
 	}
 	else
 	{
-		t = get_system_time(rtc_msg->date);
+		t = get_system_time(dt);
 		if(t < 0)
 		{
-			rtc_msg->result = -1;
+			//rtc_msg->result = -1;
+			ret = -1;
 		}
 		else
 		{
@@ -196,14 +209,22 @@ void* rtc_test(void *argc)
 			{
 				printf("test rtc failed:settime:%lu>>read time:%lu\n",
 					tv.tv_sec,t);
-				rtc_msg->result = -1;
+				//rtc_msg->result = -1;
+				ret = -1;
 			}
 			else
 			{
-				rtc_msg->result = 0;
+				//rtc_msg->result = 0;
+				ret = 0;
 			}
 		}
 	}
+	
+	if(ret == 0)
+		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",dt);
+	else
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"rtc test fail\n");
+	
 	
 	return argc;
 }

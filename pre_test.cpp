@@ -538,159 +538,64 @@ main(int argc, char **argv)
 	//FillColor(255,0,0,255,400,240,400,240);
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;
 
-	screen_msg = (struct screen_msg *)malloc(sizeof(struct screen_msg));
-	if(!screen_msg)
-	{
-		printf("malloc for screen_msg fail!\n");
-		screen_err = -1;
-	}
-	else
-	{
-		screen_msg->result = -1;
-		screen_msg->x = gr_fb_width() >> 1;
-		screen_msg->y = (gr_fb_height()*2)/3;
-		screen_msg->w = gr_fb_width() >> 1;
-		screen_msg->h = gr_fb_height()/3;
-		screen_err = pthread_create(&screen_tid, NULL, screen_test,screen_msg); //
-		if(screen_err != 0)
-		{  
+	screen_err = pthread_create(&screen_tid, NULL, screen_test,screen_msg); //
+	if(screen_err != 0)
+	{  
 		   printf("create screen test thread error: %s/n",strerror(screen_err));  
 		   
-		}  
+	}  
+	
+	err_rtc = pthread_create(&rtc_tid, NULL, rtc_test,rtc_msg); //
+	if(err_rtc != 0)
+	{  
+	   printf("create rtc test thread error: %s/n",strerror(err_rtc));  
+	   
+	}  
+	
+	camera_err = pthread_create(&camera_tid, NULL, camera_test,camera_msg); //
+	if(camera_err != 0)
+	{  
+	   printf("create camera test thread error: %s/n",strerror(camera_err));  
+	   
+	}  
+	
+
+	
+	wlan_err = pthread_create(&wlan_tid, NULL, wlan_test,wlan_msg); //
+	if(wlan_err != 0)
+	{  
+	   printf("create camera test thread error: %s/n",strerror(wlan_err));  
+	   
+	}  
+	
+
+	
+	gsensor_err = pthread_create(&gsensor_tid, NULL, gsensor_test,gsensor_msg); //
+	if(gsensor_err != 0)
+	{  
+	   printf("create camera test thread error: %s/n",strerror(gsensor_err));  
+	   
+	}  
+	
+
+	
+	udisk_err = pthread_create(&udisk_tid, NULL, udisk_test,udisk_msg); //
+	if(udisk_err != 0)
+	{  
+	   printf("create sdcard test thread error: %s/n",strerror(udisk_err));  
+	   
 	}
 
 
-	rtc_msg = (struct rtc_msg *)malloc(sizeof(struct rtc_msg));
-	if(!rtc_msg)
-	{
-		printf("malloc for rtc_msg fail!\n");
-		err_rtc = -1;
-	}
-	else
-	{
-		rtc_msg->result = -1;
-		rtc_msg->date = dt;
-		err_rtc = pthread_create(&rtc_tid, NULL, rtc_test,rtc_msg); //
-		if(err_rtc != 0)
-		{  
-		   printf("create rtc test thread error: %s/n",strerror(err_rtc));  
-		   
-		}  
-	}
+	
+	sd_err = pthread_create(&sd_tid, NULL, sdcard_test,sd_msg); //
+	if(sd_err != 0)
+	{  
+	   printf("create sdcard test thread error: %s/n",strerror(sd_err));  
+	   
+	}  
+	
 
-
-	camera_msg = (struct camera_msg *)malloc(sizeof(struct camera_msg));
-	if(!camera_msg)
-	{
-		printf("malloc for camera_msg fail!\n");
-		camera_err = -1;
-	}
-	else
-	{
-		camera_msg->result = -1;
-		camera_msg->id = 0;
-		camera_msg->x = gr_fb_width() >> 1;
-		camera_msg->y = 0;
-		camera_msg->w = gr_fb_width() >> 1;
-		camera_msg->h = gr_fb_height()*2/3;
-		//ui->FillColor(255,255,255,255,camera_msg->x,0,camera_msg->w,camera_msg->h); 
-		camera_err = pthread_create(&camera_tid, NULL, camera_test,camera_msg); //
-		if(camera_err != 0)
-		{  
-		   printf("create camera test thread error: %s/n",strerror(camera_err));  
-		   
-		}  
-	}
-
-	wlan_msg = (struct wlan_msg *)malloc(sizeof(struct wlan_msg));
-	if(!wlan_msg)
-	{
-		printf("malloc for wlan_msg fail!\n");
-		wlan_err = -1;
-	}
-	else
-	{
-		wlan_msg->result = -1;
-		wlan_msg->ssid = (char *)malloc(100*sizeof(char));
-		wlan_msg->y = cur_p_y++;
-		wlan_err = pthread_create(&wlan_tid, NULL, wlan_test,wlan_msg); //
-		if(wlan_err != 0)
-		{  
-		   printf("create camera test thread error: %s/n",strerror(wlan_err));  
-		   
-		}  
-	}
-
-	gsensor_msg = (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
-	if(!gsensor_msg)
-	{
-		printf("malloc for wlan_msg fail!\n");
-		gsensor_err = -1;
-	}
-	else
-	{
-		gsensor_msg->result = -1;
-		gsensor_msg->y = get_cur_print_y();
-		gsensor_err = pthread_create(&gsensor_tid, NULL, gsensor_test,gsensor_msg); //
-		if(gsensor_err != 0)
-		{  
-		   printf("create camera test thread error: %s/n",strerror(gsensor_err));  
-		   
-		}  
-	}
-
-	sd_msg = (struct sd_msg *)malloc(sizeof(struct sd_msg));
-	if(!sd_msg)
-	{
-		printf("malloc for sd_msg fail!\n");
-		sd_err = -1;
-	}
-	else
-	{
-		sd_msg->result = -1;
-		sd_err = pthread_create(&sd_tid, NULL, sdcard_test,sd_msg); //
-		if(sd_err != 0)
-		{  
-		   printf("create sdcard test thread error: %s/n",strerror(sd_err));  
-		   
-		}  
-	}
-
-	udisk_msg = (struct udisk_msg *)malloc(sizeof(struct udisk_msg));
-	if(!udisk_msg)
-	{
-		printf("malloc for sd_msg fail!\n");
-		udisk_err = -1;
-	}
-	else
-	{
-		udisk_msg->result = -1;
-		udisk_err = pthread_create(&udisk_tid, NULL, udisk_test,udisk_msg); //
-		if(udisk_err != 0)
-		{  
-		   printf("create sdcard test thread error: %s/n",strerror(udisk_err));  
-		   
-		}  
-	}
-
-
-	if(!screen_err)
-	{
-		pthread_join(screen_tid,(void**)&screen_res); 
-		screen_msg = (struct screen_msg *)(screen_res);
-		printf("screen test %s\n",(screen_msg->result >= 0)? "success":"fail");
-	}
-
-	if(!err_rtc)
-	{
-		pthread_join(rtc_tid,(void**)&rtc_res); 
-		rtc_msg = (struct rtc_msg *)(rtc_res);
-		if(rtc_msg->result >= 0)
-			ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",rtc_msg->date);
-		else
-			ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"rtc test fail\n");
-		
-	}
 #endif
 	//while(1);
 	gui_start();

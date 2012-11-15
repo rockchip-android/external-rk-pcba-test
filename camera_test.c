@@ -1,4 +1,6 @@
 #include "camera_test.h"
+#include "./minuitwrp/minui.h"
+
 #define VIDEO_DEV_NAME   "/dev/video0"
 #define PMEM_DEV_NAME    "/dev/pmem_cam"
 #define DISP_DEV_NAME    "/dev/graphics/fb1"
@@ -513,15 +515,15 @@ int stopCameraTest(){
 void * camera_test(void *argc)
 {
 	struct camera_msg *camera_msg = (struct camera_msg *)argc;
-	int id = camera_msg->id;
-	int x = camera_msg->x;
-	int y= camera_msg->y;
-	int w = camera_msg->w;
-	int h = camera_msg->h;
-	printf("%s:video%d x:%d y:%d w:%d h:%d\n",__func__,id,x,y,w,h);
+	int id = 0;//camera_msg->id;
+	int x =  gr_fb_width() >> 1;//camera_msg->x;
+	int y= 0;//camera_msg->y;
+	int w = gr_fb_width() >> 1;//camera_msg->w;
+	int h = gr_fb_height()*2/3;// camera_msg->h;
+	//printf("%s:video%d x:%d y:%d w:%d h:%d\n",__func__,id,x,y,w,h);
 	int result ;
 	result = startCameraTest(id,w,h,x,y);
-	camera_msg->result = result;
+	//camera_msg->result = result;
 
 	return argc;
 }

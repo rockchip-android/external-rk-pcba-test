@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include <stdlib.h>
 
+#include"extra-functions.h"
 #include"common.h"
 #include"sdcard_test.h"
 
@@ -9,7 +10,8 @@
 
 void * sdcard_test(void * argv)
 {
-	struct sd_msg *sd_msg = (struct sd_msg*)argv;
+	
+	struct sd_msg *sd_msg = (struct sd_msg *)malloc(sizeof(struct sd_msg));
 	int ret;
 	double cap;
 	FILE *fp;

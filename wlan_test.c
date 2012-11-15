@@ -60,6 +60,7 @@ void* wlan_test(void* argv)
 	int ret;
 	FILE *fp;
 	char results[SCAN_RESULT_LENGTH];
+	char ssid[100];
 	struct wlan_msg *wlan_msg = (struct wlan_msg *)argv;
 	
 	ret =  __system("busybox chmod 777 /sbin/wifi.sh");
@@ -70,7 +71,7 @@ void* wlan_test(void* argv)
 	if(ret <= 0) {
 		LOG("wifi test failed.\n");
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"wlan test fail\n");
-		wlan_msg->result = -1;
+		//wlan_msg->result = -1;
 		return argv;
 	}
 	
@@ -79,7 +80,7 @@ void* wlan_test(void* argv)
 	if(fp == NULL) {
 		LOG("can not open %s.\n", SCAN_RESULT_FILE);
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"wlan test fail\n");
-		wlan_msg->result = -1;
+		//wlan_msg->result = -1;
 		return argv;
 	}
 	
@@ -97,8 +98,8 @@ void* wlan_test(void* argv)
 	LOG("%s.\n", results);
 	
 	//LOG("end.\n");
-	strcpy_without_space_ahead(wlan_msg->ssid,results);
-	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"wlan test success:%s\n",wlan_msg->ssid);
+	strcpy_without_space_ahead(ssid,results);
+	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"wlan test success:%s\n",ssid);
 	
 		
     return 0;

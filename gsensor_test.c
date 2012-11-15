@@ -82,6 +82,29 @@ int openInput(const char* inputName)
     return fd;
 }
 
+ int  processEvent(int code, int value)
+ {
+ 
+	 float v;
+	 switch (code) 
+	 {
+	 case EVENT_TYPE_ACCEL_X:
+		 g_x = value * ACCELERATION_RATIO_ANDROID_TO_HW;
+		 //printf("x:%f\n",v);
+		 break;
+	 case EVENT_TYPE_ACCEL_Y:
+		 g_y = value * ACCELERATION_RATIO_ANDROID_TO_HW;
+		 //printf("y:%f\n",v);
+		 break;
+	 case EVENT_TYPE_ACCEL_Z:
+		 g_z = value * ACCELERATION_RATIO_ANDROID_TO_HW;
+		 //printf("z:%f\n",v);
+		 break;
+	 }
+ 
+	 return 0;
+  }
+
  int readEvents(int fd)
  {
 
@@ -108,35 +131,25 @@ int openInput(const char* inputName)
      return 0;
  }
  
-int  processEvent(int code, int value)
-{
 
-	float v;
-	switch (code) 
-	{
-	case EVENT_TYPE_ACCEL_X:
-		g_x = value * ACCELERATION_RATIO_ANDROID_TO_HW;
-		//printf("x:%f\n",v);
-		break;
-	case EVENT_TYPE_ACCEL_Y:
-		g_y = value * ACCELERATION_RATIO_ANDROID_TO_HW;
-		//printf("y:%f\n",v);
-		break;
-	case EVENT_TYPE_ACCEL_Z:
-		g_z = value * ACCELERATION_RATIO_ANDROID_TO_HW;
-		//printf("z:%f\n",v);
-		break;
-	}
-
-	return 0;
- }
 
  void* gsensor_test(void *argv)
  {
- 	struct gsensor_msg *g_msg =  (struct gsensor_msg *)argv;
  	
 	int ret;
- 	int fd = openInput("gsensor");
+	int fd;
+ 	struct gsensor_msg *g_msg =  (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
+ 	if(!g_msg)
+	{
+		printf("malloc for wlan_msg fail!\n");
+	}
+	else
+	{
+		g_msg->result = -1;
+		g_msg->y = get_cur_print_y();
+	}
+	
+ 	fd = openInput("gsensor");
 	if(fd < 0)
 	{
 		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
