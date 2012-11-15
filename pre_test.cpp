@@ -390,111 +390,8 @@ void prompt_and_wait()
 }
 
 
-#if 0
+
 int main(int argc, char **argv)
-{	
-	
-	
-	time_t start = time(NULL);
-	
-	printf("Starting pcba test on %s", ctime(&start));
-	printf("Build time:%s %s\n",__DATE__,__TIME__);
-
-    Device* device = make_device();
-    ui = device->GetUI();
-
-    ui->Init();
-	ui->ShowText(true);
-    ui->SetBackground(RecoveryUI::NONE);
-    ui->Print(2,2,100,5,5,100,"Pcba test system v1.0 \n\n");
-	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;
-	rtc_msg = (struct rtc_msg *)malloc(sizeof(struct rtc_msg));
-	if(!rtc_msg)
-	{
-		printf("malloc for rtc_msg fail!\n");
-		err_rtc = -1;
-	}
-	else
-	{
-		rtc_msg->result = -1;
-		rtc_msg->date = dt;
-		err_rtc = pthread_create(&rtc_tid, NULL, rtc_test,rtc_msg); //
-		if(err_rtc != 0)
-		{  
-		   printf("create rtc test thread error: %s/n",strerror(err_rtc));  
-		   
-		}  
-	}
-
-	screen_msg = (struct screen_msg *)malloc(sizeof(struct screen_msg));
-	if(!screen_msg)
-	{
-		printf("malloc for screen_msg fail!\n");
-		screen_err = -1;
-	}
-	else
-	{
-		screen_msg->result = -1;
-		screen_msg->x = gr_fb_width() >> 1;
-		screen_msg->y = (gr_fb_height()*2)/3;
-		screen_msg->w = gr_fb_width() >> 1;
-		screen_msg->h = gr_fb_height()/3;
-		screen_msg->ui = ui;
-		screen_err = pthread_create(&screen_tid, NULL, screen_test,screen_msg); //
-		if(screen_err != 0)
-		{  
-		   printf("create screen test thread error: %s/n",strerror(screen_err));  
-		   
-		}  
-	}
-
-
-	camera_msg = (struct camera_msg *)malloc(sizeof(struct camera_msg));
-	if(!camera_msg)
-	{
-		printf("malloc for camera_msg fail!\n");
-		camera_err = -1;
-	}
-	else
-	{
-		camera_msg->result = -1;
-		camera_msg->id = 0;
-		camera_msg->x = gr_fb_width() >> 1;
-		camera_msg->y = 0;
-		camera_msg->w = gr_fb_width() >> 1;
-		camera_msg->h = gr_fb_height()*2/3;
-		//ui->FillColor(255,255,255,255,camera_msg->x,0,camera_msg->w,camera_msg->h); 
-		camera_err = pthread_create(&camera_tid, NULL, camera_test,camera_msg); //
-		if(camera_err != 0)
-		{  
-		   printf("create camera test thread error: %s/n",strerror(camera_err));  
-		   
-		}  
-	}
-	
-	
-	if(!err_rtc)
-	{
-		pthread_join(rtc_tid,(void**)&rtc_res); 
-		rtc_msg = (struct rtc_msg *)(rtc_res);
-		if(rtc_msg->result >= 0)
-			ui->Print(2,cur_p_y++,0,0,255,100,"rtc test success:%s\n",rtc_msg->date);
-	}
-
-	if(!screen_err)
-	{
-		pthread_join(screen_tid,(void**)&screen_res); 
-		screen_msg = (struct screen_msg *)(screen_res);
-		printf("screen test %s\n",(screen_msg->result >= 0)? "success":"fail");
-	}
-
-	prompt_and_wait(device,man_title, man_items, 0,2,4);
-	
-	return 0;
-}
-#else
-int
-main(int argc, char **argv)
 {
 	int ret;
 	char *script_buf;
@@ -604,4 +501,4 @@ main(int argc, char **argv)
 	printf("pcba test over!\n");
 	return 0;
 }
-#endif
+
