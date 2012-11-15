@@ -24,6 +24,8 @@ LOCAL_SRC_FILES := \
     default_recovery_ui.c \
     reboot.c			\
     data.cpp			\
+    script.c			\
+    script_parser.c		\
     screen_test.c		\
     rtc_test.c			\
     camera_test.c		\

@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <pthread.h>
 
+#define SCRIPT_NAME                     "/sbin/test_config.cfg"
 
 extern "C" {
 	#include "./minuitwrp/minui.h"
@@ -34,9 +35,97 @@ extern "C" {
 	#include "gui/gui.h"
 	#include "extra-functions.h"
 	#include "data.h"
+	#include "script.h"
+	#include "test_case.h"
+	#include "script_parser.h"
+	#include "debug.h"
 	
 }
 
+static int total_testcases = 0;
+static struct testcase_base_info *base_info = NULL;
+static int base_info_shmid;
+
+static int parse_testcase()
+{
+    int i, j, mainkey_cnt;
+    struct testcase_base_info *info;
+    char mainkey_name[32], display_name[64], binary[16];
+    int activated, category, run_type;
+    int len;
+
+    mainkey_cnt = script_mainkey_cnt();
+    info = (struct testcase_base_info*)malloc(sizeof(struct testcase_base_info) * mainkey_cnt);
+    if (info == NULL) {
+        db_error("core: allocate memory for temporary test case basic "
+                "information failed(%s)\n", strerror(errno));
+        return -1;
+    }
+    memset(info, 0, sizeof(struct testcase_base_info) * mainkey_cnt);
+
+    for (i = 0, j = 0; i < mainkey_cnt; i++) {
+        memset(mainkey_name, 0, 32);
+        script_mainkey_name(i, mainkey_name);
+
+        if (script_fetch(mainkey_name, "display_name", (int *)display_name, 16))
+            continue;
+
+        if (script_fetch(mainkey_name, "activated", &activated, 1))
+            continue;
+
+        if (display_name[0] && activated == 1) {
+            strncpy(info[j].name, mainkey_name, 32);
+            strncpy(info[j].display_name, display_name, 64);
+            info[j].activated = activated;
+
+            if (script_fetch(mainkey_name, "program", (int *)binary, 4) == 0) {
+                strncpy(info[j].binary, binary, 16);
+            }
+
+            info[j].id = j;
+
+            if (script_fetch(mainkey_name, "category", &category, 1) == 0) {
+                info[j].category = category;
+            }
+
+            if (script_fetch(mainkey_name, "run_type", &run_type, 1) == 0) {
+                info[j].run_type = run_type;
+            }
+			printf("name:%s>>disp_name:%s>>activated:%d>>binary:%s>>id:%d>>category:%d>>run_type:%d\n",
+				info[j].name,info[j].display_name, info[j].activated,info[j].binary,info[j].id, info[j].category,
+				 info[j].run_type);
+            j++;
+        }
+    }
+    total_testcases = j;
+
+    db_msg("core: total test cases #%d\n", total_testcases);
+    if (total_testcases == 0) {
+        return 0;
+    }
+
+    len = sizeof(struct testcase_base_info) * total_testcases;
+	#if 0
+    base_info_shmid = shmget(IPC_PRIVATE, len, IPC_CREAT | 0666);
+    if (base_info_shmid == -1) {
+        db_error("core: allocate share memory segment for test case basic "
+                "information failed(%s)\n", strerror(errno));
+        return -1;
+    }
+
+    base_info = shmat(base_info_shmid, 0, 0);
+    if (base_info == (void *)-1) {
+        db_error("core: attach the share memory for test case basic "
+                "information failed(%s)\n", strerror(errno));
+        shmctl(base_info_shmid, IPC_RMID, 0);
+        return -1;
+    }
+    memcpy(base_info, info, sizeof(struct testcase_base_info) * 
+            total_testcases);
+	#endif
+
+    return total_testcases;
+}
 
 struct manual_item m_item[] = {
 		/*name,  	x, 	y, 	w,	h,	argc, 	func*/
@@ -407,6 +496,8 @@ int main(int argc, char **argv)
 int
 main(int argc, char **argv)
 {
+	int ret;
+	char *script_buf;
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
 
@@ -421,6 +512,28 @@ main(int argc, char **argv)
 #if 1
 	ui_print_xy_rgba(0,0,255,0,0,255,"Rockchip Pcba test v1.0\n");
 	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
+	
+	script_buf = parse_script(SCRIPT_NAME);
+	if (!script_buf)
+	{
+		   printf("parse script failed\n");
+		   return -1;
+	}
+	
+	ret = init_script(script_buf);
+	if (ret) {
+		   db_error("core: init script failed(%d)\n", ret);
+		   return -1;
+	}
+	ret = parse_testcase();
+    if (ret < 0) {
+        db_error("core: parse all test case from script failed(%d)\n", ret);
+        return -1;
+    }
+    else if (ret == 0) {
+        db_warn("core: NO TEST CASE to be run\n");
+        return -1;
+    }
 	init_manual_test_item();
 	//FillColor(255,0,0,255,400,240,400,240);
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;

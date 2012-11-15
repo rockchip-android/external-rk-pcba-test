@@ -1,14 +1,4 @@
-/*
- * \file        script.c
- * \brief       
- *
- * \version     1.0.0
- * \date        2012年05月31日
- * \author      James Deng <csjamesdeng@allwinnertech.com>
- *
- * Copyright (c) 2012 Allwinner Technology. All Rights Reserved.
- *
- */
+
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -19,9 +9,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "shm.h"
+//#include "shm.h"
 #include "script.h"
-#include "dragonboard.h"
+#include "debug.h"
+
 
 #define DATA_TYPE_SINGLE_WORD           1
 #define DATA_TYPE_STRING                2
@@ -51,15 +42,18 @@ struct script_subkey
 static char *script_buf = NULL;
 static int mainkey_cnt = 0;
 
-int init_script(int shmid)
+int init_script(char* buf)
 {
+#if 0
     script_buf = shmat(shmid, 0, 0);
     if (script_buf == (void *)-1) {
         db_error("script: attach the share memory segment failed(%s)\n", 
                 strerror(errno));
         return -1;
     }
-
+#else
+   script_buf = buf;
+#endif
     struct script_head *head = (struct script_head *)script_buf;
 
     mainkey_cnt = head->mainkey_cnt;
@@ -73,7 +67,7 @@ int init_script(int shmid)
 void deinit_script(void)
 {
     if (script_buf) {
-        shmdt(script_buf);
+       // shmdt(script_buf);
         script_buf = NULL;
     }
 

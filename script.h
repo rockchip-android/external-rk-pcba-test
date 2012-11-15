@@ -1,14 +1,3 @@
-/*
- * \file        script.h
- * \brief       
- *
- * \version     1.0.0
- * \date        2012年05月31日
- * \author      James Deng <csjamesdeng@allwinnertech.com>
- *
- * Copyright (c) 2012 Allwinner Technology. All Rights Reserved.
- *
- */
 
 #ifndef __SCRIPT_H__
 #define __SCRIPT_H__
@@ -28,7 +17,7 @@ struct script_gpio_set
  * init script. called before other function.
  * \param shmid.
  */
-int init_script(int shmid);
+int init_script(char* shmid);
 
 /*
  * deinit script.
@@ -55,5 +44,6 @@ int script_fetch(char *main_name, char *sub_name, int value[], int count);
  */
 int script_fetch_gpio_set(char *main_name, struct script_gpio_set *gpio_set, 
         int gpio_cnt);
+
 
 #endif /* __SCRIPT_H__ */
