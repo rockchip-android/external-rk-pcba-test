@@ -16,7 +16,7 @@ LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
 LOCAL_C_INCLUDES += bionic external/stlport/stlport
 
 LOCAL_SRC_FILES := \
-    pre_test.cpp\
+    pre_test.c\
     ui.c \
     extra-functions.c \
     ddftw.c \

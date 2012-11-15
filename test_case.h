@@ -1,17 +1,9 @@
-/*
- * \file        test_case.h
- * \brief       
- *
- * \version     1.0.0
- * \date        2012年06月01日
- * \author      James Deng <csjamesdeng@allwinnertech.com>
- *
- * Copyright (c) 2012 Allwinner Technology. All Rights Reserved.
- *
- */
 
 #ifndef __TEST_CASE_H__
 #define __TEST_CASE_H__
+
+#include<pthread.h>
+#include"list.h"
 
 #define CATEGORY_AUTO                   0
 #define CATEGORY_MANUAL                 1
@@ -28,6 +20,14 @@ struct testcase_base_info
     int id;
     int category; /* 0: auto, 1: manual */
     int run_type;
+};
+
+struct testcase_info
+{
+	pthread_t tid;
+	int 	err;
+	struct testcase_base_info *base_info;
+	struct list_head list;
 };
 
 #define INIT_CMD_PIPE()                                         \

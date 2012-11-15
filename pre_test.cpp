@@ -15,11 +15,11 @@
 #include <dirent.h>
 #include <inttypes.h>
 #include <errno.h>
-#include <pthread.h>
+
 
 #define SCRIPT_NAME                     "/sbin/test_config.cfg"
 
-extern "C" {
+//extern "C" {
 	#include "./minuitwrp/minui.h"
 	#include "recovery_ui.h"
 	#include "rtc_test.h"
@@ -40,11 +40,13 @@ extern "C" {
 	#include "script_parser.h"
 	#include "debug.h"
 	
-}
+//}
 
 static int total_testcases = 0;
 static struct testcase_base_info *base_info = NULL;
-static int base_info_shmid;
+static struct list_head auto_test_list_head;
+static struct list_head manual_test_list_head;
+
 
 static int parse_testcase()
 {
@@ -64,6 +66,7 @@ static int parse_testcase()
     memset(info, 0, sizeof(struct testcase_base_info) * mainkey_cnt);
 
     for (i = 0, j = 0; i < mainkey_cnt; i++) {
+		struct testcase_info *tc_info;
         memset(mainkey_name, 0, 32);
         script_mainkey_name(i, mainkey_name);
 
@@ -91,9 +94,20 @@ static int parse_testcase()
             if (script_fetch(mainkey_name, "run_type", &run_type, 1) == 0) {
                 info[j].run_type = run_type;
             }
-			printf("name:%s>>disp_name:%s>>activated:%d>>binary:%s>>id:%d>>category:%d>>run_type:%d\n",
-				info[j].name,info[j].display_name, info[j].activated,info[j].binary,info[j].id, info[j].category,
-				 info[j].run_type);
+			tc_info = (struct testcase_info*) malloc(sizeof(struct testcase_info));
+			if(tc_info == NULL)
+			{
+				printf("malloc for tc_info[%d] fail\n",j);
+				return -1;
+			}
+			tc_info->base_info = info[j];
+			if(tc_info->base_info->category)   
+				 list_add(&tc_info->list, &manual_test_list_head);
+			else
+				 list_add(&tc_info->list, &auto_test_list_head);
+			//printf("name:%s>>disp_name:%s>>activated:%d>>binary:%s>>id:%d>>category:%d>>run_type:%d\n",
+			//	info[j].name,info[j].display_name, info[j].activated,info[j].binary,info[j].id, info[j].category,
+			//	 info[j].run_type);
             j++;
         }
     }
@@ -170,7 +184,7 @@ int init_manual_test_item(void)
 	return 0;
 }
 
-extern "C" int start_manual_test_item(int x,int y)
+ int start_manual_test_item(int x,int y)
 {
 	struct manual_item *item = m_item;
 	int x_start,x_end;
@@ -395,6 +409,8 @@ int main(int argc, char **argv)
 {
 	int ret;
 	char *script_buf;
+	struct list_head *pos;
+	
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
 
@@ -431,6 +447,21 @@ int main(int argc, char **argv)
         db_warn("core: NO TEST CASE to be run\n");
         return -1;
     }
+
+	printf("manual testcase:\n")
+	list_for_each(pos, &manual_test_list_head) {
+        struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		printf("%s\n",tc_info->base_info->display_name);
+		
+    }
+
+	printf("\n\nauto testcase:\n");
+	list_for_each(pos, &auto_test_list_head) {
+        struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		printf("%s\n",tc_info->base_info->display_name);
+		
+    }
+	
 	init_manual_test_item();
 	//FillColor(255,0,0,255,400,240,400,240);
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;
