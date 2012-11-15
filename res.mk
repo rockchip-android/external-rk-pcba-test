@@ -8,6 +8,5 @@ PRODUCT_COPY_FILES += \
         $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/8192cu.ko:root/sbin/8192cu.ko) \
         $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/rda5890.ko:root/sbin/rda5890.ko) \
         $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/rt5370sta.ko:root/sbin/rt5370sta.ko) \
-        $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/rkwifi.ko:root/sbin/rkwifi.ko) \
-        $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/wlan.ko:root/sbin/wlan.ko)
+        $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/rkwifi.ko:root/sbin/rkwifi.ko)
 
