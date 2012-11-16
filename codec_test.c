@@ -110,7 +110,7 @@ fail:
 	return 0;
 }
 
-int codec_test(void *argv)
+void* codec_test(void *argv)
 {
 	sleep(3);    
 	codec_err = pthread_create(&codec_tid, NULL, rec_play_test,NULL); //
@@ -120,5 +120,5 @@ int codec_test(void *argv)
 	   
 	} 
 	
-    return 0;
+    return NULL;
 }

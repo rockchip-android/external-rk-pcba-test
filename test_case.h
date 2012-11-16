@@ -31,6 +31,7 @@ struct testcase_info
 	int y;
 	int w;
 	int h;
+	int dev_id;		//default 0,but some device have double,such as camera
 	int (*func)(void *argv); //test function
 	struct list_head list;
 };

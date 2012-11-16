@@ -124,7 +124,7 @@ int scan_key_code()
 	 return 0;
  }
 
- int key_test(void *argc)
+void* key_test(void *argc)
 {
 	int i = 0;
 	int code;
@@ -134,5 +134,5 @@ int scan_key_code()
 	key_code_probe();
 	g_key_test = 1;
 	
-	return 0;
+	return NULL;
 }

@@ -211,6 +211,11 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	{
 		tc_info->func = key_test;
 	}
+	else if(!strcmp(tc_info->base_info->name, "Camera_1"))
+	{
+		tc_info->func = camera_test;
+		tc_info->dev_id = 1;
+	}
 	else
 	{
 		printf("unsupported test case:%s\n",tc_info->base_info->name);
@@ -272,6 +277,11 @@ int start_manual_test_item(int x,int y)
 		//	tc_info->base_info->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
+			if (!strcmp(tc_info->base_info->name, "camera_front"))
+			{
+				stopCameraTest();
+			}
+				
 			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),255,255,0,255,"%s\n",
 					tc_info->base_info->display_name);
 			tc_info->func(tc_info);
@@ -366,9 +376,10 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		   
 		}  
 	}
-	else if(!strcmp(tc_info->base_info->name, "camera"))
+	else if(!strcmp(tc_info->base_info->name, "Camera_0"))
 	{
-		err = pthread_create(&camera_tid, NULL, camera_test,camera_msg); //
+		tc_info->dev_id = 0;
+		err = pthread_create(&camera_tid, NULL, camera_test,tc_info); //
 		if(err != 0)
 		{  
 		   printf("create camera test thread error: %s/n",strerror(err)); 

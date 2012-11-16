@@ -1,6 +1,6 @@
 #include "camera_test.h"
 #include "./minuitwrp/minui.h"
-
+#include "test_case.h"
 #define VIDEO_DEV_NAME   "/dev/video0"
 #define PMEM_DEV_NAME    "/dev/pmem_cam"
 #define DISP_DEV_NAME    "/dev/graphics/fb1"
@@ -514,8 +514,8 @@ int stopCameraTest(){
 
 void * camera_test(void *argc)
 {
-	struct camera_msg *camera_msg = (struct camera_msg *)argc;
-	int id = 0;//camera_msg->id;
+	struct testcase_info *tc_info = (struct testcase_info *)argc;
+	int id = tc_info->dev_id;
 	int x =  gr_fb_width() >> 1;//camera_msg->x;
 	int y= 0;//camera_msg->y;
 	int w = gr_fb_width() >> 1;//camera_msg->w;
