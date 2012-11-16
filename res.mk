@@ -10,3 +10,6 @@ PRODUCT_COPY_FILES += \
         $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/rt5370sta.ko:root/sbin/rt5370sta.ko) \
         $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/rkwifi.ko:root/sbin/rkwifi.ko)
 
+# for camera test
+PRODUCT_COPY_FILES += \
+        $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/proprietary/libipp/rk29-ipp.ko:root/)
