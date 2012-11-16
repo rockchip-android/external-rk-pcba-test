@@ -12,4 +12,4 @@ PRODUCT_COPY_FILES += \
 
 # for camera test
 PRODUCT_COPY_FILES += \
-        $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/proprietary/libipp/rk29-ipp.ko:root/)
+        $(call add-to-product-copy-files-if-exists,device/rockchip/$(TARGET_PRODUCT)/proprietary/libipp/rk29-ipp.ko:root/rk29-ipp.ko)
