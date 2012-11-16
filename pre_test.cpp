@@ -148,6 +148,9 @@ struct manual_item m_item[] = {
 		{NULL,		0,	0,	0,	0,	NULL,	NULL}, //end of item
 	};
 
+const int manual_p_y = 3; //manual test start y position
+
+#if 0
 int init_manual_test_item(void)
 {
 	struct manual_item *item = m_item;
@@ -183,7 +186,13 @@ int init_manual_test_item(void)
 	}
 	return 0;
 }
+#else
+int init_manual_test_item(struct testcase_info *tc_info)
+{
+	
+}
 
+#endif
  int start_manual_test_item(int x,int y)
 {
 	struct manual_item *item = m_item;

@@ -27,6 +27,11 @@ struct testcase_info
 	pthread_t tid;
 	int 	err;
 	struct testcase_base_info *base_info;
+	int x;			//x,y positon and width height on the screen
+	int y;
+	int w;
+	int h;
+	int (*func)(void *argv); //test function
 	struct list_head list;
 };
 

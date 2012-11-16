@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include "common.h"
 #include "key_test.h"
+#include "test_case.h"
 #define test_bit(bit, array)    (array[bit/8] & (1<<(bit%8)))
 
 uint8_t keyBitmask[(KEY_MAX + 1) / 8];
@@ -16,7 +17,7 @@ unsigned int gKey = 0;
 static pthread_mutex_t gKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 
 int g_key_test = 0;
-struct key_msg *key_msg = NULL;
+struct testcase_info  *tc_info = NULL;
 
 int set_gKey(unsigned int code)
 {
@@ -25,7 +26,7 @@ int set_gKey(unsigned int code)
 	{
 		if(code == key_code[i].code)
 		{
-			ui_print_xy_rgba(0,key_msg->y + 1,0,255,0,255,"%s\n",key_code[i].name);
+			ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,255,0,255,"%s\n",key_code[i].name);
 			break;
 		}
 	}
@@ -125,11 +126,11 @@ int scan_key_code()
 
  int key_test(void *argc)
 {
-	key_msg = (struct key_msg *)argc;
 	int i = 0;
 	int code;
 	int run = 1;
 	printf("start key test\n");
+	tc_info  = (struct testcase_info *)argc;
 	key_code_probe();
 	g_key_test = 1;
 	
