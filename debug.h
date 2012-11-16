@@ -38,35 +38,35 @@
 
 #ifdef DB_ERROR
 #define db_error(fmt, ...) \
-    do { fprintf(stderr, "dragonboard(error): "); fprintf(stderr, fmt, ##__VA_ARGS__); } while (0)
+    do { fprintf(stderr, "(error): "); fprintf(stderr, fmt, ##__VA_ARGS__); } while (0)
 #else
 #define db_error(fmt, ...)
 #endif /* DB_ERROR */
 
 #ifdef DB_WARN
 #define db_warn(fmt, ...) \
-    do { fprintf(stdout, "dragonboard(warn): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
+    do { fprintf(stdout, "(warn): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
 #else
 #define db_warn(fmt, ...)
 #endif /* DB_WARN */
 
 #ifdef DB_MSG
 #define db_msg(fmt, ...) \
-    do { fprintf(stdout, "dragonboard(msg): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
+    do { fprintf(stdout, "(msg): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
 #else
 #define db_msg(fmt, ...)
 #endif /* DB_MSG */
 
 #ifdef DB_DEBUG
 #define db_debug(fmt, ...) \
-    do { fprintf(stdout, "dragonboard(debug): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
+    do { fprintf(stdout, "(debug): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
 #else
 #define db_debug(fmt, ...)
 #endif /* DB_DEBUG */
 
 #ifdef DB_DUMP
 #define db_dump(fmt, ...) \
-    do { fprintf(stdout, "dragonboard(dump): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
+    do { fprintf(stdout, "(dump): "); fprintf(stdout, fmt, ##__VA_ARGS__); } while (0)
 #else
 #define db_dump(fmt, ...)
 #endif

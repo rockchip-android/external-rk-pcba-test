@@ -268,8 +268,8 @@ int start_manual_test_item(int x,int y)
 		x_end = x_start + (tc_info->w)*CHAR_WIDTH;
 		y_start = (tc_info->y - 1)*CHAR_HEIGHT;
 		y_end = y_start + (tc_info->h)*CHAR_HEIGHT;
-		printf("%s>>x_start:%d>>x_end:%d>>y_start:%d>>y_end:%d\n",
-			tc_info->base_info->name,x_start,x_end,y_start,y_end);
+		//printf("%s>>x_start:%d>>x_end:%d>>y_start:%d>>y_end:%d\n",
+		//	tc_info->base_info->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
 			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),255,255,0,255,"%s\n",
@@ -406,7 +406,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		   
 		}
 	}
-	else if(!strcmp(tc_info->base_info->name, "udisk"))
+	else if(!strcmp(tc_info->base_info->name, "sdcard"))
 	{
 		sd_err = pthread_create(&sd_tid, NULL, sdcard_test,sd_msg); //
 		if(sd_err != 0)

@@ -107,7 +107,7 @@ int scan_key_code()
 									 break;
 									 
 							}
-							printf("support key code:%d\n",i);
+							//printf("support key code:%d\n",i);
 							key_cnt++;
 						}
 						
