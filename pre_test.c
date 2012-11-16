@@ -16,31 +16,52 @@
 #include <inttypes.h>
 #include <errno.h>
 
+#include "./minuitwrp/minui.h"
+#include "recovery_ui.h"
+#include "rtc_test.h"
+#include "camera_test.h"
+#include "screen_test.h"
+#include "key_test.h"
+#include "codec_test.h"
+#include "wlan_test.h"
+#include "gsensor_test.h"
+#include "sdcard_test.h"
+#include "udisk_test.h"
+#include "common.h"
+#include "gui/gui.h"
+#include "extra-functions.h"
+#include "data.h"
+#include "script.h"
+#include "test_case.h"
+#include "script_parser.h"
+#include "debug.h"
+
 
 #define SCRIPT_NAME                     "/sbin/test_config.cfg"
+#define ITEM_H				5			//height of test item
+#define ITEM_X				1			//x positon of test item
 
-//extern "C" {
-	#include "./minuitwrp/minui.h"
-	#include "recovery_ui.h"
-	#include "rtc_test.h"
-	#include "camera_test.h"
-	#include "screen_test.h"
-	#include "key_test.h"
-	#include "codec_test.h"
-	#include "wlan_test.h"
-	#include "gsensor_test.h"
-	#include "sdcard_test.h"
-	#include "udisk_test.h"
-	#include "common.h"
-	#include "gui/gui.h"
-	#include "extra-functions.h"
-	#include "data.h"
-	#include "script.h"
-	#include "test_case.h"
-	#include "script_parser.h"
-	#include "debug.h"
-	
-//}
+static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
+
+const char* man_title[] = { "manual test",
+                        "",
+                        NULL};
+const char* man_items[]= {
+				"Codec",
+				"Backlight",
+				"tp",
+                        	NULL};
+
+struct manual_item m_item[] = {
+		/*name,  	x, 	y, 	w,	h,	argc, 	func*/
+		{"Codec",	0,	3,	40,	5,	NULL,	NULL},
+		{"KEY",		0,	9,	40,	5,	NULL,	NULL},
+		{NULL,		0,	0,	0,	0,	NULL,	NULL}, //end of item
+	};
+
+
+int manual_p_y = 3;
+
 
 static int total_testcases = 0;
 static struct testcase_base_info *base_info = NULL;
@@ -100,7 +121,7 @@ static int parse_testcase()
 				printf("malloc for tc_info[%d] fail\n",j);
 				return -1;
 			}
-			tc_info->base_info = info[j];
+			tc_info->base_info = &info[j];
 			if(tc_info->base_info->category)   
 				 list_add(&tc_info->list, &manual_test_list_head);
 			else
@@ -141,14 +162,6 @@ static int parse_testcase()
     return total_testcases;
 }
 
-struct manual_item m_item[] = {
-		/*name,  	x, 	y, 	w,	h,	argc, 	func*/
-		{"Codec",	0,	3,	40,	5,	NULL,	NULL},
-		{"KEY",		0,	9,	40,	5,	NULL,	NULL},
-		{NULL,		0,	0,	0,	0,	NULL,	NULL}, //end of item
-	};
-
-const int manual_p_y = 3; //manual test start y position
 
 #if 0
 int init_manual_test_item(void)
@@ -189,11 +202,36 @@ int init_manual_test_item(void)
 #else
 int init_manual_test_item(struct testcase_info *tc_info)
 {
+	printf("%s\n",tc_info->base_info->name);
+	if(!strcmp(tc_info->base_info->name, "Codec"))
+	{
+		tc_info->func = codec_test;
+	}
+	else if(!strcmp(tc_info->base_info->name, "Key"))
+	{
+		tc_info->func = key_test;
+	}
+	else
+	{
+		printf("unsupported test case:%s\n",tc_info->base_info->name);
+		return -1;
+	}
+
+	tc_info->x =  ITEM_X;
+	tc_info->y =  manual_p_y ;
+	tc_info->w =  gr_fb_width();
+	tc_info->h = ITEM_H;
+	ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),0,0,255,255,"%s\n",
+			tc_info->base_info->display_name);
+	manual_p_y += ITEM_H;
 	
+	return 0;
 }
 
 #endif
- int start_manual_test_item(int x,int y)
+
+#if 0
+int start_manual_test_item(int x,int y)
 {
 	struct manual_item *item = m_item;
 	int x_start,x_end;
@@ -217,16 +255,36 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	return 0;
 	
 }
-static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
+#else
+int start_manual_test_item(int x,int y)
+{
+	struct list_head *pos;
+	int x_start,x_end;
+	int y_start,y_end;
+	list_for_each(pos, &manual_test_list_head) 
+	{
+		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		x_start = (tc_info->x)*CHAR_WIDTH;
+		x_end = x_start + (tc_info->w)*CHAR_WIDTH;
+		y_start = (tc_info->y - 1)*CHAR_HEIGHT;
+		y_end = y_start + (tc_info->h)*CHAR_HEIGHT;
+		printf("%s>>x_start:%d>>x_end:%d>>y_start:%d>>y_end:%d\n",
+			tc_info->base_info->name,x_start,x_end,y_start,y_end);
+		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
+		{
+			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),255,255,0,255,"%s\n",
+					tc_info->base_info->display_name);
+			tc_info->func(tc_info);
+			break;
+		}
+		
+	}
+	return 0;
+	
+}
 
-const char* man_title[] = { "manual test",
-                        "",
-                        NULL};
-const char* man_items[]= {
-							"Codec",
-							"Backlight",
-							"tp",
-                        	NULL};
+#endif
+
 
 	//RecoveryUI* ui = NULL;
 
@@ -283,6 +341,90 @@ int get_cur_print_y(void)
 	
 }
 
+int start_auto_test_item(struct testcase_info *tc_info)
+{
+	int err;
+	printf("%s\n",tc_info->base_info->name);
+
+	if(!strcmp(tc_info->base_info->name, "Lcd"))
+	{
+		err = pthread_create(&screen_tid, NULL, screen_test,screen_msg); //
+		if(err != 0)
+		{  
+			   printf("create screen test thread error: %s/n",strerror(err));
+			   return -1;
+			   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "rtc"))
+	{
+		err = pthread_create(&rtc_tid, NULL, rtc_test,rtc_msg); //
+		if(err != 0)
+		{  
+		   printf("create rtc test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "camera"))
+	{
+		err = pthread_create(&camera_tid, NULL, camera_test,camera_msg); //
+		if(err != 0)
+		{  
+		   printf("create camera test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		}  
+		
+	}
+	else if(!strcmp(tc_info->base_info->name, "wifi"))
+	{
+		err = pthread_create(&wlan_tid, NULL, wlan_test,wlan_msg); //
+		if(err != 0)
+		{  
+		   printf("create camera test thread error: %s/n",strerror(err));	
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "gsensor"))
+	{
+		err = pthread_create(&gsensor_tid, NULL, gsensor_test,gsensor_msg); //
+		if(err != 0)
+		{  
+		   printf("create camera test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "udisk"))
+	{
+		err = pthread_create(&udisk_tid, NULL, udisk_test,udisk_msg); //
+		if(err != 0)
+		{  
+		   printf("create sdcard test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		}
+	}
+	else if(!strcmp(tc_info->base_info->name, "udisk"))
+	{
+		sd_err = pthread_create(&sd_tid, NULL, sdcard_test,sd_msg); //
+		if(sd_err != 0)
+		{  
+		   printf("create sdcard test thread error: %s/n",strerror(sd_err));
+		   return -1;
+		   
+		}  
+	}
+	else
+	{
+		printf("unsupport test item:%s\n",tc_info->base_info->name);
+		return -1;
+	}
+
+	return 0;
+			
+}
 int ensure_path_mounted(const char* path) {return 0;}
 
 int 
@@ -423,7 +565,7 @@ int main(int argc, char **argv)
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
 
-    
+    	
 	if (gui_init())
 	{
 		ui_init();
@@ -434,7 +576,9 @@ int main(int argc, char **argv)
 #if 1
 	ui_print_xy_rgba(0,0,255,0,0,255,"Rockchip Pcba test v1.0\n");
 	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
-	
+	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;
+	INIT_LIST_HEAD(&manual_test_list_head);
+	INIT_LIST_HEAD(&auto_test_list_head);
 	script_buf = parse_script(SCRIPT_NAME);
 	if (!script_buf)
 	{
@@ -448,91 +592,31 @@ int main(int argc, char **argv)
 		   return -1;
 	}
 	ret = parse_testcase();
-    if (ret < 0) {
-        db_error("core: parse all test case from script failed(%d)\n", ret);
-        return -1;
-    }
-    else if (ret == 0) {
-        db_warn("core: NO TEST CASE to be run\n");
-        return -1;
-    }
+	if (ret < 0) {
+	db_error("core: parse all test case from script failed(%d)\n", ret);
+	return -1;
+	}
+	else if (ret == 0) {
+	db_warn("core: NO TEST CASE to be run\n");
+	return -1;
+	}
 
-	printf("manual testcase:\n")
+	printf("manual testcase:\n");
 	list_for_each(pos, &manual_test_list_head) {
-        struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
-		printf("%s\n",tc_info->base_info->display_name);
+	struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		init_manual_test_item(tc_info);
 		
-    }
+	}
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
-        struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
-		printf("%s\n",tc_info->base_info->display_name);
-		
-    }
-	
-	init_manual_test_item();
-	//FillColor(255,0,0,255,400,240,400,240);
-	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;
-
-	screen_err = pthread_create(&screen_tid, NULL, screen_test,screen_msg); //
-	if(screen_err != 0)
-	{  
-		   printf("create screen test thread error: %s/n",strerror(screen_err));  
-		   
-	}  
-	
-	err_rtc = pthread_create(&rtc_tid, NULL, rtc_test,rtc_msg); //
-	if(err_rtc != 0)
-	{  
-	   printf("create rtc test thread error: %s/n",strerror(err_rtc));  
-	   
-	}  
-	
-	camera_err = pthread_create(&camera_tid, NULL, camera_test,camera_msg); //
-	if(camera_err != 0)
-	{  
-	   printf("create camera test thread error: %s/n",strerror(camera_err));  
-	   
-	}  
-	
-
-	
-	wlan_err = pthread_create(&wlan_tid, NULL, wlan_test,wlan_msg); //
-	if(wlan_err != 0)
-	{  
-	   printf("create camera test thread error: %s/n",strerror(wlan_err));  
-	   
-	}  
-	
-
-	
-	gsensor_err = pthread_create(&gsensor_tid, NULL, gsensor_test,gsensor_msg); //
-	if(gsensor_err != 0)
-	{  
-	   printf("create camera test thread error: %s/n",strerror(gsensor_err));  
-	   
-	}  
-	
-
-	
-	udisk_err = pthread_create(&udisk_tid, NULL, udisk_test,udisk_msg); //
-	if(udisk_err != 0)
-	{  
-	   printf("create sdcard test thread error: %s/n",strerror(udisk_err));  
-	   
+	struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		start_auto_test_item(tc_info);
 	}
-
-
 	
-	sd_err = pthread_create(&sd_tid, NULL, sdcard_test,sd_msg); //
-	if(sd_err != 0)
-	{  
-	   printf("create sdcard test thread error: %s/n",strerror(sd_err));  
-	   
-	}  
+	//init_manual_test_item();
+	//FillColor(255,0,0,255,400,240,400,240);
 	
-
 #endif
 	//while(1);
 	gui_start();
