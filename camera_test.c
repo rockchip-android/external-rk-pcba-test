@@ -376,7 +376,7 @@ int TaskStop(void)
 	
 	if (iCamFd > 0) {
 		close(iCamFd);
-		iCamFd = -1;
+		iCamFd = 0;
 	}
 
 	if (iPmemFd > 0) {

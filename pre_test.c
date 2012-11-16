@@ -277,7 +277,7 @@ int start_manual_test_item(int x,int y)
 		//	tc_info->base_info->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
-			if (!strcmp(tc_info->base_info->name, "camera_front"))
+			if (!strcmp(tc_info->base_info->name, "Camera_1"))
 			{
 				stopCameraTest();
 			}
