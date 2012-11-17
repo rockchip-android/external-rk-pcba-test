@@ -63,6 +63,62 @@ struct manual_item m_item[] = {
 int manual_p_y = 3;
 
 
+int cur_p_y;		//current position for auto test tiem in y direction
+pthread_t rtc_tid;  
+char *rtc_res;
+char dt[30]={"20120927.143045"};
+struct rtc_msg *rtc_msg;
+int err_rtc;
+int rtc_p_y; //rtc position in y direction
+
+pthread_t screen_tid;  
+char *screen_res;
+struct screen_msg *screen_msg;
+int screen_err = -1;
+
+
+pthread_t camera_tid;  
+char *camera_res;
+struct camera_msg *camera_msg;
+int camera_err = -1;
+
+pthread_t camera1_tid;  
+
+
+pthread_t wlan_tid;  
+char *wlan_res;
+struct wlan_msg *wlan_msg;
+int wlan_err = -1;
+
+pthread_t gsensor_tid;  
+char *gsensor_res;
+struct gsensor_msg *gsensor_msg;
+int gsensor_err = -1;
+
+
+pthread_t sd_tid;  
+char *sd_res;
+struct sd_msg *sd_msg;
+int sd_err = -1;
+
+pthread_t udisk_tid;  
+char *udisk_res;
+struct udisk_msg *udisk_msg;
+int udisk_err = -1;
+
+static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
+
+int get_cur_print_y(void)
+{
+	int tmp;
+	pthread_mutex_lock(&gCur_p_y);
+	 tmp = cur_p_y++;
+	pthread_mutex_unlock(&gCur_p_y);
+	printf("cur_print_y:%d\n",tmp);
+	return tmp;
+	
+}
+
 static int total_testcases = 0;
 static struct testcase_base_info *base_info = NULL;
 static struct list_head auto_test_list_head;
@@ -266,6 +322,7 @@ int start_manual_test_item(int x,int y)
 	struct list_head *pos;
 	int x_start,x_end;
 	int y_start,y_end;
+	int err;
 	list_for_each(pos, &manual_test_list_head) 
 	{
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
@@ -277,14 +334,22 @@ int start_manual_test_item(int x,int y)
 		//	tc_info->base_info->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
+			
+			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),255,255,0,255,"%s\n",
+					tc_info->base_info->display_name);
 			if (!strcmp(tc_info->base_info->name, "Camera_1"))
 			{
 				stopCameraTest();
+				err = pthread_create(&camera1_tid, NULL, camera_test,tc_info); //
+				if(err != 0)
+				{  
+				   printf("create camera test thread error: %s/n",strerror(err)); 
+				   return -1;
+				   
+				}  
 			}
-				
-			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),255,255,0,255,"%s\n",
-					tc_info->base_info->display_name);
-			tc_info->func(tc_info);
+			else
+				tc_info->func(tc_info);
 			break;
 		}
 		
@@ -296,60 +361,8 @@ int start_manual_test_item(int x,int y)
 #endif
 
 
-	//RecoveryUI* ui = NULL;
-
-int cur_p_y;		//current position for auto test tiem in y direction
-pthread_t rtc_tid;  
-char *rtc_res;
-char dt[30]={"20120927.143045"};
-struct rtc_msg *rtc_msg;
-int err_rtc;
-int rtc_p_y; //rtc position in y direction
-
-pthread_t screen_tid;  
-char *screen_res;
-struct screen_msg *screen_msg;
-int screen_err = -1;
-
-
-pthread_t camera_tid;  
-char *camera_res;
-struct camera_msg *camera_msg;
-int camera_err = -1;
-
-pthread_t wlan_tid;  
-char *wlan_res;
-struct wlan_msg *wlan_msg;
-int wlan_err = -1;
-
-pthread_t gsensor_tid;  
-char *gsensor_res;
-struct gsensor_msg *gsensor_msg;
-int gsensor_err = -1;
-
-
-pthread_t sd_tid;  
-char *sd_res;
-struct sd_msg *sd_msg;
-int sd_err = -1;
-
-pthread_t udisk_tid;  
-char *udisk_res;
-struct udisk_msg *udisk_msg;
-int udisk_err = -1;
-
-static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
-
-int get_cur_print_y(void)
-{
-	int tmp;
-	pthread_mutex_lock(&gCur_p_y);
-	 tmp = cur_p_y++;
-	pthread_mutex_unlock(&gCur_p_y);
-	printf("cur_print_y:%d\n",tmp);
-	return tmp;
 	
-}
+
 
 int start_auto_test_item(struct testcase_info *tc_info)
 {
