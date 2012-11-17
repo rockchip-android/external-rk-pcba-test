@@ -152,7 +152,7 @@ int openInput(const char* inputName)
  	fd = openInput("gsensor");
 	if(fd < 0)
 	{
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
 		g_msg->result = -1;
 		return argv;
 	}
@@ -160,7 +160,7 @@ int openInput(const char* inputName)
         if(fd_dev<0)
         {
          	printf("opne gsensor demon fail\n");
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
 		g_msg->result = -1;
 		return argv;
 		
@@ -168,8 +168,8 @@ int openInput(const char* inputName)
         ret = ioctl(fd_dev, MMA_IOCTL_START);
         if(ret < 0)
         {
-                printf("start sensor fail\n");
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!n");
+                printf("start sensor fail!\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
 		g_msg->result = -1;
 		return argv;
         }
