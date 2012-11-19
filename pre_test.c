@@ -219,43 +219,7 @@ static int parse_testcase()
 }
 
 
-#if 0
-int init_manual_test_item(void)
-{
-	struct manual_item *item = m_item;
-	while(item->name != NULL)
-	{
-		if(!strcmp(item->name, "Codec"))
-		{
-			item->func = codec_test;
-		}
-		else if(!strcmp(item->name, "KEY"))
-		{
-			struct key_msg *key_msg = (struct key_msg *)malloc(sizeof(struct key_msg));
-			if(!key_msg)
-			{
-				printf("malloc for key_msg fail!\n");
-			}
-			else
-			{
-				key_msg->result = -1;
-				key_msg->x = item->x + strlen(item->name) + 4;
-				key_msg->y = item->y;
-				key_msg->w = item->w;
-				key_msg->h = item->h;
-			}
-			item->func = key_test;
-			item->argc = key_msg;
-		}
 
-		//printf("%s>>x:%d>>y:%d>>w:%d>>h:%d\n",
-		//		item->name,item->x,item->y,item->w,item->h);
-		ui_print_xy_rgba(item->x,item->y,0,0,255,255,"%s\n",item->name);
-		item++;
-	}
-	return 0;
-}
-#else
 int init_manual_test_item(struct testcase_info *tc_info)
 {
 	printf("%s\n",tc_info->base_info->name);
@@ -289,34 +253,9 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	return 0;
 }
 
-#endif
 
-#if 0
-int start_manual_test_item(int x,int y)
-{
-	struct manual_item *item = m_item;
-	int x_start,x_end;
-	int y_start,y_end;
-	while(item->name != NULL)
-	{
-		x_start = (item->x)*CHAR_WIDTH;
-		x_end = x_start + (item->w)*CHAR_WIDTH;
-		y_start = (item->y - 1)*CHAR_HEIGHT;
-		y_end = y_start + (item->h)*CHAR_HEIGHT;
-		//printf("%s>>x_start:%d>>x_end:%d>>y_start:%d>>y_end:%d\n",
-		//	item->name,x_start,x_end,y_start,y_end);
-		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
-		{
-			ui_print_xy_rgba(item->x,item->y,255,255,0,255,"%s\n",item->name);
-			item->func(item->argc);
-			break;
-		}
-		item++;
-	}
-	return 0;
-	
-}
-#else
+
+
 int start_manual_test_item(int x,int y)
 {
 	struct list_head *pos;
@@ -340,16 +279,10 @@ int start_manual_test_item(int x,int y)
 			if (!strcmp(tc_info->base_info->name, "Camera_1"))
 			{
 				stopCameraTest();
-				err = pthread_create(&camera1_tid, NULL, camera_test,tc_info); //
-				if(err != 0)
-				{  
-				   printf("create camera test thread error: %s/n",strerror(err)); 
-				   return -1;
-				   
-				}  
 			}
-			else
-				tc_info->func(tc_info);
+			
+			tc_info->func(tc_info);
+			
 			break;
 		}
 		
@@ -358,10 +291,6 @@ int start_manual_test_item(int x,int y)
 	
 }
 
-#endif
-
-
-	
 
 
 int start_auto_test_item(struct testcase_info *tc_info)
@@ -638,8 +567,6 @@ int main(int argc, char **argv)
 		start_auto_test_item(tc_info);
 	}
 	
-	//init_manual_test_item();
-	//FillColor(255,0,0,255,400,240,400,240);
 	
 #endif
 	//while(1);

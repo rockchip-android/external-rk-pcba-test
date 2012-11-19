@@ -475,8 +475,25 @@ exit:
 	return err;
 }
 // the func is a while loop func , MUST  run in a single thread.
-int startCameraTest(int cameraId,int preWidth,int preHeight,int corx ,int cory){
+void * startCameraTest(void *argv){
 	int ret = 0;
+	int cameraId;
+	int preWidth;
+	int preHeight;
+	int corx ;
+	int cory;
+	struct camera_msg *camera_msg = (struct camera_msg*)argv;
+
+	if(!camera_msg)
+	{
+		printf("malloc camera_msg fail\n");
+		return NULL;
+	}
+	cameraId = camera_msg->id;
+	preWidth = camera_msg->w;
+	preHeight = camera_msg->h;
+	corx = camera_msg->x;
+	cory = camera_msg->y;
 	sprintf(videodevice,"/dev/video%d",cameraId);
 	preview_w = preWidth;
 	preview_h = preHeight;
@@ -493,7 +510,8 @@ int startCameraTest(int cameraId,int preWidth,int preHeight,int corx ,int cory){
 				ret = -1;
 				printf("%s display create wrong!\n",__FUNCTION__);
 			}
-		}else
+		}
+		else
 		{
 			ret = -1;
 			printf("%s camera start erro\n",__FUNCTION__);
@@ -506,7 +524,8 @@ int startCameraTest(int cameraId,int preWidth,int preHeight,int corx ,int cory){
 	}
 	isstoped = 1;
 	hasstoped = 1;
-		return ret ;
+	printf("camrea%d test over\n",cameraId);
+	return ret ;
 }
 int stopCameraTest(){
 	return TaskStop();
@@ -515,16 +534,36 @@ int stopCameraTest(){
 void * camera_test(void *argc)
 {
 	struct testcase_info *tc_info = (struct testcase_info *)argc;
+	struct camera_msg *camera_msg = NULL;
+	pthread_t tid;
+	int err;
 	int id = tc_info->dev_id;
 	int x =  gr_fb_width() >> 1;//camera_msg->x;
 	int y= 0;//camera_msg->y;
 	int w = gr_fb_width() >> 1;//camera_msg->w;
 	int h = gr_fb_height()*2/3;// camera_msg->h;
 	//printf("%s:video%d x:%d y:%d w:%d h:%d\n",__func__,id,x,y,w,h);
-	int result ;
-	result = startCameraTest(id,w,h,x,y);
-	//camera_msg->result = result;
-
+	camera_msg = (struct camera_msg*)malloc(sizeof(struct camera_msg));
+	if(!camera_msg)
+	{
+		printf(" malloc for camera_msg failed\n");
+		tc_info->result = -1;
+		return  argc;
+	}
+	camera_msg->id = id;
+	camera_msg->x = x;
+	camera_msg->y = y;
+	camera_msg->w = w;
+	camera_msg->h = h;
+	err = pthread_create(&tid, NULL,startCameraTest,camera_msg); //
+	if(err != 0)
+	{  
+		printf("start camera test thread error: %s/n",strerror(err)); 
+		tc_info->result = -1;
+		return  argc;
+	   
+	}  
+	
 	return argc;
 }
 
