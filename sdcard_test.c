@@ -4,6 +4,7 @@
 #include"extra-functions.h"
 #include"common.h"
 #include"sdcard_test.h"
+#include "test_case.h"
 
 #define SCAN_RESULT_LENGTH 128
 #define SCAN_RESULT_FILE "/data/sd_capacity"
@@ -11,7 +12,7 @@
 void * sdcard_test(void * argv)
 {
 	
-	struct sd_msg *sd_msg = (struct sd_msg *)malloc(sizeof(struct sd_msg));
+	struct testcase_info *tc_info = (struct testcase_info*)argv;
 	int ret;
 	double cap;
 	FILE *fp;
@@ -25,7 +26,7 @@ void * sdcard_test(void * argv)
 	if(ret < 0) {
 		printf("mmc test failed.\n");
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"sdcard test fail\n");
-		sd_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
 	}
 	
@@ -34,7 +35,7 @@ void * sdcard_test(void * argv)
 	if(fp == NULL) {
 		printf("can not open %s.\n", SCAN_RESULT_FILE);
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"sdcad test fail\n");
-		sd_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
 	}
 

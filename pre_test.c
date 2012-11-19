@@ -300,7 +300,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 
 	if(!strcmp(tc_info->base_info->name, "Lcd"))
 	{
-		err = pthread_create(&screen_tid, NULL, screen_test,screen_msg); //
+		err = pthread_create(&screen_tid, NULL, screen_test,tc_info); //
 		if(err != 0)
 		{  
 			   printf("create screen test thread error: %s/n",strerror(err));
@@ -310,7 +310,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "rtc"))
 	{
-		err = pthread_create(&rtc_tid, NULL, rtc_test,rtc_msg); //
+		err = pthread_create(&rtc_tid, NULL, rtc_test,tc_info); //
 		if(err != 0)
 		{  
 		   printf("create rtc test thread error: %s/n",strerror(err));
@@ -332,7 +332,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "wifi"))
 	{
-		err = pthread_create(&wlan_tid, NULL, wlan_test,wlan_msg); //
+		err = pthread_create(&wlan_tid, NULL, wlan_test,tc_info); //
 		if(err != 0)
 		{  
 		   printf("create camera test thread error: %s/n",strerror(err));	
@@ -341,7 +341,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "gsensor"))
 	{
-		err = pthread_create(&gsensor_tid, NULL, gsensor_test,gsensor_msg); //
+		err = pthread_create(&gsensor_tid, NULL, gsensor_test,tc_info); //
 		if(err != 0)
 		{  
 		   printf("create camera test thread error: %s/n",strerror(err)); 
@@ -351,7 +351,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "udisk"))
 	{
-		err = pthread_create(&udisk_tid, NULL, udisk_test,udisk_msg); //
+		err = pthread_create(&udisk_tid, NULL, udisk_test,tc_info); //
 		if(err != 0)
 		{  
 		   printf("create sdcard test thread error: %s/n",strerror(err)); 
@@ -361,7 +361,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "sdcard"))
 	{
-		sd_err = pthread_create(&sd_tid, NULL, sdcard_test,sd_msg); //
+		sd_err = pthread_create(&sd_tid, NULL, sdcard_test,tc_info); //
 		if(sd_err != 0)
 		{  
 		   printf("create sdcard test thread error: %s/n",strerror(sd_err));
@@ -514,6 +514,7 @@ int main(int argc, char **argv)
 	int ret;
 	char *script_buf;
 	struct list_head *pos;
+	int success = 0;
 	
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
@@ -544,26 +545,27 @@ int main(int argc, char **argv)
 		   db_error("core: init script failed(%d)\n", ret);
 		   return -1;
 	}
+	
 	ret = parse_testcase();
 	if (ret < 0) {
-	db_error("core: parse all test case from script failed(%d)\n", ret);
-	return -1;
+		db_error("core: parse all test case from script failed(%d)\n", ret);
+		return -1;
 	}
 	else if (ret == 0) {
-	db_warn("core: NO TEST CASE to be run\n");
-	return -1;
+		db_warn("core: NO TEST CASE to be run\n");
+		return -1;
 	}
 
 	printf("manual testcase:\n");
 	list_for_each(pos, &manual_test_list_head) {
-	struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
 		init_manual_test_item(tc_info);
 		
 	}
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
-	struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
 		start_auto_test_item(tc_info);
 	}
 	
@@ -573,7 +575,15 @@ int main(int argc, char **argv)
 	gui_start();
 	//prompt_and_wait();
 	stopCameraTest();
+	list_for_each(pos, &auto_test_list_head) {
+		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		if(tc_info->result == -1){
+			success = -1;
+			printf("%s test fail!\n",tc_info->base_info->name);
+			
+		}
+	}
 	printf("pcba test over!\n");
-	return 0;
+	return success;
 }
 

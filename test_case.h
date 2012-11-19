@@ -33,6 +33,7 @@ struct testcase_info
 	int h;
 	int dev_id;		//default 0,but some device have double,such as camera
 	int result;
+	void *msg;		//this is for testcase spefic msg struct
 	void* (*func)(void *argv); //test function
 	struct list_head list;
 };

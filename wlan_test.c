@@ -31,6 +31,7 @@
 #include "common.h"
 #include "extra-functions.h"
 #include "wlan_test.h"
+#include "test_case.h"
 
 #define LOG(x...) printf(x)
 
@@ -61,7 +62,7 @@ void* wlan_test(void* argv)
 	FILE *fp;
 	char results[SCAN_RESULT_LENGTH];
 	char ssid[100];
-	struct wlan_msg *wlan_msg = (struct wlan_msg *)argv;
+	struct testcase_info *tc_info = (struct testcase_info *)argv;
 	
 	ret =  __system("busybox chmod 777 /sbin/wifi.sh");
 	if(ret)
@@ -71,7 +72,7 @@ void* wlan_test(void* argv)
 	if(ret <= 0) {
 		LOG("wifi test failed.\n");
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"wlan test fail\n");
-		//wlan_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
 	}
 	
@@ -80,7 +81,7 @@ void* wlan_test(void* argv)
 	if(fp == NULL) {
 		LOG("can not open %s.\n", SCAN_RESULT_FILE);
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"wlan test fail\n");
-		//wlan_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
 	}
 	

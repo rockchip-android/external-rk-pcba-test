@@ -12,6 +12,7 @@
 #include "common.h"
 #include "rtc_test.h"
 #include "script.h"
+#include "test_case.h"
 
 int  rtc_xopen(int flags)
 {
@@ -147,6 +148,7 @@ int set_system_time(struct timeval *tv)
 
 void* rtc_test(void *argc)
 {
+	struct testcase_info *tc_info = (struct testcase_info*)argc;
 	char dt[32]={"20120926.132600"};
 	int ret;
 	struct tm tm;
@@ -164,7 +166,7 @@ void* rtc_test(void *argc)
 	 {
 	 	//printf("%s>>>args:%s\n",__func__,s);
                 strncpy(s, dt, 32);
-         }
+	}
 
 	//printf("%s>>>%s\n",__func__,s);
 	day = atoi(s);
@@ -221,9 +223,15 @@ void* rtc_test(void *argc)
 	}
 	
 	if(ret == 0)
+	{
+		tc_info->result = 0;
 		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc test success:%s\n",dt);
+	}
 	else
+	{
+		tc_info->result = -1;
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"rtc test fail\n");
+	}
 	
 	
 	return argc;

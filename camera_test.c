@@ -370,7 +370,7 @@ int TaskStop(void)
     	sleep(1);
     	}
     if (ioctl(iCamFd, VIDIOC_STREAMOFF, &creqbuf.type) == -1) {
-        printf("%s VIDIOC_STREAMOFF Failed", __FUNCTION__);
+        printf("%s VIDIOC_STREAMOFF Failed\n", __FUNCTION__);
         return -1;
     }
 	

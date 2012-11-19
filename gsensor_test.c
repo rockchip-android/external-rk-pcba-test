@@ -28,6 +28,7 @@
 #include "gsensor_test.h"
 #include "../../hardware/rk29/sensor/st/mma8452_kernel.h"              // 声明驱动为 HAL 提供的功能接口. 应该用更加抽象的文件名.
 #include "common.h"
+#include "test_case.h"
 
 
 #define EVENT_TYPE_ACCEL_X          ABS_X
@@ -139,6 +140,9 @@ int openInput(const char* inputName)
 	int ret;
 	int fd;
  	struct gsensor_msg *g_msg =  (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
+	struct testcase_info *tc_info = (struct testcase_info*)argv;
+	
+	
  	if(!g_msg)
 	{
 		printf("malloc for wlan_msg fail!\n");
@@ -154,25 +158,28 @@ int openInput(const char* inputName)
 	{
 		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
 		g_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
 	}
 	int fd_dev = open(CTL_DEV_PATH, O_RDONLY);
-        if(fd_dev<0)
-        {
-         	printf("opne gsensor demon fail\n");
+    if(fd_dev<0)
+    {
+     	printf("opne gsensor demon fail\n");
 		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
 		g_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
-		
-        }
-        ret = ioctl(fd_dev, MMA_IOCTL_START);
-        if(ret < 0)
-        {
-                printf("start sensor fail!\n");
+	
+    }
+    ret = ioctl(fd_dev, MMA_IOCTL_START);
+    if(ret < 0)
+    {
+		printf("start sensor fail!\n");
 		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
 		g_msg->result = -1;
+		tc_info->result = -1;
 		return argv;
-        }
+    }
 	for(;;)
 	{
 		readEvents(fd);
