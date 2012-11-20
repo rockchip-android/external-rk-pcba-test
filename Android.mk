@@ -35,7 +35,8 @@ LOCAL_SRC_FILES := \
     wlan_test.c			\
     sdcard_test.c		\
     udisk_test.c        \
-    gsensor_test.c 
+    gsensor_test.c 		\
+    hdmi_test.c
 
 
 RECOVERY_API_VERSION := 2

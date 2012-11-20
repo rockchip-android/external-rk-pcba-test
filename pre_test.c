@@ -35,7 +35,7 @@
 #include "test_case.h"
 #include "script_parser.h"
 #include "debug.h"
-
+#include "hdmi_test.h"
 
 #define SCRIPT_NAME                     "/sbin/test_config.cfg"
 #define ITEM_H				5			//height of test item
@@ -105,6 +105,11 @@ pthread_t udisk_tid;
 char *udisk_res;
 struct udisk_msg *udisk_msg;
 int udisk_err = -1;
+
+pthread_t hdmi_tid;  
+char *hdmi_res;
+struct sd_msg *hdmi_msg;
+int hdmi_err = -1;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -365,6 +370,16 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		if(sd_err != 0)
 		{  
 		   printf("create sdcard test thread error: %s/n",strerror(sd_err));
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "hdmi"))
+	{
+		hdmi_err = pthread_create(&hdmi_tid, NULL, hdmi_test, tc_info); //
+		if(hdmi_err != 0)
+		{  
+		   printf("create hdmi test thread error: %s/n",strerror(hdmi_err));
 		   return -1;
 		   
 		}  
