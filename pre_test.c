@@ -37,7 +37,7 @@
 #include "debug.h"
 #include "hdmi_test.h"
 
-#define SCRIPT_NAME                     "/sbin/test_config.cfg"
+#define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				5			//height of test item
 #define ITEM_X				1			//x positon of test item
 

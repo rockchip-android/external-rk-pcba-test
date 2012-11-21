@@ -1,10 +1,10 @@
 #!/sbin/busybox sh
 
-module_path_8188eu=/sbin/8188eu.ko
-module_path_8192cu=/sbin/8192cu.ko
-module_path_rk903=/sbin/rkwifi.ko
-module_path_rt5370=/sbin/rt5370sta.ko
-module_path_wlan=/sbin/wlan.ko
+module_path_8188eu=/res/8188eu.ko
+module_path_8192cu=/res/8192cu.ko
+module_path_rk903=/res/rkwifi.ko
+module_path_rt5370=/res/rt5370sta.ko
+module_path_wlan=/res/wlan.ko
 result_file=/data/scan_result.txt
 chip_type_path=/sys/class/rkwifi/chip
 module_path=$module_path_wlan

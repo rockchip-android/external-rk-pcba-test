@@ -19,11 +19,11 @@ void * udisk_test(void * argv)
 	FILE *fp;
 	char results[SCAN_RESULT_LENGTH];
 	
-	ret =  __system("busybox chmod 777 /sbin/udisktester.sh");
+	ret =  __system("busybox chmod 777 /res/udisktester.sh");
 	if(ret)
 		printf("chmod udisktester.sh failed :%d\n",ret);
 		
-	ret = __system("/sbin/udisktester.sh");
+	ret = __system("/res/udisktester.sh");
 	if(ret < 0) {
 		printf("udisk test failed.\n");
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"udisk test script fail\n");

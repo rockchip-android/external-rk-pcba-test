@@ -507,25 +507,25 @@ void * startCameraTest(void *argv){
 			}
 			else
 			{
-				ret = -1;
+				camera_msg->tc_info->result = -1;
 				printf("%s display create wrong!\n",__FUNCTION__);
 			}
 		}
 		else
 		{
-			ret = -1;
+			camera_msg->tc_info->result = -1;
 			printf("%s camera start erro\n",__FUNCTION__);
 		}
 	}
 	else
 	{
-		ret = -1;
+		camera_msg->tc_info->result = -1;
 		printf("%s camera create erro\n",__FUNCTION__);
 	}
 	isstoped = 1;
 	hasstoped = 1;
 	printf("camrea%d test over\n",cameraId);
-	return ret ;
+	return argv ;
 }
 int stopCameraTest(){
 	return TaskStop();
@@ -555,6 +555,7 @@ void * camera_test(void *argc)
 	camera_msg->y = y;
 	camera_msg->w = w;
 	camera_msg->h = h;
+	camera_msg->tc_info = tc_info;
 	err = pthread_create(&tid, NULL,startCameraTest,camera_msg); //
 	if(err != 0)
 	{  

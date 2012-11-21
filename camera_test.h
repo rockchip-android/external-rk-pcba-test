@@ -30,10 +30,12 @@
 #include <linux/videodev2.h>
 #include <linux/fb.h>
 #include <linux/version.h>
+#include "test_case.h"
 // the func is a while loop func , MUST  run in a single thread.
 //return value: 0 is ok ,-1 erro
 
 struct camera_msg {
+	struct testcase_info *tc_info;
 	int result;
 	int id;
 	int x;

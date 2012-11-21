@@ -64,11 +64,11 @@ void* wlan_test(void* argv)
 	char ssid[100];
 	struct testcase_info *tc_info = (struct testcase_info *)argv;
 	
-	ret =  __system("busybox chmod 777 /sbin/wifi.sh");
+	ret =  __system("busybox chmod 777 /res/wifi.sh");
 	if(ret)
 		LOG("chmod wifi.sh failed :%d\n",ret);
 		
-	ret = __system("/sbin/wifi.sh");
+	ret = __system("/res/wifi.sh");
 	if(ret <= 0) {
 		LOG("wifi test failed.\n");
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"wlan test fail\n");

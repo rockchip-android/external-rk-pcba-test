@@ -18,11 +18,11 @@ void * sdcard_test(void * argv)
 	FILE *fp;
 	char results[SCAN_RESULT_LENGTH];
 	
-	ret =  __system("busybox chmod 777 /sbin/mmctester.sh");
+	ret =  __system("busybox chmod 777 /res/mmctester.sh");
 	if(ret)
 		printf("chmod mmctester.sh failed :%d\n",ret);
 		
-	ret = __system("/sbin/mmctester.sh");
+	ret = __system("/res/mmctester.sh");
 	if(ret < 0) {
 		printf("mmc test failed.\n");
 		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"sdcard test fail\n");
