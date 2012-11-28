@@ -9,7 +9,7 @@
 
 #define AUDIO_HW_OUT_PERIOD_MULT 8 // (8 * 128 = 1024 frames)
 #define AUDIO_HW_OUT_PERIOD_CNT 4
-#define FILE_PATH "/sbin/codectest.pcm"
+#define FILE_PATH "/res/codectest.pcm"
 #define REC_DUR 3 //the unit is second
 pthread_t codec_tid;  
 int codec_err = -1;
