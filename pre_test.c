@@ -117,7 +117,7 @@ int get_cur_print_y(void)
 {
 	int tmp;
 	pthread_mutex_lock(&gCur_p_y);
-	 tmp = cur_p_y++;
+	 tmp = cur_p_y--;
 	pthread_mutex_unlock(&gCur_p_y);
 	printf("cur_print_y:%d\n",tmp);
 	return tmp;
@@ -545,7 +545,7 @@ int main(int argc, char **argv)
 #if 1
 	ui_print_xy_rgba(0,0,255,0,0,255,"Rockchip Pcba test v1.0\n");
 	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
-	cur_p_y = (gr_fb_height()/CHAR_HEIGHT)>> 1;
+	cur_p_y = (gr_fb_height()/CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
 	script_buf = parse_script(SCRIPT_NAME);

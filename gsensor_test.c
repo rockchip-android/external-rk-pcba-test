@@ -184,8 +184,7 @@ int openInput(const char* inputName)
 	{
 		readEvents(fd);
 		//ui_print_xy_rgba(0,g_msg->y,0,0,0,255,"                                         \n");
-		ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor test success!x:%f y:%f z:%f\n",
-			g_x,g_y,g_z);
+		ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 	}
 
 	return argv;

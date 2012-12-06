@@ -41,7 +41,7 @@
 void strcpy_without_space_ahead(char *dst,char *src)
 {
 	char *tmp = dst;
-	while( *src != '\0')
+	while( (*src != '\0') && (*src != '\n'))
 	{
 		//printf("%d ",*src);
 		if(*src!= ' ')
