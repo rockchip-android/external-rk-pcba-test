@@ -99,7 +99,7 @@ int scan_key_code()
 								case KEY_HOME:
 									 key_code[key_cnt].name = "home";
 									 break;
-								case KEY_ESC:
+								case KEY_BACK:
 									 key_code[key_cnt].name = "ESC";
 									 break;
 								default:
