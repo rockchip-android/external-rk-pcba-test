@@ -54,7 +54,7 @@
         busybox umount /tmp/udisk
         #SEND_CMD_PIPE_OK_EX $3 $capacity
 
-        echo $3 $capacity > /data/udisk_capacity.txt
+        echo $capacity > /data/udisk_capacity.txt
         break
     
 #        while true; do
