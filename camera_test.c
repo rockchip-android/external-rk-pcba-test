@@ -24,7 +24,7 @@ static unsigned int pix_format;
 
 static void* vaddr = NULL;
 static volatile int isstoped = 0;
-static int hasstoped = 0;
+static int hasstoped = 1;
 enum {
 	FD_INIT = -1,
 };
