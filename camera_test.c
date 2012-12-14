@@ -540,8 +540,8 @@ void * camera_test(void *argc)
 	int id = tc_info->dev_id;
 	int x =  gr_fb_width() >> 1;//camera_msg->x;
 	int y= 0;//camera_msg->y;
-	int w = gr_fb_width() >> 1;//camera_msg->w;
-	int h = gr_fb_height()*2/3;// camera_msg->h;
+	int w = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
+	int h = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
 	//printf("%s:video%d x:%d y:%d w:%d h:%d\n",__func__,id,x,y,w,h);
 	camera_msg = (struct camera_msg*)malloc(sizeof(struct camera_msg));
 	if(!camera_msg)
