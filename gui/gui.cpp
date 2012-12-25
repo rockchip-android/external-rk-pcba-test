@@ -477,7 +477,7 @@ static void *input_thread(void *cookie)
 			{
 				// This is a key release
 				gettimeofday(&keyEnd, NULL);
-				printf("key hold time:%lu\n",keyEnd.tv_sec-keyStart.tv_sec);
+				//printf("key hold time:%lu\n",keyEnd.tv_sec-keyStart.tv_sec);
 				kb.KeyUp(ev.code);
 				key_repeat = 0;
 				touch_and_hold = 0;
