@@ -24,6 +24,7 @@
 #include "key_test.h"
 #include "codec_test.h"
 #include "wlan_test.h"
+#include "bt_test.h"
 #include "gsensor_test.h"
 #include "sdcard_test.h"
 #include "udisk_test.h"
@@ -40,6 +41,8 @@
 #define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				5			//height of test item
 #define ITEM_X				1			//x positon of test item
+
+#define LOG(x...) printf(x)
 
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 
@@ -89,6 +92,12 @@ pthread_t wlan_tid;
 char *wlan_res;
 struct wlan_msg *wlan_msg;
 int wlan_err = -1;
+
+
+pthread_t bt_tid;  
+char *bt_res;
+struct bt_msg *bt_msg;
+int bt_err = -1;
 
 pthread_t gsensor_tid;  
 char *gsensor_res;
@@ -337,10 +346,23 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "wifi"))
 	{
+		//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"iiiiiiiiii wifi 1\n");
+		
 		err = pthread_create(&wlan_tid, NULL, wlan_test,tc_info); //
 		if(err != 0)
 		{  
-		   printf("create camera test thread error: %s/n",strerror(err));	
+		   printf("create wifi test thread error: %s/n",strerror(err));	
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "bluetooth"))
+	{
+		printf("bluetooth_test thread created\n");
+
+		err = pthread_create(&bt_tid, NULL, bt_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create bt(bluetooth) test thread error: %s/n",strerror(err));	
 		   
 		}  
 	}

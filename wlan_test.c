@@ -58,11 +58,14 @@ void strcpy_without_space_ahead(char *dst,char *src)
 void* wlan_test(void* argv)
 {
 	
+	
 	int ret;
 	FILE *fp;
 	char results[SCAN_RESULT_LENGTH];
 	char ssid[100];
 	struct testcase_info *tc_info = (struct testcase_info *)argv;
+
+	//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"iiiiiiiiii wifi 2\n");
 	
 	ret =  __system("busybox chmod 777 /res/wifi.sh");
 	if(ret)

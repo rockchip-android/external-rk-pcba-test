@@ -33,6 +33,7 @@ LOCAL_SRC_FILES := \
     alsa_pcm.c			\
     codec_test.c		\
     wlan_test.c			\
+    bt_test.c			\
     sdcard_test.c		\
     udisk_test.c        \
     gsensor_test.c 		\
@@ -141,7 +142,7 @@ endif
 
 LOCAL_MODULE_TAGS := eng
 LOCAL_STATIC_LIBRARIES :=
-LOCAL_SHARED_LIBRARIES :=
+LOCAL_SHARED_LIBRARIES := 
 
 ifeq ($(TARGET_RECOVERY_GUI),true)
   LOCAL_STATIC_LIBRARIES += libtwgui
@@ -149,9 +150,9 @@ else
   LOCAL_SRC_FILES += gui_stub.c
 endif
 LOCAL_STATIC_LIBRARIES += libminziptwrp libunz libmincrypt
-LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp 
+LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp libbluetooth
 LOCAL_STATIC_LIBRARIES += libz libc libstlport_static libcutils libstdc++
-LOCAL_STATIC_LIBRARIES += libmtdutils
+LOCAL_STATIC_LIBRARIES += libmtdutils 
 
 
 
@@ -176,6 +177,7 @@ include $(commands_recovery_local_path)/minuitwrp/Android.mk
 include $(commands_recovery_local_path)/gui/Android.mk
 include $(commands_recovery_local_path)/libjpegtwrp/Android.mk
 include $(commands_recovery_local_path)/minziptwrp/Android.mk
+include $(commands_recovery_local_path)/libbluetooth/Android.mk
 commands_recovery_local_path :=
 
 endif   # TARGET_ARCH == arm
