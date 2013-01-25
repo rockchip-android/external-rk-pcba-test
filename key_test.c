@@ -26,7 +26,7 @@ int set_gKey(unsigned int code)
 	{
 		if(code == key_code[i].code)
 		{
-			ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,255,0,255,"%s\n",key_code[i].name);
+			ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,0,255,255,"    [ %s ]\n",key_code[i].name);
 			break;
 		}
 	}

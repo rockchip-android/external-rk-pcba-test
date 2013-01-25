@@ -31,8 +31,8 @@ enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT };
 #define MENU_MAX_COLS 50
 #define MENU_MAX_ROWS 500
 
-#define CHAR_WIDTH 10
-#define CHAR_HEIGHT 18
+#define CHAR_WIDTH 18
+#define CHAR_HEIGHT 32
 
 int ensure_path_mounted(const char* path);
 char** prepend_title(const char** headers);

@@ -47,9 +47,9 @@ void * udisk_test(void * argv)
 	cap = strtod(results,NULL);
     printf("capacity : %s\n", results);
 	if(cap > 0)
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk test success:%2fG\n",cap*1.0/1024/1024);
+		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk: [ok]  [ %2fG ]\n",cap*1.0/1024/1024);
     else
-        ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk test failed!!!");
+        ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk: [error]");
 
 	return argv;
 	

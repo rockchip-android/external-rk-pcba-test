@@ -39,7 +39,7 @@
 #include "hdmi_test.h"
 
 #define SCRIPT_NAME                     "/res/test_config.cfg"
-#define ITEM_H				5			//height of test item
+#define ITEM_H				2			//height of test item
 #define ITEM_X				1			//x positon of test item
 
 #define LOG(x...) printf(x)
@@ -78,6 +78,11 @@ pthread_t screen_tid;
 char *screen_res;
 struct screen_msg *screen_msg;
 int screen_err = -1;
+
+
+pthread_t codec_tid;
+char *codec_res;
+struct codec_msg *codec_msg;
 
 
 pthread_t camera_tid;  
@@ -260,7 +265,7 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	tc_info->y =  manual_p_y ;
 	tc_info->w =  gr_fb_width();
 	tc_info->h = ITEM_H;
-	ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),0,0,255,255,"%s\n",
+	ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
 			tc_info->base_info->display_name);
 	manual_p_y += ITEM_H;
 	
@@ -288,7 +293,7 @@ int start_manual_test_item(int x,int y)
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
 			
-			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1),255,255,0,255,"%s\n",
+			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,255,0,255,"%s\n",
 					tc_info->base_info->display_name);
 			if (!strcmp(tc_info->base_info->name, "Camera_1"))
 			{
@@ -331,7 +336,17 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
-	}
+	}else if(!strcmp(tc_info->base_info->name, "Codec"))
+        {
+                err = pthread_create(&codec_tid, NULL, codec_test,NULL); //
+                if(err != 0)
+                {
+                   printf("create codec test thread error: %s/n",strerror(err));
+                   return -1;
+
+                }
+        }
+
 	else if(!strcmp(tc_info->base_info->name, "Camera_0"))
 	{
 		tc_info->dev_id = 0;
@@ -433,116 +448,116 @@ get_menu_selection(char** headers, char** items, int menu_only,
         int visible = ui_text_visible();
 
         int action = device_handle_key(key, visible);
-        if (action < 0) {
-            switch (action) {
-                case HIGHLIGHT_UP:
-                    --selected;
-                    selected = ui_menu_select(selected);
-                    break;
-                case HIGHLIGHT_DOWN:
-                    ++selected;
-                    selected = ui_menu_select(selected);
-                    break;
-                case KEY_POWER:
-                case SELECT_ITEM:
-                    chosen_item = selected;
-                    break;
-                case UP_A_LEVEL:
-                	if (menu_loc_idx != 0)
-                	{
-                		chosen_item = menu_loc[menu_loc_idx];
-                	}
-                    break;
-                case HOME_MENU:
-                	if (menu_loc_idx != 0)
-                	{
-                		go_home = 1;
-                		chosen_item = menu_loc[menu_loc_idx];
-                	}
-                    break;
-                case MENU_MENU:
-                	if (menu_loc_idx == 0)
-                	{
-                	    return 3;
-                	} else
-                	{
-                    	go_home = 1;
-                    	go_menu = 1;
-                    	chosen_item = menu_loc[menu_loc_idx];
-                	}
-                    break;
-                case NO_ACTION:
-                    break;
-            }
-        } else if (!menu_only) {
-            chosen_item = action;
-        }
-    }
+		if (action < 0) {
+		    switch (action) {
+			case HIGHLIGHT_UP:
+			    --selected;
+			    selected = ui_menu_select(selected);
+			    break;
+			case HIGHLIGHT_DOWN:
+			    ++selected;
+			    selected = ui_menu_select(selected);
+			    break;
+			case KEY_POWER:
+			case SELECT_ITEM:
+			    chosen_item = selected;
+			    break;
+			case UP_A_LEVEL:
+				if (menu_loc_idx != 0)
+				{
+					chosen_item = menu_loc[menu_loc_idx];
+				}
+			    break;
+			case HOME_MENU:
+				if (menu_loc_idx != 0)
+				{
+					go_home = 1;
+					chosen_item = menu_loc[menu_loc_idx];
+				}
+			    break;
+			case MENU_MENU:
+				if (menu_loc_idx == 0)
+				{
+				    return 3;
+				} else
+				{
+				go_home = 1;
+				go_menu = 1;
+				chosen_item = menu_loc[menu_loc_idx];
+				}
+			    break;
+			case NO_ACTION:
+			    break;
+		    }
+		} else if (!menu_only) {
+		    chosen_item = action;
+		}
+	    }
 
-    ui_end_menu();
-    return chosen_item;
-}
+	    ui_end_menu();
+	    return chosen_item;
+	}
 
 
-char**
-prepend_title(const char** headers) {
-    char* title1 = (char*)malloc(40);
-    strcpy(title1, "Team Win Recovery Project (twrp) v");
-    char* header1 = strcat(title1, DataManager_GetStrValue(TW_VERSION_VAR));
-    char* title[] = { header1,
-                      "Based on Android System Recovery <"
-                      EXPAND(RECOVERY_API_VERSION) "e>",
-                      "", //
-                      print_batt_cap(),
-                      "", //
-                      NULL };
+	char**
+	prepend_title(const char** headers) {
+	    char* title1 = (char*)malloc(40);
+	    strcpy(title1, "Team Win Recovery Project (twrp) v");
+	    char* header1 = strcat(title1, DataManager_GetStrValue(TW_VERSION_VAR));
+	    char* title[] = { header1,
+			      "Based on Android System Recovery <"
+			      EXPAND(RECOVERY_API_VERSION) "e>",
+			      "", //
+			      print_batt_cap(),
+			      "", //
+			      NULL };
 
-    // count the number of lines in our title, plus the
-    // caller-provided headers.
-    int count = 0;
-    char** p;
-    for (p = title; *p; ++p, ++count);
-    for (p = (char**) headers; *p; ++p, ++count);
+	    // count the number of lines in our title, plus the
+	    // caller-provided headers.
+	    int count = 0;
+	    char** p;
+	    for (p = title; *p; ++p, ++count);
+	    for (p = (char**) headers; *p; ++p, ++count);
 
-    char** new_headers = (char**)malloc((count+1) * sizeof(char*));
-    char** h = new_headers;
-    for (p = title; *p; ++p, ++h) *h = *p;
-    for (p = (char**) headers; *p; ++p, ++h) *h = *p;
-    *h = NULL;
+	    char** new_headers = (char**)malloc((count+1) * sizeof(char*));
+	    char** h = new_headers;
+	    for (p = title; *p; ++p, ++h) *h = *p;
+	    for (p = (char**) headers; *p; ++p, ++h) *h = *p;
+	    *h = NULL;
 
-    return new_headers;
-}
+	    return new_headers;
+	}
 
-void prompt_and_wait()
-{
-
-	// Main Menu
-	#define START_FAKE_MAIN          0
-	#define REALMENU_REBOOT     	 1
-
-	go_reboot = 0;
-    //ui_reset_progress();
-
-	char** headers = prepend_title((const char**)MENU_HEADERS);
-    char* MENU_ITEMS[] = {  "Start Recovery",
-                            "Reboot",
-                            NULL };
-	
-    for (;;)
+	void prompt_and_wait()
 	{
 
-        go_home = 0;
-        go_menu = 0;
-        menu_loc_idx = 0;
-		
+		// Main Menu
+		#define START_FAKE_MAIN          0
+		#define REALMENU_REBOOT     	 1
 
-        if (go_reboot)
+		go_reboot = 0;
+	    //ui_reset_progress();
+
+		char** headers = prepend_title((const char**)MENU_HEADERS);
+	    char* MENU_ITEMS[] = {  "Start Recovery",
+				    "Reboot",
+				    NULL };
+		
+	    for (;;)
 		{
-			return;
-		}
-		show_fake_main_menu();
-    }
-}
+
+		go_home = 0;
+		go_menu = 0;
+		menu_loc_idx = 0;
+			
+
+		if (go_reboot)
+			{
+				return;
+			}
+			show_fake_main_menu();
+	    }
+	}
 
 
 
@@ -565,8 +580,9 @@ int main(int argc, char **argv)
 	ui_print_init();
 	gui_loadResources();
 #if 1
-	ui_print_xy_rgba(0,0,255,0,0,255,"Rockchip Pcba test v1.0\n");
-	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
+	ui_print_xy_rgba(0,0,0,255,0,255,"Rockchip Pcba test v1.0\n");
+//	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
+	ui_print_xy_rgba(0,1,255,255,0,255,"/************ Manual **************/\n");
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
@@ -599,13 +615,13 @@ int main(int argc, char **argv)
 		init_manual_test_item(tc_info);
 		
 	}
+	ui_print_xy_rgba(0,manual_p_y,255,255,0,255,"/*********** Automatic ************/\n");
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
 		start_auto_test_item(tc_info);
 	}
-	
 	
 #endif
 	//while(1);

@@ -14,7 +14,7 @@
 pthread_t codec_tid;  
 int codec_err = -1;
 
-void* rec_play_test(void *argv)
+void* codec_test(void *argv)
 {		
 	struct pcm* pcmIn = NULL;
 	struct pcm* pcmOut = NULL;
@@ -121,7 +121,7 @@ fail:
 		fclose(fp);
 	return 0;
 }
-
+/*
 void* codec_test(void *argv)
 {
 	sleep(3);    
@@ -133,4 +133,4 @@ void* codec_test(void *argv)
 	} 
 	
     return NULL;
-}
+}*/

@@ -156,7 +156,7 @@ int openInput(const char* inputName)
  	fd = openInput("gsensor");
 	if(fd < 0)
 	{
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor: [error]\n");
 		g_msg->result = -1;
 		tc_info->result = -1;
 		return argv;
@@ -165,7 +165,7 @@ int openInput(const char* inputName)
     if(fd_dev<0)
     {
      	printf("opne gsensor demon fail\n");
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor: [error]\n");
 		g_msg->result = -1;
 		tc_info->result = -1;
 		return argv;
@@ -175,7 +175,7 @@ int openInput(const char* inputName)
     if(ret < 0)
     {
 		printf("start sensor fail!\n");
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor test fail!\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"gsensor: [error]\n");
 		g_msg->result = -1;
 		tc_info->result = -1;
 		return argv;
@@ -183,8 +183,8 @@ int openInput(const char* inputName)
 	for(;;)
 	{
 		readEvents(fd);
-		//ui_print_xy_rgba(0,g_msg->y,0,0,0,255,"                                         \n");
-		ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
+		ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor: [ok]\n");
+		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 	}
 
 	return argv;
