@@ -43,10 +43,32 @@
 char ssids[MAX_SCAN_COUNTS][128];
 char rssis[MAX_SCAN_COUNTS][128];
 
+/* RSSI Levels as used by notification icon
+   Level 4  -55 <= RSSI
+   Level 3  -66 <= RSSI < -55
+   Level 2  -77 <= RSSI < -67
+   Level 1  -88 <= RSSI < -78
+   Level 0         RSSI < -88 */
+int calcSingleLevel(int rssi)
+{
+	rssi *= -1;
+	if(rssi >= -55) {
+		return 4;
+	} else if(rssi >= -66) {
+		return 3;
+	} else if(rssi >= -77) {
+		return 2;
+	} else if(rssi >= -88) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 void process_ssid(char *dst, char *src, char *src2)
 {
 	char *p, *p2, *tmp, *tmp2;
-	int i, j, dbm, dbm2 = 99, index = 0;
+	int i, j, dbm, dbm2 = 99, index = 0, rssi;
 	
 	for(i = 0; i < MAX_SCAN_COUNTS; i++) {
 		
@@ -101,12 +123,9 @@ void process_ssid(char *dst, char *src, char *src2)
 	LOG("index = %d, dbm = %d\n", index, dbm2);
 	LOG("select ap: %s, %s\n", &ssids[index][0], &rssis[index][0]);
 	
-	strcpy(dst, &ssids[index][0]);
-	dst += strlen(&ssids[index][0]);
-	*dst++ = ' ';
-	strcpy(dst, &rssis[index][0]);
-	dst += strlen(&rssis[index][0]);
-	*dst++ = '\0';
+	rssi = calcSingleLevel(atoi(&rssis[index][1]));
+	
+	sprintf(dst, "[%s Level %d]", &ssids[index][0], rssi);
 }
 
 // ---------------------------------------------------------------------------
@@ -166,8 +185,10 @@ void* wlan_test(void* argv)
 	results2[SCAN_RESULT_LENGTH-1] = '\0';
   //LOG("%s.\n", results2);
 	
+	memset(ssid, 0, 100);
+	
 	process_ssid(ssid, results, results2);
-	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"Wi-Fi: %s\n",ssid);
+	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"Wi-Fi: [OK] %s\n",ssid);
 	
 	LOG("wlan_test success.\n");
 	return 0;
@@ -192,7 +213,7 @@ error_exit:
 		free(results2);
 	}
 	
-	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"Wi-Fi test fail\n");
+	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"Wi-Fi: [FAIL]\n");
 	tc_info->result = -1;
 		
   return argv;
