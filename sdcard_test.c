@@ -25,7 +25,7 @@ void * sdcard_test(void * argv)
 	ret = __system("/res/mmctester.sh");
 	if(ret < 0) {
 		printf("mmc test failed.\n");
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"sdcard: error!\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"SDCard: [FAIL]\n");
 		tc_info->result = -1;
 		return argv;
 	}
@@ -34,7 +34,7 @@ void * sdcard_test(void * argv)
 	fp = fopen(SCAN_RESULT_FILE, "r");
 	if(fp == NULL) {
 		printf("can not open %s.\n", SCAN_RESULT_FILE);
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"sdcad: error!\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"SDCard: [FAIL]\n");
 		tc_info->result = -1;
 		return argv;
 	}
@@ -54,7 +54,7 @@ void * sdcard_test(void * argv)
 	
 	cap = strtod(results,NULL);
 	if(cap)
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"sdcard:  [ok] [ %2fG ]\n",cap*1.0/1024/1024);
+		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"SDCard: [OK] [ %2fG ]\n",cap*1.0/1024/1024);
 
 	return argv;
 	

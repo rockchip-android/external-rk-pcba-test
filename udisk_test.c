@@ -26,7 +26,7 @@ void * udisk_test(void * argv)
 	ret = __system("/res/udisktester.sh");
 	if(ret < 0) {
 		printf("udisk test failed.\n");
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"udisk test script fail\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"UDISK: [FAIL]\n");
 		tc_info->result = -1;
 		return argv;
 	}
@@ -35,7 +35,7 @@ void * udisk_test(void * argv)
 	fp = fopen(SCAN_RESULT_FILE, "r");
 	if(fp == NULL) {
 		printf("can not open %s.\n", SCAN_RESULT_FILE);
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"udisk test fail read result\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"UDISK: [FAIL]\n");
 		tc_info->result = -1;
 		return argv;
 	}
@@ -47,9 +47,9 @@ void * udisk_test(void * argv)
 	cap = strtod(results,NULL);
     printf("capacity : %s\n", results);
 	if(cap > 0)
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk: [ok]  [ %2fG ]\n",cap*1.0/1024/1024);
+		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"UDISK: [OK] [ %2fG ]\n",cap*1.0/1024/1024);
     else
-        ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"udisk: [error]");
+        ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"UDISK: [FAIL]");
 
 	return argv;
 	

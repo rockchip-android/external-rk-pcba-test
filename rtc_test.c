@@ -226,12 +226,12 @@ void* rtc_test(void *argc)
 	{
 		tc_info->result = 0;
 	//	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc: ok!   { %s }\n",dt);
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc:  [ok]\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"RTC: [OK]\n");
 	}
 	else
 	{
 		tc_info->result = -1;
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"rtc:  [error]l\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"RTC: [FAIL]\n");
 	}
 	
 	
