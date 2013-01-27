@@ -111,6 +111,9 @@ void process_ssid(char *dst, char *src, char *src2)
 	}
 	
 	LOG("total = %d\n", i);
+	if(i == 0) {
+		return;
+	}
 	
 	for(j = 0; j < i; j++) {
 		dbm = atoi(&rssis[j][1]); // skip '-'
