@@ -14,7 +14,7 @@
 pthread_t codec_tid;  
 int codec_err = -1;
 
-void* codec_test(void *argv)
+void* rec_play_test(void *argv)
 {		
 	struct pcm* pcmIn = NULL;
 	struct pcm* pcmOut = NULL;
@@ -121,16 +121,20 @@ fail:
 		fclose(fp);
 	return 0;
 }
-/*
 void* codec_test(void *argv)
 {
+    int ret = -1;
 	sleep(3);    
+/*
 	codec_err = pthread_create(&codec_tid, NULL, rec_play_test,NULL); //
 	if(codec_err != 0)
 	{  
 	   printf("create camera test thread error: %s/n",strerror(codec_err));  
 	   
 	} 
-	
+*/
+    printf ("+++++++++++++++++++ executing codec_test\r\n");
+    ret = __system("/sbin/codec_test");	
+    printf ("+++++++++++++++++++ ret %d , executing codec_test\r\n", ret);
     return NULL;
-}*/
+}

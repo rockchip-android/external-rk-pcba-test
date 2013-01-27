@@ -2,6 +2,28 @@ ifneq ($(TARGET_SIMULATOR),true)
 ifeq ($(TARGET_ARCH),arm)
 
 LOCAL_PATH := $(call my-dir)
+
+ifneq ($(NO_CODEC_TEST_BIN), true)
+include $(CLEAR_VARS)
+LOCAL_MODULE := codec_test
+LOCAL_FORCE_STATIC_EXECUTABLE := true
+LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
+LOCAL_C_INCLUDES += bionic external/stlport/stlport
+
+LOCAL_SRC_FILES := \
+    alsa_pcm.c     \
+    codec_test.c   \
+    codec_main.c
+
+
+LOCAL_MODULE_TAGS := optional
+LOCAL_STATIC_LIBRARIES := libc libcutils
+LOCAL_SHARED_LIBRARIES := 
+
+
+include $(BUILD_EXECUTABLE)
+endif
+
 include $(CLEAR_VARS)
 
 commands_recovery_local_path := $(LOCAL_PATH)
