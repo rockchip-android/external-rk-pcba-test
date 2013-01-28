@@ -429,13 +429,13 @@ int bt_test(void)
 	close( sock );
 	bt_disable();
 
-	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"Bluetooth: [OK]\n");
+	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"BT    : [OK]\n");
 
 	printf("bluetooth_test main function over\n");
 	return 0;
 
 	to_enable_error:
 	to_open_error:
-	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"Bluetooth: [FAIL]\n");
+	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"BT    : [FAIL]\n");
 	return 0;
 }

@@ -549,6 +549,33 @@ void FillColor(int r,int g,int b,int a,int left,int top,int width,int height)
 	pthread_mutex_unlock(&gUpdateMutex);
 }
 
+void drawline(int r,int g,int b,int a,int left,int top,int width,int height)
+{
+	tiles_count += 1;
+	if(tiles_count > kMaxTiles)
+	{
+		tiles_count = kMaxTiles;
+	}
+	tiles[tiles_count-1].left = left;
+	tiles[tiles_count-1].top = top;
+	tiles[tiles_count-1].right = width;
+	tiles[tiles_count-1].bottom = height;
+	tiles[tiles_count-1].r = r;
+	tiles[tiles_count-1].g = g;
+	tiles[tiles_count-1].b = b;
+	tiles[tiles_count-1].a = a;
+	pthread_mutex_lock(&gUpdateMutex);
+	update_screen_locked();
+	pthread_mutex_unlock(&gUpdateMutex);
+}
+void drawline_4(int r,int g,int b,int a,int left,int top,int width,int height,int linewidth)
+{
+	drawline(r,g,b,a,left,top,width,linewidth);
+	drawline(r,g,b,a,left,(top+height-linewidth),width,linewidth);
+	drawline(r,g,b,a,left,top,linewidth,height);
+	drawline(r,g,b,a,(left+width-linewidth),top,linewidth,height);
+}
+
 
 #if 0
 void ui_print(const char *fmt, ...)

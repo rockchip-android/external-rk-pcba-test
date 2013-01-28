@@ -54,7 +54,7 @@ void * sdcard_test(void * argv)
 	
 	cap = strtod(results,NULL);
 	if(cap)
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"SDCard: [OK] [ %2fG ]\n",cap*1.0/1024/1024);
+		ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"SDCard: [OK] {%2fG}\n",cap*1.0/1024/1024);
 
 	return argv;
 	

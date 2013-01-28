@@ -40,7 +40,7 @@
 
 #define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				2			//height of test item
-#define ITEM_X				1			//x positon of test item
+#define ITEM_X				0			//x positon of test item
 
 #define LOG(x...) printf(x)
 
@@ -63,7 +63,7 @@ struct manual_item m_item[] = {
 	};
 
 
-int manual_p_y = 3;
+int manual_p_y = 4;
 
 
 int cur_p_y;		//current position for auto test tiem in y direction
@@ -83,6 +83,11 @@ int screen_err = -1;
 pthread_t codec_tid;
 char *codec_res;
 struct codec_msg *codec_msg;
+
+
+pthread_t key_tid;
+char *key_res;
+struct key_msg *key_msg;
 
 
 pthread_t camera_tid;  
@@ -265,7 +270,7 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	tc_info->y =  manual_p_y ;
 	tc_info->w =  gr_fb_width();
 	tc_info->h = ITEM_H;
-	ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
+	ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,255,0,255,"%s\n",
 			tc_info->base_info->display_name);
 	manual_p_y += ITEM_H;
 	
@@ -293,7 +298,7 @@ int start_manual_test_item(int x,int y)
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
 			
-			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,255,0,255,"%s\n",
+			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
 					tc_info->base_info->display_name);
 			if (!strcmp(tc_info->base_info->name, "Camera_1"))
 			{
@@ -345,8 +350,16 @@ int start_auto_test_item(struct testcase_info *tc_info)
                    return -1;
 
                 }
-        }
-
+        }else if(!strcmp(tc_info->base_info->name, "Key"))
+	{
+		err = pthread_create(&key_tid, NULL, key_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create key test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}
 	else if(!strcmp(tc_info->base_info->name, "Camera_0"))
 	{
 		tc_info->dev_id = 0;
@@ -563,7 +576,7 @@ get_menu_selection(char** headers, char** items, int menu_only,
 
 int main(int argc, char **argv)
 {
-	int ret;
+	int ret,w;
 	char *script_buf;
 	struct list_head *pos;
 	int success = 0;
@@ -580,9 +593,11 @@ int main(int argc, char **argv)
 	ui_print_init();
 	gui_loadResources();
 #if 1
-	ui_print_xy_rgba(0,0,0,255,0,255,"Rockchip Pcba test v1.0\n");
+	w =  gr_fb_width() >> 1;
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-7),0,0,255,0,255,"Rockchip Pcba test v1.0\n");
 //	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
-	ui_print_xy_rgba(0,1,255,255,0,255,"/************ Manual **************/\n");
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),2,255,255,0,255," Manual\n");
+        drawline_4(255,255,0,255,0,(2*CHAR_HEIGHT-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3);
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
@@ -615,7 +630,8 @@ int main(int argc, char **argv)
 		init_manual_test_item(tc_info);
 		
 	}
-	ui_print_xy_rgba(0,manual_p_y,255,255,0,255,"/*********** Automatic ************/\n");
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-4),manual_p_y+1,255,255,0,255,"Automatic \n");
+        drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+1)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {

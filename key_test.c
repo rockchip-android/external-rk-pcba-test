@@ -18,20 +18,24 @@ static pthread_mutex_t gKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 
 int g_key_test = 0;
 struct testcase_info  *tc_info = NULL;
+extern int manual_p_y;
 
 int set_gKey(unsigned int code)
 {
 	int i;
+	static n = 0;
 	 for(i=0; i < key_cnt;i++)
 	{
 		if(code == key_code[i].code)
 		{
-			ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,0,255,255,"    [ %s ]\n",key_code[i].name);
+//			ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,0,255,255,"    [ %s ]\n",key_code[i].name);
+//                        ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,255,0,255,"%s\n",key_code[i].name);
+                        ui_print_xy_rgba(0,manual_p_y,0,255,0,255,"key : {%s}\n",key_code[i].name);
 			break;
 		}
 	}
-	 if(code == KEY_POWER)
-	 	 g_key_test = 0;
+//	 if(code == KEY_POWER)
+//	 	 g_key_test = 0;
 	 
 	return 0;
 }
