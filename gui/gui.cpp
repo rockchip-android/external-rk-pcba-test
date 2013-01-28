@@ -768,8 +768,8 @@ extern "C" int gui_start()
 
     // Start by spinning off an input handler.
     pthread_t t;
-    pthread_create(&t, NULL, input_thread, NULL);
-	pthread_join(t,NULL);  //add by yxj
+    //pthread_create(&t, NULL, input_thread, NULL);
+	//pthread_join(t,NULL);  //add by yxj
 	return 0;
     //return runPages();
 }

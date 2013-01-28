@@ -1,7 +1,7 @@
 #ifndef __KEY_TEST_H_
 #define __KEY_TEST_H_
 void* key_test(void *argc);
-int set_gKey(unsigned int code);
+extern int set_gKey(unsigned int code);
 extern int g_key_test;
 struct key 
 {

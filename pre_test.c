@@ -136,6 +136,8 @@ int get_cur_print_y(void)
 {
 	int tmp;
 	pthread_mutex_lock(&gCur_p_y);
+	if (gr_fb_width() >600)
+		cur_p_y--;
 	 tmp = cur_p_y--;
 	pthread_mutex_unlock(&gCur_p_y);
 	printf("cur_print_y:%d\n",tmp);
@@ -642,6 +644,8 @@ int main(int argc, char **argv)
 #endif
 	//while(1);
 	gui_start();
+	start_input_thread();
+
 	//prompt_and_wait();
 	stopCameraTest();
 	list_for_each(pos, &auto_test_list_head) {

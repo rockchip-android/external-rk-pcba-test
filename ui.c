@@ -335,7 +335,7 @@ static void *progress_thread(void *cookie)
     }
     return NULL;
 }
-
+/*
 // Reads input events, handles special hot keys, and adds to the key queue.
 static void *input_thread(void *cookie)
 {
@@ -405,6 +405,165 @@ static void *input_thread(void *cookie)
     }
     return NULL;
 }
+*/
+
+
+#undef _EVENT_LOGGING
+
+#include "touch_test.c"
+#include "key_test.h"
+
+static void *input_thread(void *cookie)
+{
+    int drag = 0;
+	static int touch_and_hold = 0, dontwait = 0, touch_repeat = 0, x = 0, y = 0, lshift = 0, rshift = 0, key_repeat = 0;
+	static struct timeval touchStart;
+	static struct timeval keyStart, keyEnd;
+	LOGE("start input thread!\n");
+    for (;;) 
+	{
+
+        // wait for the next event
+        struct input_event ev;
+        int state = 0, ret = 0;
+
+		ret = ev_get(&ev, dontwait);
+		//LOGE("type:%d>>code:%d>>value:%d\n",ev.type,ev.code,ev.value);
+		if (ret < 0)
+		{
+			struct timeval curTime;
+			gettimeofday(&curTime, NULL);
+			long mtime, seconds, useconds;
+
+			seconds  = curTime.tv_sec  - touchStart.tv_sec;
+			useconds = curTime.tv_usec - touchStart.tv_usec;
+
+			mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+			if (touch_and_hold && mtime > 500) 
+			{
+				touch_and_hold = 0;
+				touch_repeat = 1;
+				gettimeofday(&touchStart, NULL);
+#ifdef _EVENT_LOGGING
+                LOGE("TOUCH_HOLD: %d,%d\n", x, y);
+#endif
+				NotifyTouch(TOUCH_HOLD, x, y);
+			} 
+			else if (touch_repeat && mtime > 100)
+			{
+#ifdef _EVENT_LOGGING
+                LOGE("TOUCH_REPEAT: %d,%d\n", x, y);
+#endif
+				gettimeofday(&touchStart, NULL);
+				NotifyTouch(TOUCH_REPEAT, x, y);
+			} 
+			else if (key_repeat == 1 && mtime > 500) 
+			{
+#ifdef _EVENT_LOGGING
+                LOGE("KEY_HOLD: %d,%d\n", x, y);
+#endif
+				gettimeofday(&touchStart, NULL);
+				key_repeat = 2;
+			} 
+			else if (key_repeat == 2 && mtime > 100) 
+			{
+#ifdef _EVENT_LOGGING
+                LOGE("KEY_REPEAT: %d,%d\n", x, y);
+#endif
+				gettimeofday(&touchStart, NULL);
+			}
+		} 
+		else if (ev.type == EV_ABS)
+		{
+
+            x = ev.value >> 16;
+            y = ev.value & 0xFFFF;
+
+            if (ev.code == 0)
+            {
+                if (state == 0)
+                {
+#ifdef _EVENT_LOGGING
+                    LOGE("TOUCH_RELEASE: %d,%d\n", x, y);
+#endif
+					start_manual_test_item(x,y);
+
+                    NotifyTouch(TOUCH_RELEASE, x, y);
+					touch_and_hold = 0;
+					touch_repeat = 0;
+					if (!key_repeat)
+						dontwait = 0;
+                }
+                state = 0;
+                drag = 0;
+            }
+            else
+            {
+                if (!drag)
+                {
+#ifdef _EVENT_LOGGING
+                    LOGE("TOUCH_START: %d,%d\n", x, y);
+#endif
+                    NotifyTouch(TOUCH_START, x, y);
+                    state = 1;
+                    drag = 1;
+					touch_and_hold = 1;
+					dontwait = 1;
+					key_repeat = 0;
+					gettimeofday(&touchStart, NULL);
+                }
+                else
+                {
+                    if (state == 0)
+                    {
+#ifdef _EVENT_LOGGING
+                        LOGE("TOUCH_DRAG: %d,%d\n", x, y);
+#endif
+                        NotifyTouch(TOUCH_DRAG, x, y);
+                        state = 1;
+						key_repeat = 0;
+                    }
+                }
+            }
+        }
+        else if (ev.type == EV_KEY)
+        {
+            // Handle key-press here
+#ifdef _EVENT_LOGGING
+            LOGE("TOUCH_KEY: %d\n", ev.code);
+#endif
+ LOGE("TOUCH_KEY: %d\n", ev.code);
+			if (ev.value != 0) 
+			{
+				gettimeofday(&keyStart, NULL);
+				printf("key down:%lu\n",keyStart.tv_sec);
+				key_repeat = 0;
+				touch_and_hold = 0;
+				touch_repeat = 0;
+				dontwait = 0;
+
+			} 
+			else 
+			{
+				// This is a key release
+				gettimeofday(&keyEnd, NULL);
+				printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
+				if(g_key_test)
+					set_gKey(ev.code);
+				key_repeat = 0;
+				touch_and_hold = 0;
+				touch_repeat = 0;
+				dontwait = 0;
+				if((keyEnd.tv_sec-keyStart.tv_sec) >= 2)
+				{
+					break;
+				}
+			}
+        }
+    }
+
+    return NULL;
+}
 
 void ui_print_init(void)  //add by yxj
 {
@@ -429,7 +588,14 @@ void ui_print_init(void)  //add by yxj
 	{
 		itemsInfo[i].t_row = i;
 	}
+
 	gUiInitialized = 1;
+}
+
+void start_input_thread(void){
+    pthread_t t;
+    pthread_create(&t, NULL, input_thread, NULL);
+	pthread_join(t,NULL);
 }
 
 void ui_init(void)
