@@ -75,6 +75,9 @@ int NotifyTouch(int action, int x, int y)
 
 		break;
 	case TOUCH_RELEASE:
+		pthread_mutex_lock(&gUpdateMutex);
+                gr_flip();
+                pthread_mutex_unlock(&gUpdateMutex);
 		break;
 	case TOUCH_HOLD:
 		break;
