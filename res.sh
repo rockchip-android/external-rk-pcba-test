@@ -27,28 +27,44 @@ if [ -e "device/rockchip/$TARGET_PRODUCT/wlan.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/wlan.ko $PRODUCT_OUT/recovery/root/res/
 fi
 
+if [ ! -e "$PRODUCT_OUT/recovery/root/system/etc/" ] ; then
+mkdir $PRODUCT_OUT/recovery/root/system/etc/
+fi
+
+if [ ! -e "$PRODUCT_OUT/recovery/root/system/etc/firmware" ] ; then
+mkdir $PRODUCT_OUT/recovery/root/system/etc/firmware/
+fi
+
+if [ ! -e "$PRODUCT_OUT/recovery/root/etc/firmware" ] ; then
+mkdir $PRODUCT_OUT/recovery/root/etc/firmware/
+fi
+
 if [ -e "external/wlan_loader/firmware/nvram_RK903_26M.cal" ] ; then
-cp external/wlan_loader/firmware/nvram_RK903_26M.cal $PRODUCT_OUT/recovery/root/res/
+cp external/wlan_loader/firmware/nvram_RK903_26M.cal $PRODUCT_OUT/recovery/root/system/etc/firmware
 fi
 
 if [ -e "external/wlan_loader/firmware/fw_RK903b2.bin" ] ; then
-cp external/wlan_loader/firmware/fw_RK903b2.bin $PRODUCT_OUT/recovery/root/res/
+cp external/wlan_loader/firmware/fw_RK903b2.bin $PRODUCT_OUT/recovery/root/system/etc/firmware
 fi
 
 if [ -e "external/wlan_loader/firmware/fw_RK901a0.bin" ] ; then
-cp external/wlan_loader/firmware/fw_RK901a0.bin $PRODUCT_OUT/recovery/root/res/
+cp external/wlan_loader/firmware/fw_RK901a0.bin $PRODUCT_OUT/recovery/root/system/etc/firmware
 fi
 
 if [ -e "external/wlan_loader/firmware/fw_RK901a2.bin" ] ; then
-cp external/wlan_loader/firmware/fw_RK901a2.bin $PRODUCT_OUT/recovery/root/res/
+cp external/wlan_loader/firmware/fw_RK901a2.bin $PRODUCT_OUT/recovery/root/system/etc/firmware
 fi
 
 if [ -e "external/wlan_loader/firmware/nvram_RK901.txt" ] ; then
-cp external/wlan_loader/firmware/nvram_RK901.txt $PRODUCT_OUT/recovery/root/res/
+cp external/wlan_loader/firmware/nvram_RK901.txt $PRODUCT_OUT/recovery/root/system/etc/firmware
 fi
 
 if [ -e "external/wlan_loader/firmware/WIFI_RAM_CODE" ] ; then
-cp external/wlan_loader/firmware/WIFI_RAM_CODE $PRODUCT_OUT/recovery/root/res/
+cp external/wlan_loader/firmware/WIFI_RAM_CODE $PRODUCT_OUT/recovery/root/etc/firmware
+fi
+
+if [ -e "external/wlan_loader/firmware/MTK_MT6622_E2_Patch.nb0" ] ; then
+cp external/wlan_loader/firmware/MTK_MT6622_E2_Patch.nb0 $PRODUCT_OUT/recovery/root/system/etc/firmware
 fi
 
 if [ -e "device/rockchip/$TARGET_PRODUCT/proprietary/libipp/rk29-ipp.ko" ] ; then

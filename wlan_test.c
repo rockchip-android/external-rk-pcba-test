@@ -117,6 +117,7 @@ void process_ssid(char *dst, char *src, char *src2)
 	
 	for(j = 0; j < i; j++) {
 		dbm = atoi(&rssis[j][1]); // skip '-'
+                if(dbm == 0) continue;
 		if(dbm < dbm2) { // get max rssi
 			dbm2 = dbm;
 			index = j;
