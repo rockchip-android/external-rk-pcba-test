@@ -136,7 +136,7 @@ int get_cur_print_y(void)
 {
 	int tmp;
 	pthread_mutex_lock(&gCur_p_y);
-	if (gr_fb_width() >600)
+	if (gr_fb_height() >600)
 		cur_p_y--;
 	 tmp = cur_p_y--;
 	pthread_mutex_unlock(&gCur_p_y);
