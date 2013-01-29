@@ -10,7 +10,8 @@ typedef enum {
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
 #undef MIN
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
-
+#undef ABS
+#define ABS(a)		((a) >= 0 ? (a) : (-(a))) 
 
 int draw_dot(int x, int y)
 {
@@ -22,7 +23,7 @@ int draw_dot(int x, int y)
 //	LOGE("draw (%d,%d)\n", x, y);
 	pthread_mutex_lock(&gUpdateMutex);
 	gr_color(0, 0, 255, 255);
-	gr_fill(x, y, 4, 4);
+	gr_fill(x, y, 2, 2);
 	//gr_flip();
 	pthread_mutex_unlock(&gUpdateMutex);
 
@@ -35,6 +36,8 @@ int draw_dot(int x, int y)
 int draw_line(int x1, int y1, int x2, int y2)
 {
 	int x, y;
+
+//	printf("line: (%d,%d)-(%d,%d)\n", x1, y1, x2, y2);
 	
 	if(x1 == x2){
 		x = x1;
@@ -44,11 +47,16 @@ int draw_line(int x1, int y1, int x2, int y2)
 		y = y1;
 		for(x = MIN(x1, x2); x <= MAX(x1, x2); x++)
 			draw_dot(x, y);
-	}else{
+	}else if(ABS(x1-x2) > ABS(y1-y2)){
 		for(x = MIN(x1, x2); x <= MAX(x1, x2); x++){
 			y = ((y2 - y1) * (x - x1)) / (x2 - x1) + y1;
 			draw_dot(x, y);
 		}
+	}else{
+		for(y = MIN(y1, y2); y <= MAX(y1, y2); y++){
+                        x = ((x2 - x1) * (y - y1)) / (y2 - y1) + x1;
+                        draw_dot(x, y);
+                }
 	}
 	
 	return 0;
