@@ -35,6 +35,10 @@
 #define BTHWCTL_IOC_MAGIC            0xf6
 #define BTHWCTL_IOCTL_SET_POWER      _IOWR(BTHWCTL_IOC_MAGIC, 0, uint32_t)	
 
+#define TCC_BT_DEVICE_PATH                      "/dev/tcc_bt_dev"
+#define BT_DEV_MAJOR_NUM                        234
+#define IOCTL_BT_DEV_POWER              _IO(BT_DEV_MAJOR_NUM, 100)
+
 enum WIFI_CHIP_TYPE_LIST{
 	BCM4329 = 0,
 	RTL8188CU,
@@ -44,7 +48,9 @@ enum WIFI_CHIP_TYPE_LIST{
 	RK903,
 	MT6620,
 	RT5370,
-  MT5931
+  MT5931,
+  RDA587x,
+  RDA5990
 };
 
 static int rfkill_id = -1;
@@ -194,11 +200,42 @@ out1:
     return ret;	
 }
 
+static int rda587x_set_bluetooth_power(int on) {
+	int fd = -1;
+	int bt_on_off = -1;
+	
+	fd = open(TCC_BT_DEVICE_PATH, O_RDWR);
+	if( fd < 0 )
+	{
+	    printf("[###### TCC BT #######] [%s] open error[%d]\n", TCC_BT_DEVICE_PATH, fd);
+	    return -1;
+	}
+	else
+	{
+	    bt_on_off = 0;
+	    ioctl(fd, IOCTL_BT_DEV_POWER, &bt_on_off);//make sure bt is disabled
+	    printf("[##### TCC BT #####] set_bluetooth_power [%d]\n", bt_on_off);
+	    bt_on_off = 1;
+	    ioctl(fd, IOCTL_BT_DEV_POWER, &bt_on_off);
+	    printf("[##### TCC BT #####] set_bluetooth_power [%d]\n", bt_on_off);
+	    close(fd);
+	    return 0;
+	}
+}
+
+static int rda5990_set_bluetooth_power(int on) {
+	return 0;
+}
+
 static int set_bluetooth_power(int on) {
-	if(chip_type != MT5931) {
-		return broadcom_set_bluetooth_power(on);
-	} else {
+	if(chip_type == MT5931) {
 		return mtk_set_bluetooth_power(on);
+	} else if(chip_type == RDA587x) {
+		return rda587x_set_bluetooth_power(on);
+	} else if(chip_type == RDA5990) {
+		return rda5990_set_bluetooth_power(on);
+	} else {
+		return broadcom_set_bluetooth_power(on);
 	}
 }
 
@@ -218,15 +255,43 @@ static inline int bt_test_create_sock() {
     return sock;
 }
 
+#if 1
 static int start_hciattach() {
 	int ret;
-	if(chip_type != MT5931) {	
-		ret = __system("/system/bin/brcm_patchram_plus --patchram bychip --baudrate 1500000 --enable_lpm --enable_hci /dev/ttyS0 &");
-	} else {
+	if(chip_type == MT5931) {
 		ret = __system("/system/bin/hciattach_mtk -n -t 10 -s 115200 /dev/ttyS0 mtk 1500000 noflow &");
-	}	
+	} else if(chip_type == RDA587x) {	
+	  ret = __system("/system/bin/hciattach_5876 -n -s 115200 /dev/ttyS0 rda 1500000 noflow &");
+	} else if(chip_type == RDA5990) {	
+	  ret = __system("/system/bin/hciattach_5990 -n -s 115200 /dev/ttyS0 rda 921600 noflow &");
+	} else {
+		ret = __system("/system/bin/brcm_patchram_plus --patchram bychip --baudrate 1500000 --enable_lpm --enable_hci /dev/ttyS0 &");
+	}
 	return ret;
 }
+#else
+static int start_hciattach() {
+	int ret;
+	char service_name[32];
+	
+	if(chip_type == MT5931) {	
+		strcpy(service_name, "hciattach_mtk");
+	} else if(chip_type == RDA587x) {	
+	  strcpy(service_name, "hciattach_587x");
+	} else if(chip_type == RDA5990) {	
+	  strcpy(service_name, "hciattach_5990");  
+	} else {
+		strcpy(service_name, "hciattach_brm");
+	}	
+	
+	if (property_set("ctl.start", service_name) < 0) {
+		printf("bluetooth_test Failed to start %s\n", service_name);
+		return -1;
+	}	
+	
+	return ret;
+}
+#endif
 
 static int bt_test_enable() {
     int ret = -1;
@@ -288,18 +353,33 @@ int bt_test(void)
 	int sock = 0;
     int i = 0;
 	int ret = 0;
+	char dt[32] = {0};
 	
-	chip_type = getChipType();
-	if(chip_type != BCM4329 &&
-		 chip_type != BCM4330 &&
-		 chip_type != RK903 &&
-		 chip_type != MT6620 &&
-		 chip_type != MT5931 ) {
-		printf("hardware not support, skip bt test.\n");
-		return 0;
-	}	
+	chip_type = RK903; 
+	if(script_fetch("bluetooth", "chip_type", (int *)dt, 8) == 0) {
+		printf("script_fetch chip_type = %s.\n", dt);
+	}
+	if(strcmp(dt, "rk903") == 0) {
+		chip_type = RK903; 
+	} else if(strcmp(dt, "mt6622") == 0) {
+		chip_type = MT5931; 
+	} else if(strcmp(dt, "rda587x") == 0) {
+		chip_type = RDA587x; 
+	} else if(strcmp(dt, "rda5990") == 0) {
+		chip_type = RDA5990; 
+	} else {
+		/*chip_type = getChipType();
+		if(chip_type != BCM4329 &&
+			 chip_type != BCM4330 &&
+			 chip_type != RK903 &&
+			 chip_type != MT6620 &&
+			 chip_type != MT5931 ) {*/
+			printf("hardware not support, skip bt test.\n");
+			return 0;
+		//}	
+	}
 	
-	printf("bluetooth_test main function started\n");
+	printf("bluetooth_test main function started: chip_type = %d\n", chip_type);
 
 	ret = bt_test_enable();
 	if(ret < 0){
