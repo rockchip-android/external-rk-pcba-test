@@ -302,10 +302,10 @@ int start_manual_test_item(int x,int y)
 			
 			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
 					tc_info->base_info->display_name);
-			if (!strcmp(tc_info->base_info->name, "Camera_1"))
-			{
+			//if (!strcmp(tc_info->base_info->name, "Camera_1"))
+			//{
 				stopCameraTest();
-			}
+			//}
 			
 			tc_info->func(tc_info);
 			

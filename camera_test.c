@@ -37,10 +37,7 @@ struct ion_handle_data handle_data;
 #define RK29_PLAT 0
 static int is_rk30_plat = RK30_PLAT;
 #define  FB_NONSTAND ((is_rk30_plat == RK29_PLAT)?0x2:0x20)
-
-
-
-
+static int cam_id = 0;
 int CameraCreate(void)
 {
     int err,size;
@@ -48,7 +45,7 @@ int CameraCreate(void)
 	struct v4l2_format format;
 
     if (iCamFd == 0) {
-        iCamFd = open(videodevice, O_RDWR);
+        iCamFd = open(videodevice, O_RDWR|O_CLOEXEC);
        
         if (iCamFd < 0) {
             printf(" Could not open the camera  device:%s\n",videodevice);
@@ -202,8 +199,6 @@ int CameraStart(int phy_addr, int buffer_count, int w, int h)
     enum v4l2_buf_type type;
     struct v4l2_requestbuffers creqbuf;
 		
-		isstoped = 0;
-		hasstoped = 0;
 	//buffer_count = 2;
 	if( phy_addr == 0 || buffer_count == 0  ) {
     	printf(" Video Buf is NULL\n");
@@ -277,20 +272,6 @@ exit1:
 	iCamFd = -1;
 exit:
     return -1;
-}
-
-int CameraStop()
-{
-	struct v4l2_requestbuffers creqbuf;
-
-	creqbuf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (ioctl(iCamFd, VIDIOC_STREAMOFF, &creqbuf.type) == -1) {
-        printf("%s VIDIOC_STREAMOFF Failed", __FUNCTION__);
-        return -1;
-    }
-
-	return 0;
-
 }
 
 
@@ -371,7 +352,7 @@ int TaskStop(void)
     	}
     if (ioctl(iCamFd, VIDIOC_STREAMOFF, &creqbuf.type) == -1) {
         printf("%s VIDIOC_STREAMOFF Failed\n", __FUNCTION__);
-        return -1;
+   //     return -1;
     }
 	
 	if (iCamFd > 0) {
@@ -398,6 +379,7 @@ int TaskStop(void)
 		close(iDispFd);
 		iDispFd = -1;
 	}
+	printf("\n%s: stop ok!\n",__func__);
 	return 0;
 }
 
@@ -469,7 +451,7 @@ int TaskRuning(int fps_total,int corx,int cory)
 
 	    fps++;
 	}
-	hasstoped = 1;
+//	hasstoped = 1;
 
 exit:
 	return err;
@@ -477,7 +459,7 @@ exit:
 // the func is a while loop func , MUST  run in a single thread.
 void * startCameraTest(void *argv){
 	int ret = 0;
-	int cameraId;
+	int cameraId = 0;
 	int preWidth;
 	int preHeight;
 	int corx ;
@@ -497,6 +479,13 @@ void * startCameraTest(void *argv){
 	sprintf(videodevice,"/dev/video%d",cameraId);
 	preview_w = preWidth;
 	preview_h = preHeight;
+	printf("start test camera %d ....\n",cameraId);
+	
+    if(access(videodevice, O_RDWR) <0 ){
+	   printf("access %s failed\n",videodevice);
+	   return NULL;
+     }
+	  
 	if (CameraCreate() == 0)
 	{
 		if (CameraStart(v4l2Buffer_phy_addr, 4, preview_w,preview_h) == 0)
@@ -522,26 +511,39 @@ void * startCameraTest(void *argv){
 		camera_msg->tc_info->result = -1;
 		printf("%s camera create erro\n",__FUNCTION__);
 	}
-	isstoped = 1;
+	//isstoped = 1;
 	hasstoped = 1;
 	printf("camrea%d test over\n",cameraId);
 	return argv ;
 }
 int stopCameraTest(){
+	
+	sprintf(videodevice,"/dev/video%d",(1 - (cam_id%2)));
+	if(access(videodevice, O_RDWR) <0 ){
+	   printf("access %s failed,so dont't switch to camera %d\n",videodevice,(1 - (cam_id%2)));
+	   return 0;
+	 }
+	printf("%s enter stop -----\n",__func__);
 	return TaskStop();
 }
-
 void * camera_test(void *argc)
 {
 	struct testcase_info *tc_info = (struct testcase_info *)argc;
 	struct camera_msg *camera_msg = NULL;
 	pthread_t tid;
 	int err;
-	int id = tc_info->dev_id;
+	//cam_id = tc_info->dev_id;
 	int x =  gr_fb_width() >> 1;//camera_msg->x;
 	int y= 0;//camera_msg->y;
 	int w = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
 	int h = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
+	
+	if(iCamFd > 0){
+		printf(" %s has been opened! can't switch camera!\n",videodevice);
+		return NULL;
+	}
+	isstoped = 0;
+	hasstoped = 0;
 	//printf("%s:video%d x:%d y:%d w:%d h:%d\n",__func__,id,x,y,w,h);
 	camera_msg = (struct camera_msg*)malloc(sizeof(struct camera_msg));
 	if(!camera_msg)
@@ -550,7 +552,8 @@ void * camera_test(void *argc)
 		tc_info->result = -1;
 		return  argc;
 	}
-	camera_msg->id = id;
+	camera_msg->id = cam_id%2;
+	cam_id++;
 	camera_msg->x = x;
 	camera_msg->y = y;
 	camera_msg->w = w;
