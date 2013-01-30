@@ -518,9 +518,11 @@ void * startCameraTest(void *argv){
 }
 int stopCameraTest(){
 	
-	sprintf(videodevice,"/dev/video%d",(1 - (cam_id%2)));
+	sprintf(videodevice,"/dev/video%d",(cam_id%2));
 	if(access(videodevice, O_RDWR) <0 ){
-	   printf("access %s failed,so dont't switch to camera %d\n",videodevice,(1 - (cam_id%2)));
+	   printf("access %s failed,so dont't switch to camera %d\n",videodevice,(cam_id%2));
+	   //recover videodevice
+	   sprintf(videodevice,"/dev/video%d",(1-(cam_id%2)));
 	   return 0;
 	 }
 	printf("%s enter stop -----\n",__func__);
