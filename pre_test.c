@@ -596,7 +596,7 @@ int main(int argc, char **argv)
 	gui_loadResources();
 #if 1
 	w =  gr_fb_width() >> 1;
-	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-7),0,0,255,0,255,"Rockchip Pcba test v1.0\n");
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"Rockchip Pcba test v2.0\n");
 //	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),2,255,255,0,255," Manual\n");
         drawline_4(255,255,0,255,0,(2*CHAR_HEIGHT-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3);
