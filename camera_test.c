@@ -14,8 +14,8 @@
 #define RK29_CAM_VERSION_CODE_2 KERNEL_VERSION(0, 0, 2)
 
 static void *m_v4l2Buffer[4];
-static int v4l2Buffer_phy_addr;
-static int iCamFd, iPmemFd, iDispFd;
+static int v4l2Buffer_phy_addr = 0;
+static int iCamFd, iPmemFd, iDispFd =-1;
 static int preview_w,preview_h;
 
 static char videodevice[20] ={0};
@@ -88,8 +88,10 @@ int CameraCreate(void)
     }else{
         printf("default as rk30 platform\n");
     }
+    if(v4l2Buffer_phy_addr !=0)
+		goto suc_alloc;
     if(access(PMEM_DEV_NAME, O_RDWR) < 0) {
-            iIonFd = open(ION_DEVICE, O_RDONLY);
+            iIonFd = open(ION_DEVICE, O_RDONLY|O_CLOEXEC);
 
             if(iIonFd < 0 ) {
                 printf("%s: Failed to open ion device - %s",
@@ -145,7 +147,7 @@ int CameraCreate(void)
             	printf("%s: Successfully allocated 0x%x bytes, mIonFd=%d, SharedFd=%d",
             			__FUNCTION__,ionAllocData.len, iIonFd, fd_data.fd);
         }else{
-            iPmemFd = open(PMEM_DEV_NAME, O_RDWR, 0);
+            iPmemFd = open(PMEM_DEV_NAME, O_RDWR|O_CLOEXEC, 0);
             if (iPmemFd < 0) {
             	printf(" Could not open pmem device(%s)\n",PMEM_DEV_NAME);
         		err = -1;
@@ -167,7 +169,7 @@ int CameraCreate(void)
         }
     memset(m_v4l2Buffer[0], 0x00, size);
 	v4l2Buffer_phy_addr = sub.offset;
-   
+suc_alloc:   
           err = ioctl(iCamFd, VIDIOC_QUERYCAP, &mCamDriverCapability);
         if (err < 0) {
         	printf("Error opening device unable to query device.\n");
@@ -246,7 +248,7 @@ int CameraStart(int phy_addr, int buffer_count, int w, int h)
         #endif
 
         m_v4l2Buffer[i] =(void*)((int)m_v4l2Buffer[0] + i*buffer.length);
-	memset(m_v4l2Buffer[i],0x0,buffer.length);
+//	memset(m_v4l2Buffer[i],0x0,buffer.length);
         err = ioctl(iCamFd, VIDIOC_QBUF, &buffer);
         if (err < 0) {
             printf("%s CameraStart VIDIOC_QBUF Failed\n",__FUNCTION__);
@@ -278,13 +280,15 @@ exit:
 
 int DispCreate(int corx ,int cory,int preview_w,int preview_h )
 {
-	int err;
+	int err = 0;
 	struct fb_var_screeninfo var;
 	unsigned int panelsize[2];
 	int x_phy,y_phy,w_phy,h_phy;
 	int x_visual,y_visual,w_visual,h_visual;
 	struct fb_fix_screeninfo finfo;
 	int data[2];
+	if(iDispFd !=-1)
+		goto exit;
 	iDispFd = open(DISP_DEV_NAME,O_RDWR, 0);
 	if (iDispFd < 0) {
 		printf("%s Could not open display device\n",__FUNCTION__);
@@ -302,6 +306,7 @@ int DispCreate(int corx ,int cory,int preview_w,int preview_h )
 		panelsize[0] = preview_w;
 		panelsize[1] = preview_h;
 	}
+	#if 0
 	data[0] = v4l2Buffer_phy_addr;
 	data[1] = (int)(data[0] + preview_w *preview_h);
 	if (ioctl(iDispFd, 0x5002, data) == -1) 
@@ -310,6 +315,7 @@ int DispCreate(int corx ,int cory,int preview_w,int preview_h )
 		err = -1;
 		goto exit;
 	}
+	#endif
 	if (ioctl(iDispFd, FBIOGET_VSCREENINFO, &var) == -1) {
 		printf("%s ioctl fb1 FBIOPUT_VSCREENINFO fail!\n",__FUNCTION__);
 		err = -1;
@@ -354,35 +360,20 @@ int TaskStop(void)
         printf("%s VIDIOC_STREAMOFF Failed\n", __FUNCTION__);
    //     return -1;
     }
-	
+	if (iDispFd > 0) {
+		int disable = 0;
+		printf("Close disp\n");
+		ioctl(iDispFd, FBIOSET_ENABLE,&disable);
+		close(iDispFd);
+		iDispFd = -1;
+	}
 	if (iCamFd > 0) {
 		close(iCamFd);
 		iCamFd = 0;
 	}
-
-	if (iPmemFd > 0) {
-		close(iPmemFd);
-		iPmemFd = -1;
-	}
-
-    if(iIonFd > 0){
-        munmap(m_v4l2Buffer[0], ionAllocData.len);
-
-    	close(iIonFd);
-    	iIonFd = -1;
-        }
-
-	if (iDispFd > 0) {
-        int disable = 0;
-		printf("Close disp\n");
-        ioctl(iDispFd, FBIOSET_ENABLE,&disable);
-		close(iDispFd);
-		iDispFd = -1;
-	}
 	printf("\n%s: stop ok!\n",__func__);
 	return 0;
 }
-
 int TaskRuning(int fps_total,int corx,int cory)
 {
 	int err,fps;
@@ -527,6 +518,28 @@ int stopCameraTest(){
 	 }
 	printf("%s enter stop -----\n",__func__);
 	return TaskStop();
+}
+void finishCameraTest(){
+		TaskStop();
+		if (iPmemFd > 0) {
+			close(iPmemFd);
+			iPmemFd = -1;
+		}
+	
+		if(iIonFd > 0){
+			munmap(m_v4l2Buffer[0], ionAllocData.len);
+	
+			close(iIonFd);
+			iIonFd = -1;
+			}
+		if (iDispFd > 0) {
+			int disable = 0;
+			printf("Close disp\n");
+			ioctl(iDispFd, FBIOSET_ENABLE,&disable);
+			close(iDispFd);
+			iDispFd = -1;
+		}
+		
 }
 void * camera_test(void *argc)
 {

@@ -47,4 +47,5 @@ struct camera_msg {
 extern void* camera_test(void *argc);
 //return value: 0 is ok ,-1 erro
 extern int stopCameraTest();
+extern void finishCameraTest();
 #endif

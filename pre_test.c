@@ -656,6 +656,7 @@ int main(int argc, char **argv)
 			
 		}
 	}
+	finishCameraTest();
 	printf("pcba test over!\n");
 	return success;
 }
