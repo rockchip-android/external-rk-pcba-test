@@ -7,7 +7,7 @@ ifneq ($(NO_CODEC_TEST_BIN), true)
 include $(CLEAR_VARS)
 LOCAL_MODULE := codec_test
 LOCAL_FORCE_STATIC_EXECUTABLE := true
-LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
+#LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
 LOCAL_C_INCLUDES += bionic external/stlport/stlport
 
 LOCAL_SRC_FILES := \
@@ -16,7 +16,7 @@ LOCAL_SRC_FILES := \
     codec_main.c
 
 
-LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_TAGS := eng
 LOCAL_STATIC_LIBRARIES := libc libcutils
 LOCAL_SHARED_LIBRARIES := 
 
@@ -34,7 +34,7 @@ TW_INTERNAL_STORAGE_PATH := "/mnt/sdcard"
 TW_INTERNAL_STORAGE_MOUNT_POINT := "/mnt/sdcard"
 LOCAL_MODULE := pcba_core
 LOCAL_FORCE_STATIC_EXECUTABLE := true
-LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
+#LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
 LOCAL_C_INCLUDES += bionic external/stlport/stlport
 
 LOCAL_SRC_FILES := \
@@ -162,7 +162,7 @@ endif
 # a (redundant) copy of the binary in /system/bin for user builds.
 # TODO: Build the ramdisk image in a more principled way.
 
-LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_TAGS := eng
 LOCAL_STATIC_LIBRARIES :=
 LOCAL_SHARED_LIBRARIES := 
 
