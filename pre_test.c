@@ -15,6 +15,7 @@
 #include <dirent.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "./minuitwrp/minui.h"
 #include "recovery_ui.h"
@@ -43,6 +44,8 @@
 #define ITEM_X				0			//x positon of test item
 
 #define LOG(x...) printf(x)
+
+pid_t g_codec_pid = -1;
 
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 
@@ -657,6 +660,11 @@ int main(int argc, char **argv)
 		}
 	}
 	finishCameraTest();
+
+	if(g_codec_pid > 0){
+		kill(g_codec_pid,SIGKILL);
+	}
+
 	printf("pcba test over!\n");
 	return success;
 }
