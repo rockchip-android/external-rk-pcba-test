@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <pthread.h>
-#include <sys/types.h>
 
 #include "alsa_audio.h"
 
@@ -14,7 +13,6 @@
 #define REC_DUR 3 //the unit is second
 pthread_t codec_tid;  
 int codec_err = -1;
-extern pid_t g_codec_pid;
 
 void* rec_play_test(void *argv)
 {		
@@ -135,18 +133,8 @@ void* codec_test(void *argv)
 	   
 	} 
 */
-
-
-/*
     printf ("+++++++++++++++++++ executing codec_test\r\n");
     ret = __system("/sbin/codec_test");	
     printf ("+++++++++++++++++++ ret %d , executing codec_test\r\n", ret);
-*/
-	pid_t codec_pid = fork();
-	if(codec_pid > 0){
-		g_codec_pid = codec_pid;
-		execl("/sbin/codec_test",NULL);
-	}
-
     return NULL;
 }
