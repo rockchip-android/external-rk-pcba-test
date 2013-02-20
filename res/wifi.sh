@@ -9,8 +9,10 @@ result_file=/data/scan_result.txt
 result_file2=/data/scan_result2.txt
 chip_type_path=/sys/class/rkwifi/chip
 pcba_node=/sys/class/rkwifi/pcba
+version_path=/proc/version
 module_path=$module_path_wlan
 chip_broadcom=false
+version=.3.0.36+
 
 jmax=1
 
@@ -45,6 +47,11 @@ fi
 if busybox cat $chip_type_path | busybox grep RT5370; then
   jmax=6
   module_path=$module_path_rt5370
+fi
+
+if busybox cat $version_path | busybox grep 3.0.36+; then
+  echo "kernel version 3.0.36+"
+  module_path=$module_path$version
 fi
 
 echo "touch $result_file"

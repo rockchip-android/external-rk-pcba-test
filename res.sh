@@ -7,24 +7,48 @@ if [ -e "device/rockchip/$TARGET_PRODUCT/8188eu.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/8188eu.ko $PRODUCT_OUT/recovery/root/res/
 fi
 
+if [ -e "device/rockchip/$TARGET_PRODUCT/8188eu.ko.3.0.36+" ] ; then
+cp device/rockchip/$TARGET_PRODUCT/8188eu.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
+fi
+
 if [ -e "device/rockchip/$TARGET_PRODUCT/8192cu.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/8192cu.ko $PRODUCT_OUT/recovery/root/res/
+fi
+
+if [ -e "device/rockchip/$TARGET_PRODUCT/8192cu.ko.3.0.36+" ] ; then
+cp device/rockchip/$TARGET_PRODUCT/8192cu.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
 fi
 
 if [ -e "device/rockchip/$TARGET_PRODUCT/rda5890.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/rda5890.ko $PRODUCT_OUT/recovery/root/res/
 fi
 
+if [ -e "device/rockchip/$TARGET_PRODUCT/rda5890.ko.3.0.36+" ] ; then
+cp device/rockchip/$TARGET_PRODUCT/rda5890.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
+fi
+
 if [ -e "device/rockchip/$TARGET_PRODUCT/rt5370sta.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/rt5370sta.ko $PRODUCT_OUT/recovery/root/res/
+fi
+
+if [ -e "device/rockchip/$TARGET_PRODUCT/rt5370sta.ko.3.0.36+" ] ; then
+cp device/rockchip/$TARGET_PRODUCT/rt5370sta.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
 fi
 
 if [ -e "device/rockchip/$TARGET_PRODUCT/rkwifi.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/rkwifi.ko $PRODUCT_OUT/recovery/root/res/
 fi
 
+if [ -e "device/rockchip/$TARGET_PRODUCT/rkwifi.ko.3.0.36+" ] ; then
+cp device/rockchip/$TARGET_PRODUCT/rkwifi.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
+fi
+
 if [ -e "device/rockchip/$TARGET_PRODUCT/wlan.ko" ] ; then
 cp device/rockchip/$TARGET_PRODUCT/wlan.ko $PRODUCT_OUT/recovery/root/res/
+fi
+
+if [ -e "device/rockchip/$TARGET_PRODUCT/wlan.ko.3.0.36+" ] ; then
+cp device/rockchip/$TARGET_PRODUCT/wlan.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
 fi
 
 if [ ! -e "$PRODUCT_OUT/recovery/root/system/etc/" ] ; then
