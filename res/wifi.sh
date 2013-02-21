@@ -51,7 +51,9 @@ fi
 
 if busybox cat $version_path | busybox grep 3.0.36+; then
   echo "kernel version 3.0.36+"
-  module_path=$module_path$version
+  if [ -e $module_path$version ]; then
+    module_path=$module_path$version
+  fi
 fi
 
 echo "touch $result_file"
