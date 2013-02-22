@@ -460,6 +460,7 @@ void * startCameraTest(void *argv){
 	if(!camera_msg)
 	{
 		printf("malloc camera_msg fail\n");
+		hasstoped = 1;
 		return NULL;
 	}
 	cameraId = camera_msg->id;
@@ -474,6 +475,7 @@ void * startCameraTest(void *argv){
 	
     if(access(videodevice, O_RDWR) <0 ){
 	   printf("access %s failed\n",videodevice);
+	   hasstoped = 1;
 	   return NULL;
      }
 	  

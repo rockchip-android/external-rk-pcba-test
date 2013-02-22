@@ -533,7 +533,7 @@ static void *input_thread(void *cookie)
             LOGE("TOUCH_KEY: %d\n", ev.code);
 #endif
  LOGE("TOUCH_KEY: %d\n", ev.code);
-			if (ev.value != 0) 
+			if (ev.value != 0 && ev.code != 143) 
 			{
 				gettimeofday(&keyStart, NULL);
 				printf("key down:%lu\n",keyStart.tv_sec);
@@ -543,7 +543,7 @@ static void *input_thread(void *cookie)
 				dontwait = 0;
 
 			} 
-			else 
+			else if (ev.code != 143)  
 			{
 				// This is a key release
 				gettimeofday(&keyEnd, NULL);
