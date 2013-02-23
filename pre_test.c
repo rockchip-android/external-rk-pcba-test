@@ -38,11 +38,15 @@
 #include "debug.h"
 #include "hdmi_test.h"
 
+#include <signal.h>
+
 #define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				2			//height of test item
 #define ITEM_X				0			//x positon of test item
 
 #define LOG(x...) printf(x)
+
+pid_t g_codec_pid = -1;
 
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 
@@ -657,6 +661,13 @@ int main(int argc, char **argv)
 		}
 	}
 	finishCameraTest();
+
+	if(g_codec_pid > 0){
+		kill(g_codec_pid,SIGKILL);
+		printf("pcba-test-over\n");
+		sleep(3);
+	}
+
 	printf("pcba test over!\n");
 	return success;
 }
