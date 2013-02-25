@@ -256,6 +256,10 @@ static void set_active_framebuffer(unsigned n)
     if (ioctl(gr_fb_fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
         perror("active fb swap failed");
     }
+    if (ioctl(gr_fb_fd,RK_FBIOSET_CONFIG_DONE, NULL) < 0) {
+        perror("set config done failed");
+    }
+
 }
 
 void gr_flip(void)

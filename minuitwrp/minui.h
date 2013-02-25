@@ -17,6 +17,8 @@
 #ifndef _MINUI_H_
 #define _MINUI_H_
 
+#define RK_FBIOSET_CONFIG_DONE          0x4628
+
 typedef void* gr_surface;
 typedef unsigned short gr_pixel;
 

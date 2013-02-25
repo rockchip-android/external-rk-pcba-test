@@ -432,6 +432,10 @@ int TaskRuning(int fps_total,int corx,int cory)
 				err = -1;
 				goto exit;
 			}
+			if (ioctl(iDispFd,RK_FBIOSET_CONFIG_DONE, NULL) < 0) {
+        			perror("set config done failed");
+    			}
+
 
 		}
 	if (ioctl(iCamFd, VIDIOC_QBUF, &cfilledbuffer1) < 0) {
