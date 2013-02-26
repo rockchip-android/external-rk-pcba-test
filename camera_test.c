@@ -286,6 +286,8 @@ int DispCreate(int corx ,int cory,int preview_w,int preview_h )
 	int x_phy,y_phy,w_phy,h_phy;
 	int x_visual,y_visual,w_visual,h_visual;
 	struct fb_fix_screeninfo finfo;
+	struct color_key_cfg clr_key_cfg;
+
 	int data[2];
 	if(iDispFd !=-1)
 		goto exit;
@@ -337,6 +339,14 @@ int DispCreate(int corx ,int cory,int preview_w,int preview_h )
 		err = -1;
 		goto exit;
 	}
+	
+	clr_key_cfg.win0_color_key_cfg = 0;		//win0 color key disable
+	clr_key_cfg.win1_color_key_cfg = 0x01000000; 	// win1 color key enable
+	clr_key_cfg.win2_color_key_cfg = 0;  
+	if (ioctl(iDispFd,RK_FBIOPUT_COLOR_KEY_CFG, &clr_key_cfg) == -1) {
+                printf("%s set fb color key failed!\n",__FUNCTION__);
+                err = -1;
+        }
 
 	return 0;
 exit1:

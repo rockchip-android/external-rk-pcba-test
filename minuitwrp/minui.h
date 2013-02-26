@@ -18,7 +18,13 @@
 #define _MINUI_H_
 
 #define RK_FBIOSET_CONFIG_DONE          0x4628
+#define RK_FBIOPUT_COLOR_KEY_CFG	0x4626
 
+struct color_key_cfg {
+	unsigned int win0_color_key_cfg;
+	unsigned int win1_color_key_cfg;
+	unsigned int win2_color_key_cfg;
+};
 typedef void* gr_surface;
 typedef unsigned short gr_pixel;
 
