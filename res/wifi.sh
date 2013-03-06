@@ -14,7 +14,7 @@ module_path=$module_path_wlan
 chip_broadcom=false
 version=.3.0.36+
 
-jmax=1
+jmax=3
 
 if busybox cat $chip_type_path | busybox grep RK903; then
   module_path=$module_path_rk903
