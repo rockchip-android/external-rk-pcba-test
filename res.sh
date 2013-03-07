@@ -200,20 +200,17 @@ fi
 
 if [ -e "device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko" ] ; then
 cp device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko $PRODUCT_OUT/recovery/root/
-
-
-echo "wbx-----------------------------------------------"
 fi
 
 if [ -e "device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko.3.0.36+" ] ; then
 cp device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko.3.0.36+ $PRODUCT_OUT/recovery/root/
 fi
 
-if [ -e "device/rockchip/$TARGET_COMMON/bluetooth/pcba/rk903/system/bin" ] ; then
-cp device/rockchip/$TARGET_COMMON/bluetooth/pcba/rk903/system/bin/ $PRODUCT_OUT/recovery/root/system/ -a
+if [ -e "device/rockchip/common/bluetooth/pcba/system/bin" ] ; then
+cp device/rockchip/common/bluetooth/pcba/system/bin/ $PRODUCT_OUT/recovery/root/system/ -a
 fi
 
-if [ -e "device/rockchip/$TARGET_COMMON/bluetooth/pcba/rk903/system/etc" ] ; then
-cp device/rockchip/$TARGET_COMMON/bluetooth/pcba/rk903/system/etc/ $PRODUCT_OUT/recovery/root/system/ -a 
+if [ -e "device/rockchip/common/bluetooth/pcba/system/etc" ] ; then
+cp device/rockchip/common/bluetooth/pcba/system/etc/ $PRODUCT_OUT/recovery/root/system/ -a 
 fi
 fi
