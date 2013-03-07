@@ -24,7 +24,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include <signal.h>
-#include <linux/ion.h>
+//#include <linux/ion.h>
+#include "ion.h"
 
 #include <linux/android_pmem.h>
 #include <linux/videodev2.h>
