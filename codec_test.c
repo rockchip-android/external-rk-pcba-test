@@ -16,7 +16,8 @@ pthread_t codec_tid;
 int codec_err = -1;
 extern pid_t g_codec_pid;
 
-void* rec_play_test(void *argv)
+// 先放后录模式，测试效率相对低，使用喇叭时不会有啸叫，可在使用喇叭时选择此模式
+void* rec_play_test_1(void *argv)
 {		
 	struct pcm* pcmIn = NULL;
 	struct pcm* pcmOut = NULL;
@@ -123,10 +124,68 @@ fail:
 		fclose(fp);
 	return 0;
 }
+
+// 边录边放模式，测试效率高，使用喇叭时会有啸叫，可在使用耳机时选择此模式
+void* rec_play_test_2(void *argv)
+{		
+	struct pcm* pcmIn;
+	struct pcm* pcmOut;
+	unsigned bufsize;
+	char *data;
+
+	unsigned inFlags = PCM_IN;
+	unsigned outFlags = PCM_OUT;
+	unsigned flags =  PCM_STEREO;
+
+	flags |= (AUDIO_HW_OUT_PERIOD_MULT - 1) << PCM_PERIOD_SZ_SHIFT;
+	flags |= (AUDIO_HW_OUT_PERIOD_CNT - PCM_PERIOD_CNT_MIN)<< PCM_PERIOD_CNT_SHIFT;
+
+	inFlags |= flags;
+	outFlags |= flags;
+
+	pcmIn = pcm_open(inFlags);
+	if (!pcm_ready(pcmIn)) {
+	pcm_close(pcmIn);
+	goto fail;
+	}
+
+	pcmOut = pcm_open(outFlags);
+	if (!pcm_ready(pcmOut)) {
+	pcm_close(pcmOut);
+	goto fail;
+	}
+
+	bufsize = pcm_buffer_size(pcmIn);
+	data = malloc(bufsize);
+	if (!data) {
+	fprintf(stderr,"could not allocate %d bytes\n", bufsize);
+	return -1;
+	}
+
+	while (!pcm_read(pcmIn, data, bufsize)) {
+	if (pcm_write(pcmOut, data, bufsize)) {
+	fprintf(stderr,"could not write %d bytes\n", bufsize);
+	return -1;
+	}
+	}
+
+	fail:
+	pcm_close(pcmIn);
+	pcm_close(pcmOut);
+	return 0;
+}
+
 void* codec_test(void *argv)
 {
     int ret = -1;
+    char dt[32] = {0};
+    
 	sleep(3);    
+	
+	if(script_fetch("Codec", "program", (int *)dt, 8) == 0) {
+		printf("script_fetch program = %s.\n", dt);
+	}	
+	
 /*
 	codec_err = pthread_create(&codec_tid, NULL, rec_play_test,NULL); //
 	if(codec_err != 0)
@@ -144,7 +203,7 @@ void* codec_test(void *argv)
 	if(codec_pid > 0){
 		g_codec_pid = codec_pid;
 	}else if(codec_pid == 0){
-		execl("/sbin/codec_test",NULL);
+		execl("/sbin/codec_test", dt);
 		exit(0);
 	}
 	printf("pcba-test codec pid %d\n",g_codec_pid);
