@@ -25,6 +25,7 @@
 #include "codec_test.h"
 #include "wlan_test.h"
 #include "bt_test.h"
+#include "any_test.h" //zhangwei
 #include "gsensor_test.h"
 #include "sdcard_test.h"
 #include "udisk_test.h"
@@ -112,6 +113,13 @@ pthread_t bt_tid;
 char *bt_res;
 struct bt_msg *bt_msg;
 int bt_err = -1;
+
+//zhangwei
+pthread_t any_tid;  
+char *any_res;
+struct any_msg *any_msg;
+int any_err = -1;
+
 
 pthread_t gsensor_tid;  
 char *gsensor_res;
@@ -397,6 +405,18 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		if(err != 0)
 		{  
 		   printf("create bt(bluetooth) test thread error: %s/n",strerror(err));	
+		   
+		}  
+	}
+	//zhangwei
+	else if(!strcmp(tc_info->base_info->name, "any"))
+	{
+		printf("any_test thread created\n");
+
+		err = pthread_create(&any_tid, NULL, any_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create any test thread error: %s/n",strerror(err));	
 		   
 		}  
 	}
