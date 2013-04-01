@@ -566,8 +566,20 @@ void * camera_test(void *argc)
 	//cam_id = tc_info->dev_id;
 	int x =  gr_fb_width() >> 1;//camera_msg->x;
 	int y= 0;//camera_msg->y;
-	int w = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
-	int h = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
+	
+	int w,h;
+	if(gr_fb_width() > gr_fb_height()){
+		w = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
+		h = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
+	}else{
+		h = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
+		w = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
+	}
+
+	if(w > 640)
+		w = 640;
+	if(h > 480)
+		h = 480;
 	
 	if(iCamFd > 0){
 		printf(" %s has been opened! can't switch camera!\n",videodevice);
