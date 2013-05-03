@@ -4,6 +4,7 @@ module_path_8188eu=/res/8188eu.ko
 module_path_8192cu=/res/8192cu.ko
 module_path_rk903=/res/rkwifi.ko
 module_path_rt5370=/res/rt5370sta.ko
+module_path_mt7601=/res/mt7601sta.ko
 module_path_wlan=/res/wlan.ko
 result_file=/data/scan_result.txt
 result_file2=/data/scan_result2.txt
@@ -12,6 +13,7 @@ pcba_node=/sys/class/rkwifi/pcba
 version_path=/proc/version
 module_path=$module_path_wlan
 chip_broadcom=false
+interface_up=true
 version=.3.0.36+
 
 jmax=3
@@ -49,6 +51,12 @@ if busybox cat $chip_type_path | busybox grep RT5370; then
   module_path=$module_path_rt5370
 fi
 
+if busybox cat $chip_type_path | busybox grep MT7601; then
+  jmax=6
+  module_path=$module_path_mt7601
+  interface_up=false
+fi
+
 if busybox cat $version_path | busybox grep 3.0.36+; then
   echo "kernel version 3.0.36+"
   if [ -e $module_path$version ]; then
@@ -75,7 +83,9 @@ do
     busybox sleep 3
 
     if busybox ifconfig wlan0; then
-        busybox ifconfig wlan0 up
+        if [ $interface_up = "true" ]; then
+            busybox ifconfig wlan0 up
+        fi
         #if [ $? -ne 0 ]; then
         #    echo "ifconfig wlan0 up failed"
         #    exit 0
