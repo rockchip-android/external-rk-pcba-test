@@ -533,6 +533,10 @@ static void *input_thread(void *cookie)
             LOGE("TOUCH_KEY: %d\n", ev.code);
 #endif
  LOGE("TOUCH_KEY: %d\n", ev.code);
+ 		if (ev.code==330)
+ 		{
+		 continue;
+ 		}	
 			if (ev.value != 0 && ev.code != 143) 
 			{
 				gettimeofday(&keyStart, NULL);
