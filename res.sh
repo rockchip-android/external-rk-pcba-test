@@ -47,6 +47,14 @@ if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
     cp device/rockchip/$TARGET_PRODUCT/mt7601sta.ko $PRODUCT_OUT/recovery/root/res/
     fi
 
+    if [ -e "device/rockchip/$TARGET_PRODUCT/8723au.ko" ] ; then
+    cp device/rockchip/$TARGET_PRODUCT/8723au.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
+    if [ -e "device/rockchip/$TARGET_PRODUCT/8723as.ko" ] ; then
+    cp device/rockchip/$TARGET_PRODUCT/8723as.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
     if [ -e "device/rockchip/$TARGET_PRODUCT/rkwifi.ko" ] ; then
     cp device/rockchip/$TARGET_PRODUCT/rkwifi.ko $PRODUCT_OUT/recovery/root/res/
     fi
@@ -159,6 +167,14 @@ else
 
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mt7601sta.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mt7601sta.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
+    if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723au.ko" ] ; then
+    cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723au.ko $PRODUCT_OUT/recovery/root/res/
+	fi
+
+    if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723as.ko" ] ; then
+    cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723as.ko $PRODUCT_OUT/recovery/root/res/
     fi
 
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/rkwifi.ko" ] ; then

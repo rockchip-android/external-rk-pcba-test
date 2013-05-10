@@ -5,6 +5,8 @@ module_path_8192cu=/res/8192cu.ko
 module_path_rk903=/res/rkwifi.ko
 module_path_rt5370=/res/rt5370sta.ko
 module_path_mt7601=/res/mt7601sta.ko
+module_path_8723au=/res/8723au.ko
+module_path_8723as=/res/8723as.ko
 module_path_wlan=/res/wlan.ko
 result_file=/data/scan_result.txt
 result_file2=/data/scan_result2.txt
@@ -56,6 +58,14 @@ if busybox cat $chip_type_path | busybox grep MT7601; then
   module_path=$module_path_mt7601
   interface_up=false
 fi
+
+if busybox cat $chip_type_path | busybox grep RTL8723AU; then
+  module_path=$module_path_8723au
+fi
+
+if busybox cat $chip_type_path | busybox grep RTL8723AS; then
+  module_path=$module_path_8723as
+fi  
 
 if busybox cat $version_path | busybox grep 3.0.36+; then
   echo "kernel version 3.0.36+"
