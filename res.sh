@@ -10,7 +10,7 @@ elif [ $TARGET_BOARD_PLATFORM == "rk2928" ]; then
     MODULE="modules"
 fi
 echo MODULE $MODULE
-if [ ! -e "device/rockchip/$TARGET_COMMON" ] ; then
+if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
     if [ -e "device/rockchip/$TARGET_PRODUCT/8188eu.ko" ] ; then
     cp device/rockchip/$TARGET_PRODUCT/8188eu.ko $PRODUCT_OUT/recovery/root/res/
     fi
