@@ -47,6 +47,10 @@ if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
     cp device/rockchip/$TARGET_PRODUCT/mt7601sta.ko $PRODUCT_OUT/recovery/root/res/
     fi
 
+    if [ -e "device/rockchip/$TARGET_PRODUCT/mtprealloc7601Usta.ko" ] ; then
+    cp device/rockchip/$TARGET_PRODUCT/mtprealloc7601Usta.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
     if [ -e "device/rockchip/$TARGET_PRODUCT/8723au.ko" ] ; then
     cp device/rockchip/$TARGET_PRODUCT/8723au.ko $PRODUCT_OUT/recovery/root/res/
     fi
@@ -109,6 +113,7 @@ if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
 
     if [ -e "external/wlan_loader/firmware/MT7601STA.dat" ] ; then
     cp external/wlan_loader/firmware/MT7601STA.dat $PRODUCT_OUT/recovery/root/system/etc/firmware
+    cp external/wlan_loader/firmware/MT7601STA.dat $PRODUCT_OUT/recovery/root/etc/firmware
     fi
 
     if [ -e "external/wlan_loader/firmware/MTK_MT6622_E2_Patch.nb0" ] ; then
@@ -169,9 +174,13 @@ else
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mt7601sta.ko $PRODUCT_OUT/recovery/root/res/
     fi
 
+		if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mtprealloc7601Usta.ko" ] ; then
+    cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mtprealloc7601Usta.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723au.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723au.ko $PRODUCT_OUT/recovery/root/res/
-	fi
+	  fi
 
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723as.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723as.ko $PRODUCT_OUT/recovery/root/res/
@@ -231,6 +240,7 @@ else
 
     if [ -e "external/wlan_loader/firmware/MT7601STA.dat" ] ; then
     cp external/wlan_loader/firmware/MT7601STA.dat $PRODUCT_OUT/recovery/root/system/etc/firmware
+    cp external/wlan_loader/firmware/MT7601STA.dat $PRODUCT_OUT/recovery/root/etc/firmware
     fi
 
     if [ -e "external/wlan_loader/firmware/MTK_MT6622_E2_Patch.nb0" ] ; then
