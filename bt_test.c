@@ -50,7 +50,8 @@ enum WIFI_CHIP_TYPE_LIST{
 	RT5370,
   MT5931,
   RDA587x,
-  RDA5990
+  RDA5990,
+  RTK8723AS
 };
 
 static int rfkill_id = -1;
@@ -264,6 +265,8 @@ static int start_hciattach() {
 	  ret = __system("/system/bin/hciattach_5876 -n -s 115200 /dev/ttyS0 rda 1500000 noflow &");
 	} else if(chip_type == RDA5990) {	
 	  ret = __system("/system/bin/hciattach_5990 -n -s 115200 /dev/ttyS0 rda 921600 noflow &");
+        } else if(chip_type == RTK8723AS) {
+          ret = __system("/system/bin/hciattach_8723 -n -s 115200  /dev/ttyS0 rtk_h5 &");
 	} else {
 		ret = __system("/system/bin/brcm_patchram_plus --patchram bychip --baudrate 1500000 --enable_lpm --enable_hci /dev/ttyS0 &");
 	}
