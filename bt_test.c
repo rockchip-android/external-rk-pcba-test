@@ -350,6 +350,45 @@ static int my_ba2str(const bdaddr_t *ba, char *str) {
                 ba->b[5], ba->b[4], ba->b[3], ba->b[2], ba->b[1], ba->b[0]);
 }
 
+int bt_get_chipname(char* name, int len)
+{
+    int ret = -1;
+    int fd = -1;
+    int sz = 0;
+    char* rfkill_name_path = NULL;
+
+    if (rfkill_id == -1) {
+        if (init_rfkill()) goto out;
+    }
+
+    asprintf(&rfkill_name_path, "/sys/class/rfkill/rfkill%d/name", rfkill_id);
+
+    fd = open(rfkill_name_path, O_RDONLY);
+    if (fd < 0) {
+        printf("open(%s) failed: %s (%d)", rfkill_name_path, strerror(errno),
+             errno);
+        goto out;
+    }
+
+    sz = read(fd, name, len);
+    if (sz < 0) {
+        printf("read(%s) failed: %s (%d)", rfkill_name_path, strerror(errno),
+             errno);
+        goto out;
+    }
+    name[sz] = '\0';
+    if (name[sz-1]=='\n')
+        name[sz-1] = '\0';
+
+    ret = 0;
+
+out:
+    if (fd >= 0) close(fd);
+    return ret;
+}
+
+static char bt_chip[64] = "";
+
 int bt_test(void)
 {
     int dev_id = 0;
@@ -371,15 +410,27 @@ int bt_test(void)
 	} else if(strcmp(dt, "rda5990") == 0) {
 		chip_type = RDA5990; 
 	} else {
-		/*chip_type = getChipType();
-		if(chip_type != BCM4329 &&
-			 chip_type != BCM4330 &&
-			 chip_type != RK903 &&
-			 chip_type != MT6620 &&
-			 chip_type != MT5931 ) {*/
-			printf("hardware not support, skip bt test.\n");
-			return 0;
-		//}	
+		if (bt_get_chipname(bt_chip, 63) != 0) {
+		    printf("Can't read BT chip name\n");
+		    return 0;
+		}
+		
+		if (!strcmp(bt_chip, "rk903_26M"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "rk903"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6210"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6330"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6476"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6493"))
+		    chip_type = RK903; 
+		else {
+		    printf("Not support BT chip, skip bt test.\n");
+		    return 0;
+		}		
 	}
 	
 	printf("bluetooth_test main function started: chip_type = %d\n", chip_type);
