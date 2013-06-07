@@ -89,6 +89,10 @@ if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
 
     if [ -e "external/wlan_loader/firmware/" ] ; then
     cp external/wlan_loader/firmware/ $PRODUCT_OUT/recovery/root/system/etc/ -a
+    fi
+	
+    if [ -e "external/wlan_loader/firmware/WIFI_RAM_CODE" ] ; then
+    cp external/wlan_loader/firmware/WIFI_RAM_CODE $PRODUCT_OUT/recovery/root/etc/firmware/WIFI_RAM_CODE
     fi 
 
     if [ -e "device/rockchip/$TARGET_PRODUCT/proprietary/libipp/rk29-ipp.ko" ] ; then
@@ -157,6 +161,10 @@ else
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/8723as.ko $PRODUCT_OUT/recovery/root/res/
     fi
 
+    if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mt5931.ko" ] ; then
+    cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/mt5931.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/rkwifi.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/rkwifi.ko $PRODUCT_OUT/recovery/root/res/
     fi
@@ -188,6 +196,10 @@ else
     if [ -e "external/wlan_loader/firmware/" ] ; then
     cp external/wlan_loader/firmware/ $PRODUCT_OUT/recovery/root/system/etc/ -a
     fi 
+
+    if [ -e "external/wlan_loader/firmware/WIFI_RAM_CODE" ] ; then
+    cp external/wlan_loader/firmware/WIFI_RAM_CODE $PRODUCT_OUT/recovery/root/etc/firmware/WIFI_RAM_CODE
+    fi
 
     if [ -e "device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko $PRODUCT_OUT/recovery/root/
