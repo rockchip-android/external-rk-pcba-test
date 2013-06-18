@@ -409,6 +409,8 @@ int bt_test(void)
 		chip_type = RDA587x; 
 	} else if(strcmp(dt, "rda5990") == 0) {
 		chip_type = RDA5990; 
+	} else if(strcmp(dt, "rtk8723as") == 0) {
+		chip_type = RTK8723AS; 
 	} else {
 		if (bt_get_chipname(bt_chip, 63) != 0) {
 		    printf("Can't read BT chip name\n");
