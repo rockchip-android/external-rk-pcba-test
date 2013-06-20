@@ -290,25 +290,39 @@ int channel_check(void * data,int len )
 	//checkleft first
 	for(index = 0; index < len; index += 2)
 	{
-		ALOGI("-->pcmLeftChannel[%d] = %d checkValue %d",index,pcmLeftChannel[index],checkValue);
-		if(pcmLeftChannel[index] != checkValue)
+		
+		if((pcmLeftChannel[index] >= checkValue+50)||(pcmLeftChannel[index] <= checkValue-50))
 		{
-			leftValid = 0x01;
-			break;
+			leftValid++;// = 0x01;
+			ALOGI("-->pcmLeftChannel[%d] = %d checkValue %d leftValid %d",index,pcmLeftChannel[index],checkValue,leftValid);
+			//break;
 		}	
 	}
+
+	if(leftValid >20)
+		leftValid = 0x01;
+	else
+		leftValid = 0;
+	
 	checkValue = *pcmRightChannel;
 
 		//then check right 
 	for(index = 0; index < len; index += 2)
 	{
-		ALOGI("-->pcmRightChannel[%d] = %d checkValue %d",index,pcmRightChannel[index],checkValue);
-		if(pcmRightChannel[index] != checkValue)
+		
+		if((pcmRightChannel[index] >= checkValue+50)||(pcmRightChannel[index] <= checkValue-50))
 		{
-			rightValid = 0x02;
-			break;
+			rightValid++;//= 0x02;
+			ALOGI("-->pcmRightChannel[%d] = %d checkValue %d rightValid %d",index,pcmRightChannel[index],checkValue,rightValid);
+			//break;
 		}	
 	}
+
+	if(rightValid >20)
+		rightValid = 0x02;
+	else
+		rightValid = 0;
+	
 	ALOGI("leftValid %d rightValid %d",leftValid,rightValid);
 	return leftValid|rightValid;
 }
