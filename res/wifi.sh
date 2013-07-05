@@ -57,9 +57,10 @@ fi
 if busybox cat $chip_type_path | busybox grep MT7601; then
   jmax=6
   module_path=$module_path_mt7601
-  echo "mt7601 insmod pre-alloc driver"
+  echo "mt7601 insmod pre-alloc driver & copy firmware"
   insmod "$module_path_mtPrealloc7601"
-  interface_up=false
+  busybox cp /system/etc/firmware/RT2870STA.dat /etc/firmware/
+  #interface_up=false
 fi
 
 if busybox cat $chip_type_path | busybox grep RTL8723AU; then
