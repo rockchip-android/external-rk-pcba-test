@@ -61,7 +61,8 @@ LOCAL_SRC_FILES := \
     sdcard_test.c		\
     udisk_test.c        \
     gsensor_test.c 		\
-    hdmi_test.c
+    hdmi_test.c       \
+    sim_test.c
 
 
 RECOVERY_API_VERSION := 2

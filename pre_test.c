@@ -38,6 +38,7 @@
 #include "script_parser.h"
 #include "debug.h"
 #include "hdmi_test.h"
+#include "sim_test.h"
 
 #include <signal.h>
 
@@ -141,6 +142,8 @@ pthread_t hdmi_tid;
 char *hdmi_res;
 struct sd_msg *hdmi_msg;
 int hdmi_err = -1;
+
+pthread_t sim_tid;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -456,6 +459,16 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		if(hdmi_err != 0)
 		{  
 		   printf("create hdmi test thread error: %s/n",strerror(hdmi_err));
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "sim"))
+	{
+		err = pthread_create(&sim_tid, NULL, sim_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create sim test thread error: %s/n",strerror(err));
 		   return -1;
 		   
 		}  
