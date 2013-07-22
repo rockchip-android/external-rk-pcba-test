@@ -173,6 +173,10 @@ else
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/rkwifi.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
     fi
 
+    if [ -e "device/rockchip/$TARGET_COMMON/bluetooth/lib/modules_smp/rtk_btusb.ko" ] ; then
+    cp device/rockchip/$TARGET_COMMON/bluetooth/lib/modules_smp/rtk_btusb.ko $PRODUCT_OUT/recovery/root/res/
+    fi
+
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/wlan.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/wlan.ko $PRODUCT_OUT/recovery/root/res/
     fi
@@ -215,5 +219,9 @@ else
 
     if [ -e "device/rockchip/common/bluetooth/pcba/system/etc" ] ; then
     cp device/rockchip/common/bluetooth/pcba/system/etc/ $PRODUCT_OUT/recovery/root/system/ -a
+    fi
+
+    if [ -e "device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au" ] ; then
+    cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au/rtk8723* $PRODUCT_OUT/recovery/root/system/etc/firmware
     fi
 fi

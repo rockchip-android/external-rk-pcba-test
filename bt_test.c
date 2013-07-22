@@ -51,7 +51,8 @@ enum WIFI_CHIP_TYPE_LIST{
   MT5931,
   RDA587x,
   RDA5990,
-  RTK8723AS
+  RTK8723AS,
+  RTK8723AU,
 };
 
 static int rfkill_id = -1;
@@ -260,13 +261,15 @@ static inline int bt_test_create_sock() {
 static int start_hciattach() {
 	int ret;
 	if(chip_type == MT5931) {
-		ret = __system("/system/bin/hciattach_mtk -n -t 10 -s 115200 /dev/ttyS0 mtk 1500000 noflow &");
+	  ret = __system("/system/bin/hciattach_mtk -n -t 10 -s 115200 /dev/ttyS0 mtk 1500000 noflow &");
 	} else if(chip_type == RDA587x) {	
 	  ret = __system("/system/bin/hciattach_5876 -n -s 115200 /dev/ttyS0 rda 1500000 noflow &");
 	} else if(chip_type == RDA5990) {	
 	  ret = __system("/system/bin/hciattach_5990 -n -s 115200 /dev/ttyS0 rda 921600 noflow &");
-        } else if(chip_type == RTK8723AS) {
-          ret = __system("/system/bin/hciattach_8723 -n -s 115200  /dev/ttyS0 rtk_h5 &");
+	} else if(chip_type == RTK8723AS) {
+	  ret = __system("/system/bin/hciattach_8723 -n -s 115200  /dev/ttyS0 rtk_h5 &");
+	} else if(chip_type == RTK8723AU) {
+	  ret = __system("insmod /res/rtk_btusb.ko");      
 	} else {
 		ret = __system("/system/bin/brcm_patchram_plus --patchram bychip --baudrate 1500000 --enable_lpm --enable_hci /dev/ttyS0 &");
 	}
@@ -411,6 +414,8 @@ int bt_test(void)
 		chip_type = RDA5990; 
 	} else if(strcmp(dt, "rtk8723as") == 0) {
 		chip_type = RTK8723AS; 
+	} else if(strcmp(dt, "rtk8723au") == 0) {
+		chip_type = RTK8723AU; 
 	} else {
 		if (bt_get_chipname(bt_chip, 63) != 0) {
 		    printf("Can't read BT chip name\n");
@@ -436,6 +441,19 @@ int bt_test(void)
 	}
 	
 	printf("bluetooth_test main function started: chip_type = %d\n", chip_type);
+	
+	if(chip_type == RTK8723AU) {
+		int ret;
+		ret = __system("insmod /res/rtk_btusb.ko"); 
+		ret = __system("busybox dmesg | busybox grep 'hci_register_dev success'");
+		printf("ret = %d.\n", ret);
+		if(ret != 0) {
+			printf("bluetooth_test fail.\n");
+			goto fail;
+		}
+		printf("bluetooth_test success.\n");
+		goto success;
+	}
 
 	ret = bt_test_enable();
 	if(ret < 0){
@@ -474,6 +492,7 @@ int bt_test(void)
 		return 0;
 	}*/
 
+success:
 	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"BT    : [OK]\n");
 	printf("bluetooth_test main function end\n");
 	return 0;
