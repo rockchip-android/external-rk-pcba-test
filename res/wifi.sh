@@ -105,13 +105,13 @@ do
         #    exit 0
         #fi
     
-        iwlist wlan0 scanning
+        iwlist wlan0 scanning > $result_file
         if [ $chip_broadcom = "true" ]; then
             echo "sleep 3s"
             busybox sleep 3    
         fi
         iwlist wlan0 scanning last | busybox grep SSID > $result_file
-#        busybox cat $result_file
+        busybox cat $result_file
         iwlist wlan0 scanning last | busybox grep "Signal level" > $result_file2
         busybox cat $result_file2
         echo "success"
