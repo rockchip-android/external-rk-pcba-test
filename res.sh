@@ -4,7 +4,7 @@ TARGET_PRODUCT=$1
 PRODUCT_OUT=$2
 TARGET_BOARD_PLATFORM=$3
 TARGET_COMMON=common
-if [ $TARGET_BOARD_PLATFORM == "rk30xx" -o $TARGET_BOARD_PLATFORM = "rk30xxb" ]; then
+if [ $TARGET_BOARD_PLATFORM == "rk30xx" -o $TARGET_BOARD_PLATFORM = "rk30xxb" -o $TARGET_BOARD_PLATFORM = "rk3188"]; then
     MODULE="modules_smp"
 elif [ $TARGET_BOARD_PLATFORM == "rk2928" ]; then
     MODULE="modules"
