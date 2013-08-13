@@ -308,6 +308,10 @@ void* sim_test(void *argc)
 			ios.c_cflag |= CRTSCTS;
 			cfsetispeed(&ios, B460800);
 			cfsetospeed(&ios, B460800);
+		}else if(biID == 14){
+			ios.c_cflag |= CRTSCTS;
+			cfsetispeed(&ios, B115200);
+                        cfsetospeed(&ios, B115200);
 		}else{
 			cfsetispeed(&ios, B115200);
 			cfsetospeed(&ios, B115200);
