@@ -19,6 +19,7 @@
 #include "libbluetooth/bluetooth/hci_lib.h"
 
 #include "common.h"
+#include "language.h"
 
 #ifndef HCI_DEV_ID
 #define HCI_DEV_ID 0
@@ -493,12 +494,12 @@ int bt_test(void)
 	}*/
 
 success:
-	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"BT    : [OK]\n");
+	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
 	printf("bluetooth_test main function end\n");
 	return 0;
 	
 fail:
-	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"BT    : [FAIL]\n");
+	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_FAILED);
 	printf("bluetooth_test main function end\n");
 	return 0;
 }

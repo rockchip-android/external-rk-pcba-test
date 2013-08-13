@@ -35,7 +35,7 @@ TW_INTERNAL_STORAGE_MOUNT_POINT := "/mnt/sdcard"
 LOCAL_MODULE := pcba_core
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 #LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
-LOCAL_C_INCLUDES += bionic external/stlport/stlport
+LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language
 
 LOCAL_SRC_FILES := \
     pre_test.c\
@@ -62,8 +62,8 @@ LOCAL_SRC_FILES := \
     udisk_test.c        \
     gsensor_test.c 		\
     hdmi_test.c       \
-    sim_test.c
-
+    sim_test.c \
+    battery_test.c
 
 RECOVERY_API_VERSION := 2
 LOCAL_CFLAGS += -DRECOVERY_API_VERSION=$(RECOVERY_API_VERSION)

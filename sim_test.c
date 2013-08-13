@@ -14,6 +14,7 @@
 #include "sim_test.h"
 #include "script.h"
 #include "test_case.h"
+#include "language.h"
 
 #define MODEM_POWER_UP  1
 
@@ -270,13 +271,15 @@ void* sim_test(void *argc)
    	 	ioctl(modem_fd,BP_IOCTL_POWON,&arg);
 			sleep(2);     
   	}else{ 
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"modem open fail !\n");
+		//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"modem open fail !\n");
+		printf("modem open fail !\n");
 		tc_info->result = -1; 
 		return argc;
   	} 
 	err = ioctl(modem_fd,BP_IOCTL_GET_BPID,&biID);
 	if(err < 0){
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"biID fail !\n");
+		//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"biID fail !\n");
+		printf("biID fail !\n");
 		tc_info->result = -1;
 		return argc;
 	}
@@ -291,7 +294,8 @@ void* sim_test(void *argc)
 
 	if(serial_fd <0)
 	{
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"open at port fail!\n");
+		//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"open at port fail!\n");
+		printf("open at port fail!\n");
 		tc_info->result = -1;
 		return argc;
 	}
@@ -317,7 +321,8 @@ void* sim_test(void *argc)
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
      if(pthread_create(&s_tid_reader, &attr, readerLoop, &attr)<0)
-     	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"pthread_create err\n");
+     	//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"pthread_create err\n");
+     	printf("pthread_create err\n");
      	
      	//while(1){sleep(5);write (gFd, "AT+CPIN?\r\n", 10);}
 	}
@@ -325,10 +330,10 @@ void* sim_test(void *argc)
 	sleep(5);
 	if(at_send(serial_fd,"AT+CPIN?\r\n","READY") >= 0){
 		tc_info->result = 0;
-		ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"sim test success\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_SECCESS);
 	}else{
 		tc_info->result = -1;
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,100,"sim test fail\n");
+		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_FAILED);
 	}
 	ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
 	return argc;

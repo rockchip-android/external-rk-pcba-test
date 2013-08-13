@@ -32,6 +32,7 @@
 #include "extra-functions.h"
 #include "wlan_test.h"
 #include "test_case.h"
+#include "language.h"
 
 #define LOG(x...) printf(x)
 
@@ -192,7 +193,7 @@ void* wlan_test(void* argv)
 	memset(ssid, 0, 100);
 	
 	process_ssid(ssid, results, results2);
-	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"Wi-Fi : [OK] %s\n",ssid);
+	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_SECCESS,ssid);
 	
 	LOG("wlan_test success.\n");
 	return 0;
@@ -217,7 +218,7 @@ error_exit:
 		free(results2);
 	}
 	
-	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"Wi-Fi : [FAIL]\n");
+	ui_print_xy_rgba(0,get_cur_print_y(),225,0,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_FAILED,ssid);
 	tc_info->result = -1;
 		
   return argv;

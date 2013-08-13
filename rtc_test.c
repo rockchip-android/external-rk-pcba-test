@@ -13,6 +13,7 @@
 #include "rtc_test.h"
 #include "script.h"
 #include "test_case.h"
+#include "language.h"
 
 int  rtc_xopen(int flags)
 {
@@ -157,6 +158,8 @@ void* rtc_test(void *argc)
 	int day ;
 	int hour;
 	time_t t;
+	struct tm *p;
+	int initprint;
 	
 	
 	struct timespec ts;
@@ -199,6 +202,22 @@ void* rtc_test(void *argc)
 	}
 	else
 	{
+	    sleep(1);
+	    initprint=get_cur_print_y();
+		while(1)
+		{
+			t = get_system_time(dt);
+			if(t < 0)
+			{
+			//rtc_msg->result = -1;
+				ret = -1;
+				break;
+			}
+			p = localtime(&t);
+			ui_print_xy_rgba(0,initprint,0,255,0,255,"%s:[%s] %04d/%02d/%02d %02d:%02d:%02d\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
+			sleep(1);
+		}
+/*
 		t = get_system_time(dt);
 		if(t < 0)
 		{
@@ -220,18 +239,19 @@ void* rtc_test(void *argc)
 				ret = 0;
 			}
 		}
+*/
 	}
 	
 	if(ret == 0)
 	{
 		tc_info->result = 0;
 	//	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc: ok!   { %s }\n",dt);
-		ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"RTC   : [OK]\n");
+		ui_print_xy_rgba(0,initprint,0,255,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_SECCESS);
 	}
 	else
 	{
 		tc_info->result = -1;
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"RTC   : [FAIL]\n");
+		ui_print_xy_rgba(0,initprint,255,0,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_FAILED);
 	}
 	
 	

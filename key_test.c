@@ -8,6 +8,7 @@
 #include "common.h"
 #include "key_test.h"
 #include "test_case.h"
+#include "language.h"
 #define test_bit(bit, array)    (array[bit/8] & (1<<(bit%8)))
 
 uint8_t keyBitmask[(KEY_MAX + 1) / 8];
@@ -30,7 +31,7 @@ int set_gKey(unsigned int code)
 		{
 //			ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,0,255,255,"    [ %s ]\n",key_code[i].name);
 //                        ui_print_xy_rgba(tc_info->x,tc_info->y + 1,0,255,0,255,"%s\n",key_code[i].name);
-                        ui_print_xy_rgba(0,manual_p_y,0,255,0,255,"key : {%s}\n",key_code[i].name);
+                        ui_print_xy_rgba(0,manual_p_y,0,255,0,255,"%s : {%s}\n",PCBA_KEY,key_code[i].name);
 			break;
 		}
 	}

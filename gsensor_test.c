@@ -29,6 +29,7 @@
 #include "../../hardware/rk29/sensor/st/mma8452_kernel.h"              // 声明驱动为 HAL 提供的功能接口. 应该用更加抽象的文件名.
 #include "common.h"
 #include "test_case.h"
+#include "language.h"
 
 
 #define EVENT_TYPE_ACCEL_X          ABS_X
@@ -156,7 +157,7 @@ int openInput(const char* inputName)
  	fd = openInput("gsensor");
 	if(fd < 0)
 	{
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"Sensor: [FAIL]\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_FAILED);
 		g_msg->result = -1;
 		tc_info->result = -1;
 		return argv;
@@ -165,7 +166,7 @@ int openInput(const char* inputName)
     if(fd_dev<0)
     {
      	printf("opne gsensor demon fail\n");
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"Sensor: [FAIL]\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_FAILED);
 		g_msg->result = -1;
 		tc_info->result = -1;
 		return argv;
@@ -175,19 +176,20 @@ int openInput(const char* inputName)
     if(ret < 0)
     {
 		printf("start sensor fail!\n");
-		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"Sensor: [FAIL]\n");
+		ui_print_xy_rgba(0,g_msg->y,255,0,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_FAILED);
 		g_msg->result = -1;
 		tc_info->result = -1;
 		return argv;
     }
-/*	for(;;)
+	for(;;)
 	{
 		readEvents(fd);
-		ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"Gsensor: [OK]\n");
+		ui_print_xy_rgba(0,g_msg->y,0,255,0,255,"%s:[%s] (%2d,%2d,%2d)\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
-	}*/
+		usleep(10000);
+	}
 
-        ui_print_xy_rgba(0,g_msg->y,0,255,0,255,"Sensor: [OK]\n");
+    ui_print_xy_rgba(0,g_msg->y,0,255,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_SECCESS);
 	return argv;
  }
  

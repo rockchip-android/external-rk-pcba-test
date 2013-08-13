@@ -39,8 +39,10 @@
 #include "debug.h"
 #include "hdmi_test.h"
 #include "sim_test.h"
+#include "battery_test.h"
 
 #include <signal.h>
+#include "language.h"
 
 #define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				2			//height of test item
@@ -79,6 +81,7 @@ char dt[30]={"20120927.143045"};
 struct rtc_msg *rtc_msg;
 int err_rtc;
 int rtc_p_y; //rtc position in y direction
+pthread_t battery_tid;  
 
 pthread_t screen_tid;  
 char *screen_res;
@@ -276,6 +279,12 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	{
 		tc_info->func = camera_test;
 		tc_info->dev_id = 1;
+		tc_info->x =  gr_fb_width() >> 1;;
+		tc_info->y =  0 ;
+		tc_info->w = ((gr_fb_width() >> 1) & ~0x03);
+		tc_info->h = ((gr_fb_height()*2/3) & ~0x03);;
+		manual_p_y += ITEM_H;
+		return 0;
 	}
 	else
 	{
@@ -306,17 +315,18 @@ int start_manual_test_item(int x,int y)
 	list_for_each(pos, &manual_test_list_head) 
 	{
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
-		x_start = (tc_info->x)*CHAR_WIDTH;
-		x_end = x_start + (tc_info->w)*CHAR_WIDTH;
-		y_start = (tc_info->y - 1)*CHAR_HEIGHT;
-		y_end = y_start + (tc_info->h)*CHAR_HEIGHT;
+		x_start = tc_info->x;
+		x_end = x_start + tc_info->w;
+		y_start = tc_info->y;
+		y_end = y_start + tc_info->h;
+	
 		//printf("%s>>x_start:%d>>x_end:%d>>y_start:%d>>y_end:%d\n",
 		//	tc_info->base_info->name,x_start,x_end,y_start,y_end);
 		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 		{
 			
-			ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
-					tc_info->base_info->display_name);
+			//ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
+			//		tc_info->base_info->display_name);
 			//if (!strcmp(tc_info->base_info->name, "Camera_1"))
 			//{
 				stopCameraTest();
@@ -355,6 +365,15 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		if(err != 0)
 		{  
 		   printf("create rtc test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}else if(!strcmp(tc_info->base_info->name, "battery"))
+	{
+		err = pthread_create(&battery_tid, NULL, battery_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create battery_test test thread error: %s/n",strerror(err));
 		   return -1;
 		   
 		}  
@@ -633,10 +652,10 @@ int main(int argc, char **argv)
 	gui_loadResources();
 #if 1
 	w =  gr_fb_width() >> 1;
-	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"Rockchip Pcba test v2.0\n");
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_VERSION_NAME);
 //	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
-	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),2,255,255,0,255," Manual\n");
-        drawline_4(255,255,0,255,0,(2*CHAR_HEIGHT-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3);
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),1,255,255,0,255,"%s\n",PCBA_MANUAL_TEST);
+    drawline_4(255,255,0,255,0,(1*CHAR_HEIGHT-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3);
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
@@ -669,8 +688,8 @@ int main(int argc, char **argv)
 		init_manual_test_item(tc_info);
 		
 	}
-	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-4),manual_p_y+1,255,255,0,255,"Automatic \n");
-        drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+1)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),manual_p_y+2,255,255,0,255,"%s\n",PCBA_AUTO_TEST);
+        drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+2)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
