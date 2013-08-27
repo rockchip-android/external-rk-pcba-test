@@ -63,7 +63,8 @@ LOCAL_SRC_FILES := \
     gsensor_test.c 		\
     hdmi_test.c       \
     sim_test.c \
-    battery_test.c
+    battery_test.c\
+	ddr_test.c
 
 RECOVERY_API_VERSION := 2
 LOCAL_CFLAGS += -DRECOVERY_API_VERSION=$(RECOVERY_API_VERSION)

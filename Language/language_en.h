@@ -19,4 +19,5 @@
 #define PCBA_BATTERY_DISCHARGE   "DisCharge"
 #define PCBA_BATTERY_FULLCHARGE   "FullCharge"
 #define PCBA_BATTERY_VOLTAGE  "Voltage"
+#define PCBA_DDR "DDR"
 #endif
