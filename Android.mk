@@ -3,12 +3,13 @@ ifeq ($(TARGET_ARCH),arm)
 
 LOCAL_PATH := $(call my-dir)
 
+NO_CODEC_TEST_BIN=true
 ifneq ($(NO_CODEC_TEST_BIN), true)
 include $(CLEAR_VARS)
 LOCAL_MODULE := codec_test
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 #LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
-LOCAL_C_INCLUDES += bionic external/stlport/stlport
+LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language
 
 LOCAL_SRC_FILES := \
     alsa_pcm.c     \

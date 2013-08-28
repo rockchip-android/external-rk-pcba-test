@@ -14,10 +14,13 @@
 #define PCBA_SDCARD  "SD卡"
 #define PCBA_UCARD  "U盘"
 #define PCBA_WIFI   "网络"
+#define PCBA_WIFI_SIGNAL "信号强度"
+#define PCBA_WIFI_SIGNAL1 "格"
 #define PCBA_BATTERY   "电池"
 #define PCBA_BATTERY_CHARGE   "充电"
 #define PCBA_BATTERY_DISCHARGE   "放电"
 #define PCBA_BATTERY_FULLCHARGE   "满电"
 #define PCBA_BATTERY_VOLTAGE  "电压"
+#define PCBA_RECORD "录音音量"
 
 #endif

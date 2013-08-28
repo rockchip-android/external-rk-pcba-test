@@ -349,7 +349,7 @@ void channel_fixed(void * data,int len, int chFlag)
 	}
 	return;
 }
-int pcm_read(struct pcm *pcm, void *data, unsigned count)
+int pcm_read(struct pcm *pcm, void *data, unsigned count, int size)
 {
     struct snd_xferi x;
 
@@ -377,6 +377,11 @@ int pcm_read(struct pcm *pcm, void *data, unsigned count)
             }
             return oops(pcm, errno, "cannot read stream data");
         }
+
+        /*delay for a bug:sometime no sound*/
+        if(size == 0)
+        	usleep(100000);        
+        
 //        LOGV("read() got %d frames", x.frames);
 		if(!(pcm->flags & PCM_MONO))
 		{
@@ -446,7 +451,7 @@ struct pcm *pcm_open(unsigned flags)
     period_cnt = 4;//((flags & PCM_PERIOD_CNT_MASK) >> PCM_PERIOD_CNT_SHIFT) + PCM_PERIOD_CNT_MIN;
 
     pcm->flags = flags;
-    pcm->fd = open(dname, O_RDWR);
+    pcm->fd = open(dname, O_RDWR|O_CLOEXEC);
     if (pcm->fd < 0) {
         oops(pcm, errno, "cannot open device '%s'", dname);
         return pcm;

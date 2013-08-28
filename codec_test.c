@@ -1,20 +1,49 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <poll.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <pthread.h>
 #include <sys/types.h>
 
 #include "alsa_audio.h"
+#include "language.h"
+#include "common.h"
+#include "extra-functions.h"
+#include "test_case.h"
 
 #define AUDIO_HW_OUT_PERIOD_MULT 8 // (8 * 128 = 1024 frames)
 #define AUDIO_HW_OUT_PERIOD_CNT 4
 #define FILE_PATH "/res/codectest.pcm"
 #define REC_DUR 3 //the unit is second
-pthread_t codec_tid;  
+pthread_t rec_disp_tid;  
 int codec_err = -1;
 extern pid_t g_codec_pid;
+
+static int maxRecPcm = 0;
+static int maxRecPcmPeriod = 0;
+static int nTime = 0;
+static void calcAndDispRecAudioStrenth(short *pcm, int len)
+{	
+	short i, data;
+	
+	// calc mac rec value
+	for(i = 0; i < len/2; i++) {
+		data = abs(*pcm++);
+		if(maxRecPcmPeriod < data) {
+			maxRecPcmPeriod = data;
+		}
+	}
+	
+	//printf("---- maxRecPcmPeriod = %d\n", maxRecPcmPeriod);
+	if(nTime++ >= 10) {
+		nTime = 0;
+		maxRecPcm = maxRecPcmPeriod;
+		maxRecPcmPeriod = 0;
+	}
+}
 
 // 先放后录模式，测试效率相对低，使用喇叭时不会有啸叫，可在使用喇叭时选择此模式
 void* rec_play_test_1(void *argv)
@@ -25,6 +54,7 @@ void* rec_play_test_1(void *argv)
 	unsigned bufsize;
 	char *data;
 	char recData[4*REC_DUR*44100];
+	int dataLen =0 ;
 
 	unsigned inFlags = PCM_IN;
 	unsigned outFlags = PCM_OUT;
@@ -78,8 +108,11 @@ repeat:
 	bufsize = pcm_buffer_size(pcmIn);
 	usleep(10000);
 	data = recData;
-	while (!pcm_read(pcmIn, data, bufsize)) {
+	dataLen = 0;
+	while (!pcm_read(pcmIn, data, bufsize, dataLen)) {
+		calcAndDispRecAudioStrenth(data, bufsize);
 		data += bufsize;
+		dataLen += bufsize;
 		if(data + bufsize - recData >= 4*REC_DUR*44100)
 		{
 			pcm_close(pcmIn);
@@ -162,7 +195,8 @@ void* rec_play_test_2(void *argv)
 	return -1;
 	}
 
-	while (!pcm_read(pcmIn, data, bufsize)) {
+	while (!pcm_read(pcmIn, data, bufsize, 1)) {
+	calcAndDispRecAudioStrenth(data, bufsize);
 	if (pcm_write(pcmOut, data, bufsize)) {
 	fprintf(stderr,"could not write %d bytes\n", bufsize);
 	return -1;
@@ -173,6 +207,21 @@ void* rec_play_test_2(void *argv)
 	pcm_close(pcmIn);
 	pcm_close(pcmOut);
 	return 0;
+}
+
+void rec_volum_display(void)
+{
+	int volume;
+	int y_offset = get_cur_print_y();
+	
+	printf("enter rec_volum_display thread.\n");
+	while(1) {
+		usleep(300000);
+		volume = 20 + ((maxRecPcm*100)/32768);
+		if(volume > 100) volume = 100;
+		ui_print_xy_rgba(0,y_offset,0,255,0,255,"%s:[%d%%]\n",PCBA_RECORD,volume);
+		//printf("---- display maxRecPcm = %d\n", maxRecPcm);
+	}
 }
 
 void* codec_test(void *argv)
@@ -186,26 +235,22 @@ void* codec_test(void *argv)
 		printf("script_fetch program = %s.\n", dt);
 	}	
 	
-/*
-	codec_err = pthread_create(&codec_tid, NULL, rec_play_test,NULL); //
+	codec_err = pthread_create(&rec_disp_tid, NULL, rec_volum_display,NULL); //
 	if(codec_err != 0)
 	{  
-	   printf("create camera test thread error: %s/n",strerror(codec_err));  
-	   
+	   printf("create rec_volum_display thread error: %s/n",strerror(codec_err));  
 	} 
-*/
-/*
-    printf ("+++++++++++++++++++ executing codec_test\r\n");
-    ret = __system("/sbin/codec_test");	
-    printf ("+++++++++++++++++++ ret %d , executing codec_test\r\n", ret);
-*/
-	pid_t codec_pid = vfork();
-	if(codec_pid > 0){
-		g_codec_pid = codec_pid;
-	}else if(codec_pid == 0){
-		execl("/sbin/codec_test", dt);
-		exit(0);
+
+	{
+	    printf ("\r\nBEGIN CODEC TEST ---------------- \r\n");
+	    if(strcmp(dt, "case2") == 0) {
+	    	rec_play_test_2(NULL);
+		} else {
+			rec_play_test_1(NULL);
+		}
+	    printf ("\r\nEND CODEC TEST\r\n");
 	}
-	printf("pcba-test codec pid %d\n",g_codec_pid);
+	//printf("pcba-test codec pid %d\n",g_codec_pid);
+	
     return NULL;
 }

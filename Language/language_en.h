@@ -14,9 +14,12 @@
 #define PCBA_SDCARD  "SDCard"
 #define PCBA_UCARD  "UDisk"
 #define PCBA_WIFI   "Wifi"
+#define PCBA_WIFI_SIGNAL "Level"
+#define PCBA_WIFI_SIGNAL1 ""
 #define PCBA_BATTERY   "Battery"
 #define PCBA_BATTERY_CHARGE   "Charge"
 #define PCBA_BATTERY_DISCHARGE   "DisCharge"
 #define PCBA_BATTERY_FULLCHARGE   "FullCharge"
 #define PCBA_BATTERY_VOLTAGE  "Voltage"
+#define PCBA_RECORD "Record Volum"
 #endif

@@ -714,11 +714,11 @@ int main(int argc, char **argv)
 	}
 	finishCameraTest();
 
-	if(g_codec_pid > 0){
+	/*if(g_codec_pid > 0){
 		kill(g_codec_pid,SIGKILL);
 		printf("pcba-test-over\n");
 		sleep(3);
-	}
+	}*/
 
 	printf("pcba test over!\n");
 	return success;

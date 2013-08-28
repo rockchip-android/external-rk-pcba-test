@@ -57,7 +57,7 @@ unsigned pcm_buffer_size(struct pcm *pcm);
  * occurs after a fifo underrun.
  */
 int pcm_write(struct pcm *pcm, void *data, unsigned count);
-int pcm_read(struct pcm *pcm, void *data, unsigned count);
+int pcm_read(struct pcm *pcm, void *data, unsigned count, int size);
 
 struct mixer;
 struct mixer_ctl;
