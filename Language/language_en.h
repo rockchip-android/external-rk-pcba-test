@@ -22,4 +22,5 @@
 #define PCBA_BATTERY_FULLCHARGE   "FullCharge"
 #define PCBA_BATTERY_VOLTAGE  "Voltage"
 #define PCBA_RECORD "Record Volum"
+#define PCBA_DDR "DDR"
 #endif

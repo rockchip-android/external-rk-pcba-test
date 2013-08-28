@@ -40,6 +40,7 @@
 #include "hdmi_test.h"
 #include "sim_test.h"
 #include "battery_test.h"
+#include "ddr_test.h"
 
 #include <signal.h>
 #include "language.h"
@@ -147,6 +148,9 @@ struct sd_msg *hdmi_msg;
 int hdmi_err = -1;
 
 pthread_t sim_tid;
+
+pthread_t ddr_tid;  
+int ddr_err = -1;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -488,6 +492,16 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		if(err != 0)
 		{  
 		   printf("create sim test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}	
+	else if(!strcmp(tc_info->base_info->name, "ddr"))
+	{
+		ddr_err = pthread_create(&ddr_tid, NULL, ddr_test,tc_info); //
+		if(ddr_err != 0)
+		{  
+		   printf("create ddr test thread error: %s/n",strerror(ddr_err));
 		   return -1;
 		   
 		}  

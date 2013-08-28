@@ -22,5 +22,5 @@
 #define PCBA_BATTERY_FULLCHARGE   "满电"
 #define PCBA_BATTERY_VOLTAGE  "电压"
 #define PCBA_RECORD "录音音量"
-
+#define PCBA_DDR	"内存"
 #endif
