@@ -207,10 +207,16 @@ int BatteryPathInit()
 	char *strbatstatus;
 	char *strbatVoltage;
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
-	curprint= get_cur_print_y();	
+
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s \n",PCBA_BATTERY);
+		
  	if(BatteryPathInit()<0)
  	{
- 		ui_print_xy_rgba(0,curprint,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
+ 		ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
 		tc_info->result = -1;
 		return argv;
  	}
@@ -231,14 +237,14 @@ int BatteryPathInit()
 
 		result=getBatteryStatus(Statusbuf);
 		if(result==BATTERY_STATUS_CHARGING){
-			ui_print_xy_rgba(0,curprint,0,255,0,255,"%s:[%s] (%s:%d)\n",\
+			ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
 				PCBA_BATTERY,PCBA_BATTERY_CHARGE,PCBA_BATTERY_VOLTAGE, atoi(Voltagebuf)/1000);
 		}
 		else if(result==BATTERY_STATUS_FULL){
-			ui_print_xy_rgba(0,curprint,0,255,0,255,"%s:[%s] (%s:%d)\n",\
+			ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
 				PCBA_BATTERY,PCBA_BATTERY_FULLCHARGE,PCBA_BATTERY_VOLTAGE,atoi(Voltagebuf)/1000);
 		}else{
-			ui_print_xy_rgba(0,curprint,0,255,0,255,"%s:[%s] (%s:%d)\n",\
+			ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
 				PCBA_BATTERY,PCBA_BATTERY_DISCHARGE,PCBA_BATTERY_VOLTAGE,atoi(Voltagebuf)/1000);
 		}
 		
@@ -247,7 +253,7 @@ int BatteryPathInit()
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 		sleep(1);
 	}
-    ui_print_xy_rgba(0,curprint,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
+    ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
 	return argv;
  }
  

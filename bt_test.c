@@ -20,7 +20,7 @@
 
 #include "common.h"
 #include "language.h"
-
+#include "test_case.h"
 #ifndef HCI_DEV_ID
 #define HCI_DEV_ID 0
 #endif
@@ -393,14 +393,21 @@ out:
 
 static char bt_chip[64] = "";
 
-int bt_test(void)
+void *bt_test(void *argv)
 {
     int dev_id = 0;
 	int sock = 0;
     int i = 0;
 	int ret = 0;
 	char dt[32] = {0};
+	struct testcase_info *tc_info = (struct testcase_info *)argv;
 	
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_BLUETOOTH,PCBA_TESTING);
+
 	chip_type = RK903; 
 	if(script_fetch("bluetooth", "chip_type", (int *)dt, 8) == 0) {
 		printf("script_fetch chip_type = %s.\n", dt);
@@ -419,8 +426,9 @@ int bt_test(void)
 		chip_type = RTK8723AU; 
 	} else {
 		if (bt_get_chipname(bt_chip, 63) != 0) {
+			
 		    printf("Can't read BT chip name\n");
-		    return 0;
+			goto fail;
 		}
 		
 		if (!strcmp(bt_chip, "rk903_26M"))
@@ -437,7 +445,7 @@ int bt_test(void)
 		    chip_type = RK903; 
 		else {
 		    printf("Not support BT chip, skip bt test.\n");
-		    return 0;
+			goto fail;
 		}		
 	}
 	
@@ -489,17 +497,17 @@ int bt_test(void)
 	/*ret = bt_test_disable();
 	if(ret < 0){
 		printf("bluetooth_test main function fail to disable\n");
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"bluetooth test error\n");
+		ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"bluetooth test error\n");
 		return 0;
 	}*/
 
 success:
-	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
+	ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
 	printf("bluetooth_test main function end\n");
 	return 0;
 	
 fail:
-	ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_FAILED);
+	ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_FAILED);
 	printf("bluetooth_test main function end\n");
 	return 0;
 }

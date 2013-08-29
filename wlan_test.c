@@ -137,7 +137,7 @@ void process_ssid(char *dst, char *src, char *src2)
 
 void* wlan_test(void* argv)
 {
-	int ret;
+	int ret,y;
 	FILE *fp = NULL;
 	FILE *fp2 = NULL;
 	char *results = NULL;
@@ -146,7 +146,12 @@ void* wlan_test(void* argv)
 	struct testcase_info *tc_info = (struct testcase_info *)argv;
 	char wifi_pcba_node = 1;
 
-	//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"iiiiiiiiii wifi 2\n");
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	y = tc_info->y;
+	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_WIFI,PCBA_TESTING);
 	
 	ret =  __system("busybox chmod 777 /res/wifi.sh");
 	if(ret)
@@ -193,7 +198,7 @@ void* wlan_test(void* argv)
 	memset(ssid, 0, 100);
 	
 	process_ssid(ssid, results, results2);
-	ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_SECCESS,ssid);
+	ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_SECCESS,ssid);
 	
 	LOG("wlan_test success.\n");
 	return 0;
@@ -218,7 +223,7 @@ error_exit:
 		free(results2);
 	}
 	
-	ui_print_xy_rgba(0,get_cur_print_y(),225,0,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_FAILED,ssid);
+	ui_print_xy_rgba(0,y,225,0,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_FAILED,ssid);
 	tc_info->result = -1;
 		
   return argv;

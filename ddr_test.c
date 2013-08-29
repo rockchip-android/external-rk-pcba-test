@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "test_case.h"
 #include "extra-functions.h"
 #include "language.h"
 
@@ -97,7 +98,7 @@ int get_block_size(int total_size)
 {
 	if(total_size < 256*1024)
 		return -1;
-	
+
 	return ((total_size/256)*5);
 }
 
@@ -106,8 +107,16 @@ void *ddr_test(void *argv)
 {
 	char *ddr_data1[MAX_TEST];
 	char *ddr_data2[MAX_TEST];
-	int val = 0, num =0,result = 0,i = 0,block_size = 0;
+	int val = 0, num =0,result = 0,i = 0,block_size = 0,y=0;
 	float use_rate = 0,total_size = 0;
+	struct testcase_info *tc_info = (struct testcase_info *)argv;
+
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_DDR,PCBA_TESTING);
+	
 	
 	/*Get ddr total size*/
 	total_size = get_ddr_msg(GET_TOTAL_SIZE);
@@ -116,7 +125,7 @@ void *ddr_test(void *argv)
 	block_size = get_block_size((int)total_size); 
 	if(block_size <= 0)
 	{	
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"%s:[%s] \n",PCBA_DDR,PCBA_FAILED);
+		ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s] \n",PCBA_DDR,PCBA_FAILED);
 		return -1;
 	}
 	
@@ -148,7 +157,7 @@ void *ddr_test(void *argv)
 			result = -1;
 			break;
 		}	
-		num++;	
+		num++;
 	}
 
 	for(i = 0; i< num; i++)
@@ -161,9 +170,9 @@ void *ddr_test(void *argv)
 	}
 
 	if(result < 0)	
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"%s:[%s] \n",PCBA_DDR,PCBA_FAILED);
+		ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s] \n",PCBA_DDR,PCBA_FAILED);
 	else
-		ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s] \n",PCBA_DDR,PCBA_SECCESS);
+		ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] \n",PCBA_DDR,PCBA_SECCESS);
 		
 	return 0;
 

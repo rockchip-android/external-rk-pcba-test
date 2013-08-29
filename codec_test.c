@@ -8,11 +8,12 @@
 #include <pthread.h>
 #include <sys/types.h>
 
+#include "codec_test.h"
+#include "test_case.h"
 #include "alsa_audio.h"
 #include "language.h"
 #include "common.h"
 #include "extra-functions.h"
-#include "test_case.h"
 
 #define AUDIO_HW_OUT_PERIOD_MULT 8 // (8 * 128 = 1024 frames)
 #define AUDIO_HW_OUT_PERIOD_CNT 4
@@ -25,6 +26,7 @@ extern pid_t g_codec_pid;
 static int maxRecPcm = 0;
 static int maxRecPcmPeriod = 0;
 static int nTime = 0;
+static struct testcase_info  *tc_info = NULL;
 static void calcAndDispRecAudioStrenth(short *pcm, int len)
 {	
 	short i, data;
@@ -212,14 +214,14 @@ void* rec_play_test_2(void *argv)
 void rec_volum_display(void)
 {
 	int volume;
-	int y_offset = get_cur_print_y();
+	int y_offset = tc_info->y;
 	
 	printf("enter rec_volum_display thread.\n");
 	while(1) {
 		usleep(300000);
 		volume = 20 + ((maxRecPcm*100)/32768);
 		if(volume > 100) volume = 100;
-		ui_print_xy_rgba(0,y_offset,0,255,0,255,"%s:[%d%%]\n",PCBA_RECORD,volume);
+		ui_print_xy_rgba(0,y_offset,0,255,0,255,"%s:[%s:%d%%]\n",PCBA_RECORD,PCBA_VOLUME,volume);
 		//printf("---- display maxRecPcm = %d\n", maxRecPcm);
 	}
 }
@@ -228,7 +230,13 @@ void* codec_test(void *argv)
 {
     int ret = -1;
     char dt[32] = {0};
-    
+
+	tc_info = (struct testcase_info *)argv;
+			
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s \n",PCBA_RECORD);
 	sleep(3);    
 	
 	if(script_fetch("Codec", "program", (int *)dt, 8) == 0) {

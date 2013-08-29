@@ -486,7 +486,7 @@ static void *input_thread(void *cookie)
 #ifdef _EVENT_LOGGING
                     LOGE("TOUCH_RELEASE: %d,%d\n", x, y);
 #endif
-					start_manual_test_item(x,y);
+			start_manual_test_item(x,y);
 
                     NotifyTouch(TOUCH_RELEASE, x, y);
 					touch_and_hold = 0;

@@ -72,7 +72,7 @@ struct manual_item m_item[] = {
 	};
 
 
-int manual_p_y = 4;
+int manual_p_y = 1;
 
 
 int cur_p_y;		//current position for auto test tiem in y direction
@@ -225,6 +225,8 @@ static int parse_testcase()
 				printf("malloc for tc_info[%d] fail\n",j);
 				return -1;
 			}
+			tc_info->x = 0;
+			tc_info->y =0;
 			tc_info->base_info = &info[j];
 			if(tc_info->base_info->category)   
 				 list_add(&tc_info->list, &manual_test_list_head);
@@ -267,88 +269,7 @@ static int parse_testcase()
 }
 
 
-
-int init_manual_test_item(struct testcase_info *tc_info)
-{
-	printf("%s\n",tc_info->base_info->name);
-	if(!strcmp(tc_info->base_info->name, "Codec"))
-	{
-		tc_info->func = codec_test;
-	}
-	else if(!strcmp(tc_info->base_info->name, "Key"))
-	{
-		tc_info->func = key_test;
-	}
-	else if(!strcmp(tc_info->base_info->name, "Camera_1"))
-	{
-		tc_info->func = camera_test;
-		tc_info->dev_id = 1;
-		tc_info->x =  gr_fb_width() >> 1;;
-		tc_info->y =  0 ;
-		tc_info->w = ((gr_fb_width() >> 1) & ~0x03);
-		tc_info->h = ((gr_fb_height()*2/3) & ~0x03);;
-		manual_p_y += ITEM_H;
-		return 0;
-	}
-	else
-	{
-		printf("unsupported test case:%s\n",tc_info->base_info->name);
-		return -1;
-	}
-
-	tc_info->x =  ITEM_X;
-	tc_info->y =  manual_p_y ;
-	tc_info->w =  gr_fb_width();
-	tc_info->h = ITEM_H;
-	ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,255,0,255,"%s\n",
-			tc_info->base_info->display_name);
-	manual_p_y += ITEM_H;
-	
-	return 0;
-}
-
-
-
-
-int start_manual_test_item(int x,int y)
-{
-	struct list_head *pos;
-	int x_start,x_end;
-	int y_start,y_end;
-	int err;
-	list_for_each(pos, &manual_test_list_head) 
-	{
-		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
-		x_start = tc_info->x;
-		x_end = x_start + tc_info->w;
-		y_start = tc_info->y;
-		y_end = y_start + tc_info->h;
-	
-		//printf("%s>>x_start:%d>>x_end:%d>>y_start:%d>>y_end:%d\n",
-		//	tc_info->base_info->name,x_start,x_end,y_start,y_end);
-		if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
-		{
-			
-			//ui_print_xy_rgba(tc_info->x,tc_info->y + (ITEM_H >> 1)-1,0,0,255,255,"%s\n",
-			//		tc_info->base_info->display_name);
-			//if (!strcmp(tc_info->base_info->name, "Camera_1"))
-			//{
-				stopCameraTest();
-			//}
-			
-			tc_info->func(tc_info);
-			
-			break;
-		}
-		
-	}
-	return 0;
-	
-}
-
-
-
-int start_auto_test_item(struct testcase_info *tc_info)
+int start_test_pthread(struct testcase_info *tc_info)
 {
 	int err;
 	printf("%s\n",tc_info->base_info->name);
@@ -383,7 +304,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		}  
 	}else if(!strcmp(tc_info->base_info->name, "Codec"))
         {
-                err = pthread_create(&codec_tid, NULL, codec_test,NULL); //
+                err = pthread_create(&codec_tid, NULL, codec_test,tc_info); //
                 if(err != 0)
                 {
                    printf("create codec test thread error: %s/n",strerror(err));
@@ -400,7 +321,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 		   
 		}  
 	}
-	else if(!strcmp(tc_info->base_info->name, "Camera_0"))
+	else if(!strcmp(tc_info->base_info->name, "camera"))
 	{
 		tc_info->dev_id = 0;
 		err = pthread_create(&camera_tid, NULL, camera_test,tc_info); //
@@ -515,6 +436,35 @@ int start_auto_test_item(struct testcase_info *tc_info)
 	return 0;
 			
 }
+
+int init_manual_test_item(struct testcase_info *tc_info)
+{
+	int err = 0;
+
+	manual_p_y += 1;
+	tc_info->y=manual_p_y;
+
+	start_test_pthread(tc_info);
+	
+	return 0;
+}
+
+
+
+
+int start_manual_test_item(int x,int y)
+{
+	return Camera_Click_Event(x,y); 
+}
+
+int start_auto_test_item(struct testcase_info *tc_info)
+{
+	printf("start_auto_test_item : %d, %s \r\n",tc_info->y,tc_info->base_info->name);
+	start_test_pthread(tc_info);
+	
+	return 0;
+}
+
 int ensure_path_mounted(const char* path) {return 0;}
 
 int 
@@ -702,8 +652,8 @@ int main(int argc, char **argv)
 		init_manual_test_item(tc_info);
 		
 	}
-	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),manual_p_y+2,255,255,0,255,"%s\n",PCBA_AUTO_TEST);
-        drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+2)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),manual_p_y+1,255,255,0,255,"%s\n",PCBA_AUTO_TEST);
+        drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+1)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {

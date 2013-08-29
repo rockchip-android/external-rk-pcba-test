@@ -142,8 +142,14 @@ int openInput(const char* inputName)
 	int fd;
  	struct gsensor_msg *g_msg =  (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
-	
-	
+		
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	g_msg->y = tc_info->y;
+	ui_print_xy_rgba(0,g_msg->y,255,255,0,255,"%s:[%s..] \n",PCBA_GSENSOR,PCBA_TESTING);
+
  	if(!g_msg)
 	{
 		printf("malloc for wlan_msg fail!\n");
@@ -151,7 +157,7 @@ int openInput(const char* inputName)
 	else
 	{
 		g_msg->result = -1;
-		g_msg->y = get_cur_print_y();
+		//g_msg->y = get_cur_print_y();
 	}
 	
  	fd = openInput("gsensor");
@@ -184,7 +190,7 @@ int openInput(const char* inputName)
 	for(;;)
 	{
 		readEvents(fd);
-		ui_print_xy_rgba(0,g_msg->y,0,255,0,255,"%s:[%s] (%2d,%2d,%2d)\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
+		ui_print_xy_rgba(0,g_msg->y,0,255,0,255,"%s:[%s] { %2d,%2d,%2d }\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 		usleep(10000);
 	}

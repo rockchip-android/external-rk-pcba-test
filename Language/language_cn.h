@@ -1,7 +1,7 @@
 #ifndef __LANGUAGE_CN_H_
 #define __LANGUAGE_CN_H_
 
-#define PCBA_VERSION_NAME "RockChip Pcba 测试 V2.1"
+#define PCBA_VERSION_NAME "ROCKCHIP PCBA 测试 V2.2"
 #define PCBA_MANUAL_TEST  "手动测试"
 #define PCBA_AUTO_TEST  "自动测试"
 #define PCBA_SECCESS "通过"
@@ -21,6 +21,8 @@
 #define PCBA_BATTERY_DISCHARGE   "放电"
 #define PCBA_BATTERY_FULLCHARGE   "满电"
 #define PCBA_BATTERY_VOLTAGE  "电压"
-#define PCBA_RECORD "录音音量"
+#define PCBA_RECORD "录音"
+#define PCBA_VOLUME "音量"
 #define PCBA_DDR	"内存"
+#define PCBA_TESTING "测试中"
 #endif

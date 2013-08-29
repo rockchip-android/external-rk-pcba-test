@@ -27,7 +27,7 @@ int  rtc_xopen(int flags)
 		rtc = open(minor_rtc, flags);
 		if(rtc >= 0)
 		{
-			printf("open %s\n",minor_rtc);
+		//	printf("open %s\n",minor_rtc);
 		}
 		else
 		{
@@ -151,18 +151,22 @@ void* rtc_test(void *argc)
 {
 	struct testcase_info *tc_info = (struct testcase_info*)argc;
 	char dt[32]={"20120926.132600"};
-	int ret;
+	int ret,y;
 	struct tm tm;
 	struct timeval tv;
 	char *s;
-	int day ;
-	int hour;
+	int day,hour;
 	time_t t;
 	struct tm *p;
-	int initprint;
-	
-	
 	struct timespec ts;
+	
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();
+	
+	y = tc_info->y;	
+	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_RTC,PCBA_TESTING);
+
 
 	s = malloc(32);
 	 if(script_fetch("rtc", "module_args", (int *)dt, 8) == 0)
@@ -203,7 +207,7 @@ void* rtc_test(void *argc)
 	else
 	{
 	    sleep(1);
-	    initprint=get_cur_print_y();
+//	    y=get_cur_print_y();
 		while(1)
 		{
 			t = get_system_time(dt);
@@ -214,7 +218,7 @@ void* rtc_test(void *argc)
 				break;
 			}
 			p = localtime(&t);
-			ui_print_xy_rgba(0,initprint,0,255,0,255,"%s:[%s] %04d/%02d/%02d %02d:%02d:%02d\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { %04d/%02d/%02d %02d:%02d:%02d }\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
 			sleep(1);
 		}
 /*
@@ -246,12 +250,12 @@ void* rtc_test(void *argc)
 	{
 		tc_info->result = 0;
 	//	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc: ok!   { %s }\n",dt);
-		ui_print_xy_rgba(0,initprint,0,255,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_SECCESS);
+		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_SECCESS);
 	}
 	else
 	{
 		tc_info->result = -1;
-		ui_print_xy_rgba(0,initprint,255,0,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_FAILED);
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_FAILED);
 	}
 	
 	

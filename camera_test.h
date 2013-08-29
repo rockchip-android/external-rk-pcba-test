@@ -49,4 +49,5 @@ extern void* camera_test(void *argc);
 //return value: 0 is ok ,-1 erro
 extern int stopCameraTest();
 extern void finishCameraTest();
+extern int Camera_Click_Event(int x,int y);
 #endif

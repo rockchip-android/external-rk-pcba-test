@@ -38,6 +38,43 @@ struct ion_handle_data handle_data;
 static int is_rk30_plat = RK30_PLAT;
 #define  FB_NONSTAND ((is_rk30_plat == RK29_PLAT)?0x2:0x20)
 static int cam_id = 0;
+
+static int camera_x=0,camera_y=0,camera_w=0,camera_h=0,camera_num=0;
+static struct testcase_info *tc_info = NULL;
+
+int Camera_Click_Event(int x,int y)
+{	
+	struct list_head *pos;
+	int x_start,x_end;
+	int y_start,y_end;
+	int err;
+
+	if(tc_info == NULL)
+		return -1;		
+
+	if(camera_num < 2)
+		return -1;
+	
+	get_camera_size();
+
+	x_start = camera_x;
+	x_end = x_start + camera_w;
+	y_start = camera_y;
+	y_end = y_start + camera_h;
+
+	if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
+	{
+		
+		printf("Camera_Click_Event : change \r\n");	
+		stopCameraTest();
+		startCameraTest();
+	}
+		
+	return 0;
+	
+}
+
+
 int CameraCreate(void)
 {
     int err,size;
@@ -462,26 +499,29 @@ exit:
 	return err;
 }
 // the func is a while loop func , MUST  run in a single thread.
-void * startCameraTest(void *argv){
+int startCameraTest(){
 	int ret = 0;
 	int cameraId = 0;
 	int preWidth;
 	int preHeight;
 	int corx ;
 	int cory;
-	struct camera_msg *camera_msg = (struct camera_msg*)argv;
 
-	if(!camera_msg)
-	{
-		printf("malloc camera_msg fail\n");
-		hasstoped = 1;
-		return NULL;
+	get_camera_size();
+	
+	if(iCamFd > 0){
+		printf(" %s has been opened! can't switch camera!\n",videodevice);
+		return -1;
 	}
-	cameraId = camera_msg->id;
-	preWidth = camera_msg->w;
-	preHeight = camera_msg->h;
-	corx = camera_msg->x;
-	cory = camera_msg->y;
+
+	isstoped = 0;
+	hasstoped = 0;
+	cameraId = cam_id%2;
+	cam_id++;
+	preWidth = camera_w;
+	preHeight = camera_h;
+	corx = camera_x;
+	cory = camera_y;
 	sprintf(videodevice,"/dev/video%d",cameraId);
 	preview_w = preWidth;
 	preview_h = preHeight;
@@ -490,7 +530,7 @@ void * startCameraTest(void *argv){
     if(access(videodevice, O_RDWR) <0 ){
 	   printf("access %s failed\n",videodevice);
 	   hasstoped = 1;
-	   return NULL;
+	   return -1;
      }
 	  
 	if (CameraCreate() == 0)
@@ -503,26 +543,27 @@ void * startCameraTest(void *argv){
 			}
 			else
 			{
-				camera_msg->tc_info->result = -1;
+				tc_info->result = -1;
 				printf("%s display create wrong!\n",__FUNCTION__);
 			}
 		}
 		else
 		{
-			camera_msg->tc_info->result = -1;
+			tc_info->result = -1;
 			printf("%s camera start erro\n",__FUNCTION__);
 		}
 	}
 	else
 	{
-		camera_msg->tc_info->result = -1;
+		tc_info->result = -1;
 		printf("%s camera create erro\n",__FUNCTION__);
 	}
 	//isstoped = 1;
 	hasstoped = 1;
 	printf("camrea%d test over\n",cameraId);
-	return argv ;
+	return 0;
 }
+
 int stopCameraTest(){
 	
 	sprintf(videodevice,"/dev/video%d",(cam_id%2));
@@ -557,59 +598,45 @@ void finishCameraTest(){
 		}
 		
 }
-void * camera_test(void *argc)
+
+int get_camera_size()
 {
-	struct testcase_info *tc_info = (struct testcase_info *)argc;
-	struct camera_msg *camera_msg = NULL;
-	pthread_t tid;
-	int err;
-	//cam_id = tc_info->dev_id;
-	int x =  gr_fb_width() >> 1;//camera_msg->x;
-	int y= 0;//camera_msg->y;
-	
-	int w,h;
+	if(camera_x>0 && camera_y>0 && camera_w>0 && camera_h >0)
+		return 0;	
+
 	if(gr_fb_width() > gr_fb_height()){
-		w = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
-		h = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
-	}else{
-		h = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
-		w = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
+		camera_w = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
+		camera_h = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
+	}
+	else{
+		camera_h = ((gr_fb_width() >> 1) & ~0x03);//camera_msg->w;
+		camera_w = ((gr_fb_height()*2/3) & ~0x03);// camera_msg->h;
 	}
 
-	if(w > 640)
-		w = 640;
-	if(h > 480)
-		h = 480;
+	if(camera_w > 640)
+		camera_w = 640;
+	if(camera_h > 480)
+		camera_h=480;			
 	
-	if(iCamFd > 0){
-		printf(" %s has been opened! can't switch camera!\n",videodevice);
-		return NULL;
+	camera_x = gr_fb_width() >> 1; 	
+	camera_y = 0;
+
+	return 0;
+}
+
+
+void * camera_test(void *argc)
+{
+	int ret,num;
+
+	tc_info = (struct testcase_info *)argc; 
+
+	if (script_fetch("camera", "number",&num, 1) == 0) {
+		printf("camera_test num:%d\r\n",num);
+		camera_num = num;	
 	}
-	isstoped = 0;
-	hasstoped = 0;
-	//printf("%s:video%d x:%d y:%d w:%d h:%d\n",__func__,id,x,y,w,h);
-	camera_msg = (struct camera_msg*)malloc(sizeof(struct camera_msg));
-	if(!camera_msg)
-	{
-		printf(" malloc for camera_msg failed\n");
-		tc_info->result = -1;
-		return  argc;
-	}
-	camera_msg->id = cam_id%2;
-	cam_id++;
-	camera_msg->x = x;
-	camera_msg->y = y;
-	camera_msg->w = w;
-	camera_msg->h = h;
-	camera_msg->tc_info = tc_info;
-	err = pthread_create(&tid, NULL,startCameraTest,camera_msg); //
-	if(err != 0)
-	{  
-		printf("start camera test thread error: %s/n",strerror(err)); 
-		tc_info->result = -1;
-		return  argc;
-	   
-	}  
+
+	startCameraTest();
 	
 	return argc;
 }
