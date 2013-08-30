@@ -1,7 +1,7 @@
 #ifndef __LANGUAGE_CN_H_
 #define __LANGUAGE_CN_H_
 
-#define PCBA_VERSION_NAME "ROCKCHIP PCBA 测试 V2.2"
+#define PCBA_VERSION_NAME "ROCKCHIP PCBA TEST V2.2"
 #define PCBA_MANUAL_TEST  "手动测试"
 #define PCBA_AUTO_TEST  "自动测试"
 #define PCBA_SECCESS "通过"

@@ -65,7 +65,8 @@ LOCAL_SRC_FILES := \
     hdmi_test.c       \
     sim_test.c \
     battery_test.c\
-	ddr_test.c
+	ddr_test.c \
+	cpu_test.c
 
 RECOVERY_API_VERSION := 2
 LOCAL_CFLAGS += -DRECOVERY_API_VERSION=$(RECOVERY_API_VERSION)
@@ -176,6 +177,7 @@ ifeq ($(TARGET_RECOVERY_GUI),true)
 else
   LOCAL_SRC_FILES += gui_stub.c
 endif
+LOCAL_STATIC_LIBRARIES += libm
 LOCAL_STATIC_LIBRARIES += libminziptwrp libunz libmincrypt
 LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp libbluetooth
 LOCAL_STATIC_LIBRARIES += libz libc libstlport_static libcutils libstdc++

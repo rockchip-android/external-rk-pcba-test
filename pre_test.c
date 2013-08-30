@@ -41,6 +41,7 @@
 #include "sim_test.h"
 #include "battery_test.h"
 #include "ddr_test.h"
+#include "cpu_test.h"
 
 #include <signal.h>
 #include "language.h"
@@ -151,6 +152,9 @@ pthread_t sim_tid;
 
 pthread_t ddr_tid;  
 int ddr_err = -1;
+
+pthread_t cpu_tid;
+int cpu_err = -1;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -426,6 +430,13 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "cpu")){
+		cpu_err = pthread_create(&cpu_tid, NULL, cpu_test, tc_info);
+		if(cpu_err != 0){
+		   printf("create cpu test thread error: %s/n",strerror(cpu_err));
+		   return -1;
+		}
 	}
 	else
 	{
