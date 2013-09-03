@@ -14,7 +14,7 @@
 #define PCBA_SDCARD  "SD卡"
 #define PCBA_UCARD  "U盘"
 #define PCBA_WIFI   "网络"
-#define PCBA_WIFI_SIGNAL "信号强度"
+#define PCBA_WIFI_SIGNAL "信号"
 #define PCBA_WIFI_SIGNAL1 "格"
 #define PCBA_BATTERY   "电池"
 #define PCBA_BATTERY_CHARGE   "充电"
@@ -25,4 +25,8 @@
 #define PCBA_VOLUME "音量"
 #define PCBA_DDR	"内存"
 #define PCBA_TESTING "测试中"
+
+#define PCBA_ERR_CHECK "检测错误"
+#define PCBA_ERR_FREQ "变频错误"
+
 #endif
