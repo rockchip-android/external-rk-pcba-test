@@ -36,9 +36,13 @@
 #ifdef BOARD_USE_CUSTOM_RECOVERY_FONT
 #include BOARD_USE_CUSTOM_RECOVERY_FONT
 #else
-//#include "roboto_15x24.h"
-//#include "roboto_test.h"
-#include "font_10x18_cn.h"
+//#include "font/font_cn_18x18.h"
+#include "font/font_cn_20x20.h"
+//#include "font/font_cn_24x24.h"
+//#include "font/font_cn_28x28.h"
+//#include "font/font_cn_32x32.h"
+//#include "font/font_cn_36x36.h"
+
 #endif
 
 #ifdef RECOVERY_BGRA
@@ -59,11 +63,16 @@ const unsigned cw_en=10;
 
 typedef struct {
     GGLSurface texture;
-    unsigned cwidth;
-    unsigned cheight;
+    unsigned char *cwidth;
+    unsigned char *cheight;
     unsigned ascent;
+	unsigned count;
+	unsigned offset[97];
+	void **fontdata;
+	unsigned *unicodemap;
 } GRFont;
 
+static GGLSurface font_ftex;
 static GRFont *gr_font = 0;
 static GGLContext *gr_context = 0;
 static GGLSurface gr_font_texture;
@@ -344,7 +353,7 @@ int getGBCharID(unsigned c1, unsigned c2)
 	}
 	return -1;
 }
-
+/*
 int getUNICharID(unsigned short unicode)
 {
 	int i;
@@ -353,10 +362,123 @@ int getUNICharID(unsigned short unicode)
 	}
 	return -1;
 }
+*/
+
+struct utf8_table {
+	int     cmask;
+	int     cval;
+	int     shift;
+	long    lmask;
+	long    lval;
+};
+
+static struct utf8_table utf8_table[] =
+{
+    {0x80,  0x00,   0*6,    0x7F,           0,         /* 1 byte sequence */},
+    {0xE0,  0xC0,   1*6,    0x7FF,          0x80,      /* 2 byte sequence */},
+    {0xF0,  0xE0,   2*6,    0xFFFF,         0x800,     /* 3 byte sequence */},
+    {0xF8,  0xF0,   3*6,    0x1FFFFF,       0x10000,   /* 4 byte sequence */},
+    {0xFC,  0xF8,   4*6,    0x3FFFFFF,      0x200000,  /* 5 byte sequence */},
+    {0xFE,  0xFC,   5*6,    0x7FFFFFFF,     0x4000000, /* 6 byte sequence */},
+    {0,						       /* end of table    */}
+};
+
+int utf8_mbtowc(wchar_t *p, const char *s, int n)
+{
+	wchar_t l;
+	int c0, c, nc;
+	struct utf8_table *t;
+
+	nc = 0;
+	c0 = *s;
+	l = c0;
+	for (t = utf8_table; t->cmask; t++) {
+		nc++;
+		if ((c0 & t->cmask) == t->cval) {
+			l &= t->lmask;
+			if (l < t->lval)
+			{	
+				printf("aa\r\n");
+				return -nc;
+			}
+			*p = l;
+			return nc;
+		}
+		if (n <= nc)
+		{
+	
+			return 0;
+		}
+		s++;
+		c = (*s ^ 0x80) & 0xFF;
+		if (c & 0xC0)
+		{
+			return -nc;}
+		l = (l << 6) | c;
+	}
+	return -nc;
+
+}
+
+int getCharID(const char* s, void* pFont)
+{
+	unsigned i, unicode;
+	GRFont *gfont = (GRFont*) pFont;
+	if (!gfont)  gfont = gr_font;
+	utf8_mbtowc(&unicode, s, strlen(s));
+	for (i = 0; i < gfont->count; i++)
+	{
+		if (unicode == gfont->unicodemap[i])
+		return i;
+	}
+	return 0;
+}
 
 
 int gr_textEx(int x, int y, const char *s, void* pFont)
-{
+{	
+    GGLContext *gl = gr_context;
+    GRFont *gfont = NULL;
+    unsigned off, width, height, n;
+    wchar_t ch;
+
+    /* Handle default font */
+    if (!gfont)  gfont = gr_font;
+    //x += overscan_offset_x;
+    //x += 0;
+    //y += overscan_offset_y;
+    //y += 0;
+    //y -= gfont->ascent;
+    // fprintf(stderr, "gr_text: x=%d,y=%d,w=%s\n", x, y, s);
+    gl->texEnvi(gl, GGL_TEXTURE_ENV, GGL_TEXTURE_ENV_MODE, GGL_REPLACE);
+    gl->texGeni(gl, GGL_S, GGL_TEXTURE_GEN_MODE, GGL_ONE_TO_ONE);
+    gl->texGeni(gl, GGL_T, GGL_TEXTURE_GEN_MODE, GGL_ONE_TO_ONE);
+    gl->enable(gl, GGL_TEXTURE_2D);
+
+    while(*s) {
+        if(*((unsigned char*)(s)) < 0x20) {
+            s++;
+            continue;
+        }
+		off = getCharID(s,NULL);
+        n = utf8_mbtowc(&ch, s, strlen(s));
+        if(n <= 0)
+            break;
+        s += n;
+	
+		width = gfont->cwidth[off];
+		height = gfont->cheight[off];
+        memcpy(&font_ftex, &gfont->texture, sizeof(font_ftex));
+        font_ftex.width = width;
+        font_ftex.height = height;
+        font_ftex.stride = width;
+        font_ftex.data = gfont->fontdata[off];
+        gl->bindTexture(gl, &font_ftex);
+	    gl->texCoord2i(gl, 0 - x, 0 - y);
+        gl->recti(gl, x, y, x + width, y + height);
+        x += width;
+	}
+/*
     GGLContext *gl = gr_context;
     GRFont *font = (GRFont*) pFont;
 	unsigned off;
@@ -364,8 +486,6 @@ int gr_textEx(int x, int y, const char *s, void* pFont)
 	unsigned off3;
 	int id;
 	unsigned short unicode;
-
-    /* Handle default font */
     if (!font)  font = gr_font;
 
     gl->bindTexture(gl, &font->texture);
@@ -401,6 +521,7 @@ int gr_textEx(int x, int y, const char *s, void* pFont)
 			x += font->cwidth;
 		}
 	}
+*/
     return x;
 }
 
@@ -535,13 +656,68 @@ int gr_getFontDetails(void* font, unsigned* cheight, unsigned* maxwidth)
 
 static void gr_init_font(void)
 {
-    int fontRes;
     GGLSurface *ftex;
-    unsigned char *bits, *rle;
+    unsigned char *bits;
     unsigned char *in, data;
-    unsigned width, height;
-    unsigned element;
+    int bmp, pos;
+    unsigned i, d, n;
+    void** font_data;
+    unsigned char *width, *height;
 
+    gr_font = calloc(sizeof(*gr_font), 1);
+    ftex = &gr_font->texture;
+
+    //width = font.width;
+    //height = font.height;
+    width = malloc(font.count);
+    height = malloc(font.count);
+    font_data = malloc(font.count * sizeof(void*));
+
+    for(n = 0; n < font.count; n++) {
+		if (n<95) {
+			font_data[n] = malloc(font.width*font.height);
+			memset(font_data[n], 0, font.width*font.height);
+			width[n] = font.width;
+			height[n] = font.height;
+		}
+		else {
+			font_data[n] = malloc(font.cwidth*font.cheight);
+			memset(font_data[n], 0, font.cwidth * font.cheight);
+			width[n] = font.cwidth;
+			height[n] = font.cheight;
+		}
+	}
+
+
+    d = 0;
+    in = font.rundata;
+    while((data = *in++)) {
+        n = data & 0x7f;
+        for(i = 0; i < n; i++, d++) {
+			if (d<95*font.width*font.height) {
+				bmp = d/(font.width*font.height);
+				pos = d%(font.width*font.height);
+			}
+			else {
+				bmp = (d-95*font.width*font.height)/(font.cwidth*font.cheight)+95;
+				pos = (d-95*font.width*font.height)%(font.cwidth*font.cheight);
+			}
+            ((unsigned char*)(font_data[bmp]))[pos] = (data & 0x80) ? 0xff : 0;
+        }
+
+    }
+
+
+    ftex->version = sizeof(*ftex);
+    ftex->format = GGL_PIXEL_FORMAT_A_8;
+    gr_font->count = font.count;
+    gr_font->unicodemap = font.unicodemap;
+    gr_font->cwidth = width;
+    gr_font->cheight = height;
+    gr_font->fontdata = font_data;
+    gr_font->ascent = font.cheight - 2;
+
+/*
     gr_font = calloc(sizeof(*gr_font), 1);
     ftex = &gr_font->texture;
 
@@ -566,7 +742,7 @@ static void gr_init_font(void)
     gr_font->cwidth = font.cwidth;
     gr_font->cheight = font.cheight;
     gr_font->ascent = font.cheight - 2;
-
+*/
     return;
 }
 

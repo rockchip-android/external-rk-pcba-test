@@ -130,7 +130,8 @@ void process_ssid(char *dst, char *src, char *src2)
 	
 	rssi = calcSingleLevel(atoi(&rssis[index][1]));
 	
-	sprintf(dst, "{ %s %s %d %s }", &ssids[index][0], PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1);
+	//sprintf(dst, "{ %s %s %d %s }", &ssids[index][0], PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1);
+	sprintf(dst, "{ %s \"%d\" }", &ssids[index][0], rssi);
 }
 
 // ---------------------------------------------------------------------------
