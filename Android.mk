@@ -13,6 +13,7 @@ LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language
 
 LOCAL_SRC_FILES := \
     alsa_pcm.c     \
+    alsa_mixer.c   \
     codec_test.c   \
     codec_main.c
 
@@ -54,6 +55,7 @@ LOCAL_SRC_FILES := \
     camera_test.c		\
 	et_cc_linux_arm.c	\
     key_test.c			\
+    alsa_mixer.c		\
     alsa_pcm.c			\
     codec_test.c		\
     wlan_test.c			\

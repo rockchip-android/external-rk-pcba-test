@@ -62,6 +62,63 @@ void* rec_play_test_1(void *argv)
 	unsigned outFlags = PCM_OUT;
 	unsigned flags =  PCM_STEREO;
 
+	struct mixer*   mMixer = NULL;
+	struct mixer_ctl* mRouteCtl = NULL;
+	char mString[10] = "";
+	static FILE * HWFile;
+	int headsetState = 0;
+	unsigned isNeedChangeRate = 0;
+
+	//open mixer
+	if (!mMixer)
+		mMixer = mixer_open();
+
+	//read codec id
+	HWFile = fopen("/sys/devices/platform/soc-audio/sound/card0/id", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open sound card0 id error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		if (strncmp("RKRK616", mString, 7) == 0) {
+			fprintf(stderr, "sound card0 is RK616, audio capture uses rate change.\n");
+			isNeedChangeRate = 1;
+		} else {
+			isNeedChangeRate = 0;
+		}
+	}
+
+	//read HP state
+	HWFile = fopen("/sys/class/switch/h2w/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open headset state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		headsetState = mString[0] - '0';
+		fprintf(stderr, "headsetState %d\n", headsetState);
+	}
+
+	//read HDMI state
+	HWFile = fopen("/sys/class/switch/hdmi/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open hdmi state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		if (mString[0] - '0' == 1) {
+			fprintf(stderr, "HDMI is in\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_8000HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD1;
+		} else {
+			fprintf(stderr, "HDMI is out\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_44100HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD0;
+		}
+	}
+
 	flags |= (AUDIO_HW_OUT_PERIOD_MULT - 1) << PCM_PERIOD_SZ_SHIFT;
 	flags |= (AUDIO_HW_OUT_PERIOD_CNT - PCM_PERIOD_CNT_MIN)<< PCM_PERIOD_CNT_SHIFT;
 
@@ -74,7 +131,6 @@ void* rec_play_test_1(void *argv)
 		fprintf(stderr,"could not open %s file, will go to fail\n", FILE_PATH);
 		goto fail;
 	}
-				
 	
 	pcmOut = pcm_open(outFlags);
 	if (!pcm_ready(pcmOut)) {
@@ -83,7 +139,20 @@ void* rec_play_test_1(void *argv)
 		pcmOut = NULL;
 		goto fail;
 	}
-	
+
+	//open route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
+		if (mRouteCtl) {
+			if (headsetState == 2)
+				mixer_ctl_select(mRouteCtl, "HP_NO_MIC");
+			else if (headsetState == 1)
+				mixer_ctl_select(mRouteCtl, "HP");
+			else
+				mixer_ctl_select(mRouteCtl, "SPK");
+		}
+	}
+
 	bufsize = pcm_buffer_size(pcmOut);
 	usleep(10000);
 repeat:	
@@ -95,9 +164,48 @@ repeat:
 			goto fail;
 		}
 	}
-	
+
+	//close route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
+		if (mRouteCtl) {
+			mixer_ctl_select(mRouteCtl, "OFF");
+		}
+	}
+
 	pcm_close(pcmOut);
 	pcmOut = NULL;
+
+	//read HP state
+	HWFile = fopen("/sys/class/switch/h2w/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open headset state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		headsetState = mString[0] - '0';
+		fprintf(stderr, "headsetState %d\n", headsetState);
+	}
+
+	//read HDMI state
+	HWFile = fopen("/sys/class/switch/hdmi/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open hdmi state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		if (mString[0] - '0' == 1) {
+			fprintf(stderr, "HDMI is in\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_8000HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD1;
+		} else {
+			fprintf(stderr, "HDMI is out\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_44100HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD0;
+		}
+	}
 
 	pcmIn = pcm_open(inFlags);
 	if (!pcm_ready(pcmIn)) {
@@ -106,7 +214,18 @@ repeat:
 		pcmIn = NULL;
 		goto fail;
 	}
-	
+
+	//open route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Capture MIC Path", 0);
+		if (mRouteCtl) {
+			if (headsetState == 1)
+				mixer_ctl_select(mRouteCtl, "Hands Free Mic");
+			else
+				mixer_ctl_select(mRouteCtl, "Main Mic");
+		}
+	}
+
 	bufsize = pcm_buffer_size(pcmIn);
 	usleep(10000);
 	data = recData;
@@ -115,18 +234,57 @@ repeat:
 		calcAndDispRecAudioStrenth(data, bufsize);
 		data += bufsize;
 		dataLen += bufsize;
-		if(data + bufsize - recData >= 4*REC_DUR*44100)
+		if(data + bufsize - recData >= 4*REC_DUR*((inFlags & PCM_8000HZ) == 0 ? 44100 : 8000))
 		{
-			pcm_close(pcmIn);
-			pcmIn = NULL;
 			break;
 		}		
 	}
-	
-	if(data + bufsize - recData < 4*REC_DUR*44100)
+
+	pcm_close(pcmIn);
+	pcmIn = NULL;
+	//close route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Capture MIC Path", 0);
+		if (mRouteCtl) {
+			mixer_ctl_select(mRouteCtl, "MIC OFF");
+		}
+	}
+
+	if(data + bufsize - recData < 4*REC_DUR*((inFlags & PCM_8000HZ) == 0 ? 44100 : 8000))
 	{
 			fprintf(stderr,"the pcmIn could not be read\n");
 			goto fail;
+	}
+
+	//read HP state
+	HWFile = fopen("/sys/class/switch/h2w/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open headset state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		headsetState = mString[0] - '0';
+		fprintf(stderr, "headsetState %d\n", headsetState);
+	}
+
+	//read HDMI state
+	HWFile = fopen("/sys/class/switch/hdmi/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open hdmi state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		if (mString[0] - '0' == 1) {
+			fprintf(stderr, "HDMI is in\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_8000HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD1;
+		} else {
+			fprintf(stderr, "HDMI is out\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_44100HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD0;
+		}
 	}
 
 	pcmOut = pcm_open(outFlags);
@@ -136,13 +294,26 @@ repeat:
 		pcmOut = NULL;
 		goto fail;
 	}
-	
+
+	//open route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
+		if (mRouteCtl) {
+			if (headsetState == 2)
+				mixer_ctl_select(mRouteCtl, "HP_NO_MIC");
+			else if (headsetState == 1)
+				mixer_ctl_select(mRouteCtl, "HP");
+			else
+				mixer_ctl_select(mRouteCtl, "SPK");
+		}
+	}
+
 	bufsize = pcm_buffer_size(pcmOut);
 	usleep(10000);
 	data = recData;
 	while (!pcm_write(pcmOut, data, bufsize)) {
 		data += bufsize;
-		if(data + bufsize - recData >= 4*REC_DUR*44100)
+		if(data + bufsize - recData >= 4*REC_DUR*((inFlags & PCM_8000HZ) == 0 ? 44100 : 8000))
 		{
 			fprintf(stderr,"now goto repeat\n");
 			goto repeat;
@@ -151,6 +322,21 @@ repeat:
 	fprintf(stderr,"the pcmOut could not write record data ,will go to fail\n");
 	
 fail:
+	//close route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
+		if (mRouteCtl) {
+			mixer_ctl_select(mRouteCtl, "OFF");
+		}
+
+		mRouteCtl = mixer_get_control(mMixer, "Capture MIC Path", 0);
+		if (mRouteCtl) {
+			mixer_ctl_select(mRouteCtl, "MIC OFF");
+		}
+	}
+
+	if (mMixer)
+		mixer_close(mMixer);
 	if(pcmIn)
 		pcm_close(pcmIn);
 	if(pcmOut)
@@ -172,6 +358,59 @@ void* rec_play_test_2(void *argv)
 	unsigned outFlags = PCM_OUT;
 	unsigned flags =  PCM_STEREO;
 
+	struct mixer*   mMixer = NULL;
+	struct mixer_ctl* mRouteCtl = NULL;
+	char mString[10] = "";
+	static FILE * HWFile;
+	int headsetState = 0;
+	unsigned isNeedChangeRate = 0;
+
+	//read codec id
+	HWFile = fopen("/sys/devices/platform/soc-audio/sound/card0/id", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open sound card0 id error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		if (strncmp("RKRK616", mString, 7) == 0) {
+			fprintf(stderr, "sound card0 is RK616, audio capture uses rate change.\n");
+			isNeedChangeRate = 1;
+		} else {
+			isNeedChangeRate = 0;
+		}
+	}
+
+	//read HP state
+	HWFile = fopen("/sys/class/switch/h2w/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open headset state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		headsetState = mString[0] - '0';
+		fprintf(stderr, "headsetState %d\n", headsetState);
+	}
+
+	//read HDMI state
+	HWFile = fopen("/sys/class/switch/hdmi/state", "rt");
+	if (!HWFile) {
+		fprintf(stderr, "Open hdmi state error!\n");
+	} else {
+		fread(mString, sizeof(char), sizeof(mString), HWFile);
+		fclose(HWFile);
+		if (mString[0] - '0' == 1) {
+			fprintf(stderr, "HDMI is in\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_8000HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD1;
+		} else {
+			fprintf(stderr, "HDMI is out\n");
+			if (isNeedChangeRate)
+				inFlags = (~PCM_RATE_MASK & inFlags) | PCM_44100HZ;
+			outFlags = (~PCM_CARD_MASK & outFlags) | PCM_CARD0;
+		}
+	}
+
 	flags |= (AUDIO_HW_OUT_PERIOD_MULT - 1) << PCM_PERIOD_SZ_SHIFT;
 	flags |= (AUDIO_HW_OUT_PERIOD_CNT - PCM_PERIOD_CNT_MIN)<< PCM_PERIOD_CNT_SHIFT;
 
@@ -190,6 +429,29 @@ void* rec_play_test_2(void *argv)
 	goto fail;
 	}
 
+	//open route
+	if (!mMixer)
+		mMixer = mixer_open();
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
+		if (mRouteCtl) {
+			if (headsetState == 2)
+				mixer_ctl_select(mRouteCtl, "HP_NO_MIC");
+			else if (headsetState == 1)
+				mixer_ctl_select(mRouteCtl, "HP");
+			else
+				mixer_ctl_select(mRouteCtl, "SPK");
+		}
+
+		mRouteCtl = mixer_get_control(mMixer, "Capture MIC Path", 0);
+		if (mRouteCtl) {
+			if (headsetState == 1)
+				mixer_ctl_select(mRouteCtl, "Hands Free Mic");
+			else
+				mixer_ctl_select(mRouteCtl, "Main Mic");
+		}
+	}
+
 	bufsize = pcm_buffer_size(pcmIn);
 	data = malloc(bufsize);
 	if (!data) {
@@ -206,6 +468,20 @@ void* rec_play_test_2(void *argv)
 	}
 
 	fail:
+	//close route
+	if (mMixer) {
+		mRouteCtl = mixer_get_control(mMixer, "Playback Path", 0);
+		if (mRouteCtl) {
+			mixer_ctl_select(mRouteCtl, "OFF");
+		}
+
+		mRouteCtl = mixer_get_control(mMixer, "Capture MIC Path", 0);
+		if (mRouteCtl) {
+			mixer_ctl_select(mRouteCtl, "MIC OFF");
+		}
+	}
+	mixer_close(mMixer);
+	mMixer = NULL;
 	pcm_close(pcmIn);
 	pcm_close(pcmOut);
 	return 0;

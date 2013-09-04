@@ -437,10 +437,15 @@ struct pcm *pcm_open(unsigned flags)
     if (!pcm)
         return &bad_pcm;
 
+__open_again:
+
     if (flags & PCM_IN) {
         dname = "/dev/snd/pcmC0D0c";
     } else {
-        dname = "/dev/snd/pcmC0D0p";
+        if (flags & PCM_CARD1)
+            dname = "/dev/snd/pcmC1D0p";
+        else
+            dname = "/dev/snd/pcmC0D0p";
     }
 
     LOGV("pcm_open() period sz multiplier %d",
@@ -454,6 +459,11 @@ struct pcm *pcm_open(unsigned flags)
     pcm->fd = open(dname, O_RDWR|O_CLOEXEC);
     if (pcm->fd < 0) {
         oops(pcm, errno, "cannot open device '%s'", dname);
+        if (flags & PCM_CARD1) {
+            LOGV("Open sound card1 for HDMI error, open sound card0");
+            flags &= ~PCM_CARD1;
+            goto __open_again;
+        }
         return pcm;
     }
 
@@ -481,8 +491,11 @@ struct pcm *pcm_open(unsigned flags)
     param_set_int(&params, SNDRV_PCM_HW_PARAM_CHANNELS,
                   (flags & PCM_MONO) ? 1 : 2);
     param_set_int(&params, SNDRV_PCM_HW_PARAM_PERIODS, period_cnt);
-    param_set_int(&params, SNDRV_PCM_HW_PARAM_RATE, 44100);
-	
+    if (flags & PCM_8000HZ) {
+        LOGD("set audio capture 8KHz");
+        param_set_int(&params, SNDRV_PCM_HW_PARAM_RATE, 8000);
+    } else
+        param_set_int(&params, SNDRV_PCM_HW_PARAM_RATE, 44100);
 
     if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_PARAMS, &params)) {
         oops(pcm, errno, "cannot set hw params");
