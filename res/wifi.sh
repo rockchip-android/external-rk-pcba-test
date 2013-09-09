@@ -9,6 +9,7 @@ module_path_mtPrealloc7601=/res/mtprealloc7601Usta.ko
 module_path_8723au=/res/8723au.ko
 module_path_8723as=/res/8723as.ko
 module_path_wlan=/res/wlan.ko
+module_path_esp8089=/res/esp8089.ko
 result_file=/data/scan_result.txt
 result_file2=/data/scan_result2.txt
 chip_type_path=/sys/class/rkwifi/chip
@@ -70,6 +71,10 @@ fi
 if busybox cat $chip_type_path | busybox grep RTL8723AS; then
   module_path=$module_path_8723as
 fi  
+
+if busybox cat $chip_type_path | busybox grep ESP8089; then
+  module_path=$module_path_esp8089
+fi
 
 if busybox cat $version_path | busybox grep 3.0.36+; then
   echo "kernel version 3.0.36+"
