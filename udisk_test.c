@@ -59,6 +59,8 @@ void * udisk_test(void * argv)
     else
         ui_print_xy_rgba(0,y,0,0,255,255,"%s:[%s]\n",PCBA_UCARD,PCBA_FAILED);
 
+        fclose(fp);
+
 	return argv;
 	
 }

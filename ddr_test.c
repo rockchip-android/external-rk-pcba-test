@@ -67,15 +67,18 @@ float get_ddr_msg(int state)
         len = fread(buf, 1,sizeof(buf), fp);
         if(len<=0)
         {
-                printf("%s open err\r\n",__FUNCTION__);
+                printf("%s read err\r\n",__FUNCTION__);
+                fclose(fp);
                 return -1;
         }
 	
 	ddr_used = get_data(buf,"Mem:");
 	ddr_free = get_data(buf,"used,");
 	
-	if(ddr_free == 0 || ddr_used ==0)
+	if(ddr_free == 0 || ddr_used ==0) {
+                fclose(fp);
 		return -1;
+        }
   
         fclose(fp);
 

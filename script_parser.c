@@ -713,6 +713,7 @@ char * parse_script(const char *name)
     if (buf == NULL) {
         db_error("script: allocate memory for script data failed(%s)\n", 
                 strerror(errno));
+        fclose(fscript);
         return NULL;
     }
 

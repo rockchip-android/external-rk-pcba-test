@@ -456,14 +456,15 @@ void* rec_play_test_2(void *argv)
 	data = malloc(bufsize);
 	if (!data) {
 	fprintf(stderr,"could not allocate %d bytes\n", bufsize);
-	return -1;
+	return 0;
 	}
 
 	while (!pcm_read(pcmIn, data, bufsize, 1)) {
 	calcAndDispRecAudioStrenth(data, bufsize);
 	if (pcm_write(pcmOut, data, bufsize)) {
 	fprintf(stderr,"could not write %d bytes\n", bufsize);
-	return -1;
+        free(data);
+	return 0;
 	}
 	}
 

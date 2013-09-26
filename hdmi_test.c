@@ -105,6 +105,7 @@ static void hdmi_audio_test(char *filename)
 	if (!pcm_ready(pcmOut)) {
 		pcm_close(pcmOut);
 		pcmOut = NULL;
+                fclose(fp);
 		return;
 	}
 
@@ -114,6 +115,7 @@ static void hdmi_audio_test(char *filename)
         LOG("Unable to allocate %d bytes\n", bufsize);
         free(buffer);
         pcm_close(pcmOut);
+        fclose(fp);
         return;
     }
 

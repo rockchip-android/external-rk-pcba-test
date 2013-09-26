@@ -7,7 +7,7 @@
 
 void* screen_test(void *argc)
 {
-	struct testcase_info *tc_info = malloc(sizeof(struct testcase_info));
+	struct testcase_info *tc_info = (struct tstcase_info *)argc;//malloc(sizeof(struct testcase_info));
 	int x =  gr_fb_width() >> 1;;
 	int y = (gr_fb_height()*2)/3;
 	int w =  gr_fb_width() >> 1;

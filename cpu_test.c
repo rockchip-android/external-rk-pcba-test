@@ -128,6 +128,7 @@ int get_curl_freq(char *patch)
 	if(len<=0)
 	{	
 		printf("%s open err\r\n",__FUNCTION__);
+                fclose(fp);
 		return 0;
 	}
 	
@@ -198,6 +199,7 @@ int get_freq_table(CPU_FREQ *cpu_freq, char *patch)
 	if(len<=0)
 	{	
 		printf("%s read err\r\n",__FUNCTION__);
+                fclose(fp);
 		return 0;
 	}
 
@@ -451,6 +453,7 @@ int get_cpu_info()
         if(len<=0)
         {
                 printf("%s open err\r\n",__FUNCTION__);
+                fclose(fp);
                 return 0;
         }
 
@@ -459,6 +462,7 @@ int get_cpu_info()
         if(p2 == NULL)
         {
                 printf("%s no find  nice\r\n",__FUNCTION__);
+                fclose(fp);
                 return 0;
         }
 
@@ -508,6 +512,7 @@ int get_boot_mode()
         if(len<=0)
         {
                 printf("%s open err\r\n",__FUNCTION__);
+                fclose(fp);
                 return 0;
         }
 
@@ -516,6 +521,7 @@ int get_boot_mode()
         if(p2 == NULL)
         {
                 printf("%s no find \r\n",__FUNCTION__);
+                fclose(fp);
                 return 0;
         }
 
