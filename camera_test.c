@@ -42,6 +42,8 @@ static int cam_id = 0;
 static int camera_x=0,camera_y=0,camera_w=0,camera_h=0,camera_num=0;
 static struct testcase_info *tc_info = NULL;
 
+pthread_t camera_tid;
+ 
 int Camera_Click_Event(int x,int y)
 {	
 	struct list_head *pos;
@@ -67,7 +69,8 @@ int Camera_Click_Event(int x,int y)
 		
 		printf("Camera_Click_Event : change \r\n");	
 		stopCameraTest();
-		startCameraTest();
+//		usleep(200000);
+		pthread_create(&camera_tid, NULL, startCameraTest, NULL); 
 	}
 		
 	return 0;
@@ -636,8 +639,8 @@ void * camera_test(void *argc)
 		camera_num = num;	
 	}
 
-	startCameraTest();
-	
+	pthread_create(&camera_tid, NULL, startCameraTest, NULL); 
+		
 	return argc;
 }
 

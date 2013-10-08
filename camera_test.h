@@ -50,4 +50,5 @@ extern void* camera_test(void *argc);
 extern int stopCameraTest();
 extern void finishCameraTest();
 extern int Camera_Click_Event(int x,int y);
+extern int startCameraTest();
 #endif
