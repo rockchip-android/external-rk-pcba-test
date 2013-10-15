@@ -75,14 +75,15 @@ if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
     cp device/rockchip/$TARGET_PRODUCT/wlan.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
     fi
 
-	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko" ] ; then
-	cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko $PRODUCT_OUT/recovery/root/res/
-	fi
-	
 	if [ ! -e "$PRODUCT_OUT/recovery/root/system/lib/" ] ; then
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/modules/
 	fi
+	
+	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko" ] ; then
+	cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko $PRODUCT_OUT/recovery/root/system/lib/modules/
+	fi
+
 
 	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/init_data.conf" ] ; then
 	cp device/rockchip/$TARGET_COMMON/wifi/lib/init_data.conf  $PRODUCT_OUT/recovery/root/system/lib/modules/
@@ -202,13 +203,13 @@ else
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/wlan.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
     fi
 
-	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko" ] ; then
-	cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko $PRODUCT_OUT/recovery/root/res/
-	fi
-
 	if [ ! -e "$PRODUCT_OUT/recovery/root/system/lib/" ] ; then
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/modules/
+	fi
+
+	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko" ] ; then
+	cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko $PRODUCT_OUT/recovery/root/system/lib/modules/
 	fi
 
 
