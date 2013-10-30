@@ -69,7 +69,7 @@ int Camera_Click_Event(int x,int y)
 		
 		printf("Camera_Click_Event : change \r\n");	
 		stopCameraTest();
-//		usleep(200000);
+		usleep(100000);
 		pthread_create(&camera_tid, NULL, startCameraTest, NULL); 
 	}
 		
