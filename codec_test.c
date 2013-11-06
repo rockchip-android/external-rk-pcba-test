@@ -498,7 +498,8 @@ void rec_volum_display(void)
 		usleep(300000);
 		volume = 20 + ((maxRecPcm*100)/32768);
 		if(volume > 100) volume = 100;
-		ui_print_xy_rgba(0,y_offset,0,255,0,255,"%s:[%s:%d%%]\n",PCBA_RECORD,PCBA_VOLUME,volume);
+		//ui_print_xy_rgba(0,y_offset,0,255,0,255,"%s:[%s:%d%%]\n",PCBA_RECORD,PCBA_VOLUME,volume);
+		ui_display_sync(0,y_offset,0,255,0,255,"%s:[%s:%d%%]\n",PCBA_RECORD,PCBA_VOLUME,volume);
 		//printf("---- display maxRecPcm = %d\n", maxRecPcm);
 	}
 }

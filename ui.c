@@ -119,6 +119,7 @@ static pthread_mutex_t key_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t key_queue_cond = PTHREAD_COND_INITIALIZER;
 static int key_queue[256], key_queue_len = 0;
 static volatile char key_pressed[KEY_MAX + 1];
+static int touch_tp_state = 0;
 
 // Clear the screen and draw the currently selected background icon (if any).
 // Should only be called with gUpdateMutex locked.
@@ -486,6 +487,8 @@ static void *input_thread(void *cookie)
 #ifdef _EVENT_LOGGING
                     LOGE("TOUCH_RELEASE: %d,%d\n", x, y);
 #endif
+			touch_tp_state = 0;
+
 			start_manual_test_item(x,y);
 
                     NotifyTouch(TOUCH_RELEASE, x, y);
@@ -516,6 +519,7 @@ static void *input_thread(void *cookie)
                 {
                     if (state == 0)
                     {
+			touch_tp_state = 1;
 #ifdef _EVENT_LOGGING
                         LOGE("TOUCH_DRAG: %d,%d\n", x, y);
 #endif
@@ -564,7 +568,10 @@ static void *input_thread(void *cookie)
 				}
 			}
         }
+	//printf("tp touch : state : %d\r\n",state);
+	//touch_tp_state = state;
     }
+	
 
     return NULL;
 }
@@ -828,6 +835,21 @@ void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char* fm
     }
     pthread_mutex_unlock(&gUpdateMutex);
 }
+
+void ui_display_sync(int t_col,int t_row,int r,int g,int b,int a,const char* fmt, ...)
+{
+	char buf[512];
+	va_list ap;
+
+	if(touch_tp_state == 0)
+	{
+		va_start(ap, fmt);
+		vsnprintf(buf, 512, fmt, ap);
+		va_end(ap);
+		ui_print_xy_rgba(t_col,t_row,r,g,b,a,buf);
+	}
+}
+
 
 void ui_print_overwrite(const char *fmt, ...)
 {

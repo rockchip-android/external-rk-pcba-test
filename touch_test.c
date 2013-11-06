@@ -22,6 +22,7 @@ int draw_dot(int x, int y)
 
 //	LOGE("draw (%d,%d)\n", x, y);
 	pthread_mutex_lock(&gUpdateMutex);
+//	drawline(0,0,255,255,x,y,2,2);
 	gr_color(0, 0, 255, 255);
 	gr_fill(x, y, 2, 2);
 	//gr_flip();

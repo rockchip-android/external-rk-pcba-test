@@ -42,6 +42,7 @@ static const char *SDCARD_ROOT = "/sdcard";
 void ui_init();
 void ui_print_init(void);
 void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char * fmt,...);
+void ui_display_sync(int t_col,int t_row,int r,int g,int b,int a,const char* fmt,...);
 void FillColor(int r,int g,int b,int a,int left,int top,int width,int height);
 
 extern int notError;
