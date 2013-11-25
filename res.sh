@@ -4,6 +4,7 @@ TARGET_PRODUCT=$1
 PRODUCT_OUT=$2
 TARGET_BOARD_PLATFORM=$3
 TARGET_COMMON=common
+PCBA_PATH=external/rk-pcba-test
 if [ $TARGET_BOARD_PLATFORM = "rk30xx" ] || [ $TARGET_BOARD_PLATFORM = "rk30xxb" ] || [ $TARGET_BOARD_PLATFORM = "rk3188" ] || [ $TARGET_BOARD_PLATFORM = "rk3026" ]; then
     MODULE="modules_smp"
 elif [ $TARGET_BOARD_PLATFORM = "rk2928" ]; then
@@ -261,4 +262,25 @@ else
     if [ -e "device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au" ] ; then
     cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au/rtk8723* $PRODUCT_OUT/recovery/root/system/etc/firmware
     fi
+
+    ############################################### bin/lib ##################################################
+
+    cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/system/bin/
+
+    if [ -e "$PRODUCT_OUT/obj/lib/libc.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libc.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libcutils.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libcutils.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/liblog.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/liblog.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libm.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libm.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libstdc++.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libstdc++.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+
 fi
