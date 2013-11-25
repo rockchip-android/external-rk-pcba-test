@@ -53,6 +53,7 @@ enum WIFI_CHIP_TYPE_LIST{
   RDA587x,
   RDA5990,
   RTK8723AS,
+  RTK8723BS,
   RTK8723AU,
 };
 
@@ -391,6 +392,78 @@ out:
     return ret;
 }
 
+int check_bluedroid_test()
+{
+	FILE *fp;
+	
+	fp = fopen("/data/bt_success.txt", "r");
+	if(fp != NULL) {
+		printf("check_bluedroid_test: success.\n");
+		fclose(fp);
+		fp = NULL;
+		return 1;
+	}
+	
+	fp = fopen("/data/bt_fail.txt", "r");
+	if(fp != NULL) {
+		printf("check_bluedroid_test: fail.\n");
+		fclose(fp);
+		fp = NULL;
+		return -1;
+	}	
+	
+	return 0; // wait
+}
+
+int bluedroid_test()
+{
+	int ret, counts = 15;
+	
+    if (chmod(BTHWCTL_DEV_NAME, 0660) < 0) {
+        printf("Error changing permissions of %s to 0660: %s",
+                BTHWCTL_DEV_NAME, strerror(errno));
+        unlink(BTHWCTL_DEV_NAME);
+    }
+    
+    if (chmod("/sys/class/rfkill/rfkill0/state", 0775) < 0) {
+        printf("Error changing permissions of %s to 0660: %s",
+                "/sys/class/rfkill/rfkill0/state", strerror(errno));
+        unlink("/sys/class/rfkill/rfkill0/state");
+    }
+
+    if (chmod("/sys/class/rfkill/rfkill0/type", 0775) < 0) {
+        printf("Error changing permissions of %s to 0660: %s",
+                "/sys/class/rfkill/rfkill0/type", strerror(errno));
+        unlink("/sys/class/rfkill/rfkill0/type");
+    }
+
+    if (chmod("/data", 0775) < 0) {
+        printf("Error changing permissions of %s to 0660: %s",
+                "/data", strerror(errno));
+        unlink("/data");
+    }
+    
+    printf("bluedroid_test: start bdt test:\n");
+	
+	ret = __system("/system/bin/bdt &");
+    if(ret != 0) {
+    	printf("bluedroid_test: start bdt failed.\n");
+    	return -1;
+    }
+    
+    while(counts-- > 0) {
+    	ret = check_bluedroid_test();
+    	if(ret == 1) {
+    		break;
+    	} else if(ret == -1) {
+    		break;
+    	}
+    	usleep(1000000);
+    }
+    
+    return ret;
+}
+
 static char bt_chip[64] = "";
 
 void *bt_test(void *argv)
@@ -422,6 +495,8 @@ void *bt_test(void *argv)
 		chip_type = RDA5990; 
 	} else if(strcmp(dt, "rtk8723as") == 0) {
 		chip_type = RTK8723AS; 
+	} else if(strcmp(dt, "rtk8723bs") == 0) {
+		chip_type = RTK8723BS; 
 	} else if(strcmp(dt, "rtk8723au") == 0) {
 		chip_type = RTK8723AU; 
 	} else {
@@ -450,6 +525,17 @@ void *bt_test(void *argv)
 	}
 	
 	printf("bluetooth_test main function started: chip_type = %d\n", chip_type);
+	
+	if(chip_type == RTK8723BS) {
+		ret = bluedroid_test();
+		if(ret == 1) {
+			printf("bluetooth_test success.\n");
+			goto success;
+		} else {
+			printf("bluetooth_test fail.\n");
+			goto fail;
+		}
+	}
 	
 	if(chip_type == RTK8723AU) {
 		int ret;

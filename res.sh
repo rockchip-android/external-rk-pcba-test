@@ -5,6 +5,7 @@ PRODUCT_OUT=$2
 TARGET_BOARD_PLATFORM=$3
 TARGET_COMMON=common
 PCBA_PATH=external/rk-pcba-test
+BT_BLUEDROID=false
 if [ $TARGET_BOARD_PLATFORM = "rk30xx" ] || [ $TARGET_BOARD_PLATFORM = "rk30xxb" ] || [ $TARGET_BOARD_PLATFORM = "rk3188" ] || [ $TARGET_BOARD_PLATFORM = "rk3026" ]; then
     MODULE="modules_smp"
 elif [ $TARGET_BOARD_PLATFORM = "rk2928" ]; then
@@ -234,6 +235,10 @@ else
     if [ ! -e "$PRODUCT_OUT/recovery/root/etc/firmware" ] ; then
     mkdir $PRODUCT_OUT/recovery/root/etc/firmware/
     fi
+    
+    if [ ! -e "$PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt" ] ; then
+    mkdir $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/
+    fi
 
     if [ -e "external/wlan_loader/firmware/" ] ; then
     cp external/wlan_loader/firmware/ $PRODUCT_OUT/recovery/root/system/etc/ -a
@@ -263,8 +268,13 @@ else
     cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au/rtk8723* $PRODUCT_OUT/recovery/root/system/etc/firmware
     fi
 
-    ############################################### bin/lib ##################################################
+    if [ -e "device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs" ] ; then
+    cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs/rtl8723b_fw $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/rtlbt_fw
+    cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs/rtl8723b_config $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/rtlbt_config
+    fi
 
+    ############################################### bin/lib ##################################################
+    
     cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/system/bin/
 
     if [ -e "$PRODUCT_OUT/obj/lib/libc.so" ] ; then
@@ -282,5 +292,51 @@ else
     if [ -e "$PRODUCT_OUT/obj/lib/libstdc++.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libstdc++.so $PRODUCT_OUT/recovery/root/system/lib/
     fi
-
+if [ $BT_BLUEDROID = "true" ] ; then
+    if [ -e "$PRODUCT_OUT/obj/lib/bluetooth.default.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/bluetooth.default.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbluetooth_mtk.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbluetooth_mtk.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-hci.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-hci.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-utils.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-utils.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/vendor/lib/libbt-vendor.so" ] ; then
+    cp $PRODUCT_OUT/obj/vendor/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libcorkscrew.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libcorkscrew.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libgccdemangle.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libgccdemangle.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libhardware_legacy.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libhardware_legacy.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libhardware.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libhardware.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libnetutils.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libnetutils.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libpower.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libpower.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libutils.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libutils.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libwpa_client.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libwpa_client.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libz.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libz.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+fi
 fi
