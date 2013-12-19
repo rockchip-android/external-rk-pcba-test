@@ -3,7 +3,7 @@ ifeq ($(TARGET_ARCH),arm)
 
 LOCAL_PATH := $(call my-dir)
 
-NO_CODEC_TEST_BIN=true
+NO_CODEC_TEST_BIN=false
 ifneq ($(NO_CODEC_TEST_BIN), true)
 include $(CLEAR_VARS)
 LOCAL_MODULE := codec_test
@@ -19,7 +19,7 @@ LOCAL_SRC_FILES := \
 
 
 LOCAL_MODULE_TAGS := eng
-LOCAL_STATIC_LIBRARIES := libc libcutils
+LOCAL_STATIC_LIBRARIES := libc libcutils liblog
 LOCAL_SHARED_LIBRARIES := 
 
 
@@ -183,7 +183,7 @@ LOCAL_STATIC_LIBRARIES += libm
 LOCAL_STATIC_LIBRARIES += libminziptwrp libunz libmincrypt
 LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp libbluetooth
 LOCAL_STATIC_LIBRARIES += libz libc libstlport_static libcutils libstdc++
-LOCAL_STATIC_LIBRARIES += libmtdutils 
+LOCAL_STATIC_LIBRARIES += libmtdutils liblog
 
 
 
