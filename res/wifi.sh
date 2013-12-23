@@ -20,6 +20,7 @@ chip_broadcom=false
 interface_up=true
 version=.3.0.36+
 mt5931_kitkat=false
+android_kitkat=false
 
 jmax=3
 
@@ -89,6 +90,11 @@ if busybox ls /dev/wmtWifi | busybox grep wmtWifi; then
   mt5931_kitkat=true
 fi
 
+if busybox ifconfig wlan0; then
+  echo "android_kitkat=true"
+  android_kitkat=true
+fi
+
 echo "touch $result_file"
 busybox touch $result_file
 
@@ -101,7 +107,9 @@ do
     if [ $mt5931_kitkat = "true" ]; then
         echo 1 > /dev/wmtWifi
     else
+      if [ $android_kitkat = "false" ]; then
         insmod "$module_path"
+      fi
     fi
     if [ $? -ne 0 ]; then
         echo "insmod failed"
@@ -137,7 +145,9 @@ do
     if [ $mt5931_kitkat = "true" ]; then
         echo 0 > /dev/wmtWifi
     else
+      if [ $android_kitkat = "false" ]; then
         rmmod wlan
+      fi
     fi
     busybox sleep 1
     
