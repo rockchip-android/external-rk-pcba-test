@@ -19,6 +19,7 @@ module_path=$module_path_wlan
 chip_broadcom=false
 interface_up=true
 version=.3.0.36+
+mt5931_kitkat=false
 
 jmax=3
 
@@ -83,6 +84,11 @@ if busybox cat $version_path | busybox grep 3.0.36+; then
   fi
 fi
 
+if busybox ls /dev/wmtWifi | busybox grep wmtWifi; then
+  echo "mt5931_kitkat=true"
+  mt5931_kitkat=true
+fi
+
 echo "touch $result_file"
 busybox touch $result_file
 
@@ -92,7 +98,11 @@ echo "get scan results"
 while [ $j -lt $jmax ]; 
 do
     echo "insmod $module_path"
-    insmod "$module_path"
+    if [ $mt5931_kitkat = "true" ]; then
+        echo 1 > /dev/wmtWifi
+    else
+        insmod "$module_path"
+    fi
     if [ $? -ne 0 ]; then
         echo "insmod failed"
         exit 0
@@ -124,7 +134,11 @@ do
     fi
 
     echo "rmmod wlan"
-    rmmod wlan
+    if [ $mt5931_kitkat = "true" ]; then
+        echo 0 > /dev/wmtWifi
+    else
+        rmmod wlan
+    fi
     busybox sleep 1
     
     j=$((j+1))

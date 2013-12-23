@@ -252,6 +252,10 @@ else
     cp external/wlan_loader/firmware/WIFI_RAM_CODE $PRODUCT_OUT/recovery/root/etc/firmware/WIFI_RAM_CODE
     fi
 
+    if [ -e "hardware/mediatek/wlan/mt5931_6622/firmware/WIFI_RAM_CODE_MT5931" ] ; then
+    cp hardware/mediatek/wlan/mt5931_6622/firmware/WIFI_RAM_CODE_MT5931 $PRODUCT_OUT/recovery/root/etc/firmware/WIFI_RAM_CODE_MT5931
+    fi
+
     if [ -e "device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko" ] ; then
     cp device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko $PRODUCT_OUT/recovery/root/
     fi
