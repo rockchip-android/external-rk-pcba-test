@@ -6,10 +6,10 @@ TARGET_BOARD_PLATFORM=$3
 TARGET_COMMON=common
 PCBA_PATH=external/rk-pcba-test
 BT_BLUEDROID=false
-if [ $TARGET_BOARD_PLATFORM = "rk30xx" ] || [ $TARGET_BOARD_PLATFORM = "rk30xxb" ] || [ $TARGET_BOARD_PLATFORM = "rk3188" ] || [ $TARGET_BOARD_PLATFORM = "rk3026" ]; then
-    MODULE="modules_smp"
-elif [ $TARGET_BOARD_PLATFORM = "rk2928" ]; then
+if [ $TARGET_BOARD_PLATFORM = "rk2928" ]; then
     MODULE="modules"
+else
+    MODULE="modules_smp"
 fi
 echo MODULE $MODULE
 if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
@@ -204,6 +204,10 @@ else
     if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/wlan.ko.3.0.36+" ] ; then
     cp device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/wlan.ko.3.0.36+ $PRODUCT_OUT/recovery/root/res/
     fi
+
+	if [ ! -e "$PRODUCT_OUT/recovery/root/system/" ] ; then
+	mkdir $PRODUCT_OUT/recovery/root/system/
+	fi
 
 	if [ ! -e "$PRODUCT_OUT/recovery/root/system/lib/" ] ; then
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/
