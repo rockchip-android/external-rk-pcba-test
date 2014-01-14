@@ -273,7 +273,7 @@ else
     fi
 
     if [ -e "device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au" ] ; then
-    cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au/rtk8723* $PRODUCT_OUT/recovery/root/system/etc/firmware
+    cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723au/* $PRODUCT_OUT/recovery/root/system/etc/firmware
     fi
 
     if [ -e "device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs" ] ; then
