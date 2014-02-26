@@ -502,6 +502,7 @@ void *bt_test(void *argv)
 		chip_type = RTK8723AU; 
     } else if(strcmp(dt, "bk3515") == 0) {
         chip_type = BK3515;
+		sleep(5);
 	} else {
 		if (bt_get_chipname(bt_chip, 63) != 0) {
 			
