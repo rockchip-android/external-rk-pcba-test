@@ -49,13 +49,14 @@ enum WIFI_CHIP_TYPE_LIST{
 	RK903,
 	MT6620,
 	RT5370,
-  MT5931,
-  RDA587x,
-  RDA5990,
-  RTK8723AS,
-  RTK8723BS,
-  RTK8723AU,
-  BK3515,
+    MT5931,
+    RDA587x,
+    RDA5990,
+    RTK8723AS,
+    RTK8723BS,
+    RTK8723AU,
+    RTK8723BU,
+    BK3515,
 };
 
 static int rfkill_id = -1;
@@ -405,20 +406,20 @@ int check_bluedroid_test()
 		return 1;
 	}
 	
-	fp = fopen("/data/bt_fail.txt", "r");
-	if(fp != NULL) {
-		printf("check_bluedroid_test: fail.\n");
-		fclose(fp);
-		fp = NULL;
-		return -1;
-	}	
+	//fp = fopen("/data/bt_fail.txt", "r");
+	//if(fp != NULL) {
+	//	printf("check_bluedroid_test: fail.\n");
+	//	fclose(fp);
+	//	fp = NULL;
+	//	return -1;
+	//}	
 	
 	return 0; // wait
 }
 
 int bluedroid_test()
 {
-	int ret, counts = 15;
+	int ret, counts = 10;
 	
     if (chmod(BTHWCTL_DEV_NAME, 0660) < 0) {
         printf("Error changing permissions of %s to 0660: %s",
@@ -443,6 +444,11 @@ int bluedroid_test()
                 "/data", strerror(errno));
         unlink("/data");
     }
+
+    if (chmod("/dev/ttyS0", 0775) < 0) {
+        printf("Error changing permissions of %s to 0775 %s",
+                "/dev/ttyS0", strerror(errno));
+    }
     
     printf("bluedroid_test: start bdt test:\n");
 	
@@ -456,10 +462,12 @@ int bluedroid_test()
     	ret = check_bluedroid_test();
     	if(ret == 1) {
     		break;
-    	} else if(ret == -1) {
-    		break;
     	}
     	usleep(1000000);
+    }
+    if (counts == 0) {
+        printf("bluedroid_test: waitting for bt test ready timeout!\n");
+        ret = -1;
     }
     
     return ret;
@@ -500,6 +508,8 @@ void *bt_test(void *argv)
 		chip_type = RTK8723BS; 
 	} else if(strcmp(dt, "rtk8723au") == 0) {
 		chip_type = RTK8723AU; 
+	} else if(strcmp(dt, "rtk8723bu") == 0) {
+		chip_type = RTK8723BU; 
     } else if(strcmp(dt, "bk3515") == 0) {
         chip_type = BK3515;
 		sleep(5);
@@ -541,11 +551,15 @@ void *bt_test(void *argv)
 		}
 	}
 	
-	if(chip_type == RTK8723AU) {
+	if(chip_type == RTK8723AU || chip_type == RTK8723BU) {
 		int ret;
-		ret = __system("insmod /res/rtk_btusb.ko"); 
 		ret = __system("busybox dmesg | busybox grep 'hci_register_dev success'");
-		printf("ret = %d.\n", ret);
+		printf("a:ret = %d.\n", ret);
+        if (ret != 0) {
+		    ret = __system("insmod /res/rtk_btusb.ko"); 
+		    ret = __system("busybox dmesg | busybox grep 'hci_register_dev success'");
+        }
+		printf("b:ret = %d.\n", ret);
 		if(ret != 0) {
 			printf("bluetooth_test fail.\n");
 			goto fail;

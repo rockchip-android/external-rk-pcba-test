@@ -5,7 +5,7 @@ PRODUCT_OUT=$2
 TARGET_BOARD_PLATFORM=$3
 TARGET_COMMON=common
 PCBA_PATH=external/rk-pcba-test
-BT_BLUEDROID=false
+BT_BLUEDROID=true
 if [ $TARGET_BOARD_PLATFORM = "rk2928" ]; then
     MODULE="modules"
 else
