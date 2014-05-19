@@ -278,7 +278,8 @@ else
 
     if [ -e "device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs" ] ; then
     cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs/rtl8723b_fw $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/rtlbt_fw
-    cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs/rtl8723b_config $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/rtlbt_config
+    cp $PRODUCT_OUT/system/etc/firmware/rtlbt/rtlbt_config $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/rtlbt_config
+    #cp device/rockchip/common/bluetooth/realtek/bt/firmware/rtl8723bs/rtl8723b_config $PRODUCT_OUT/recovery/root/system/etc/firmware/rtlbt/rtlbt_config
     fi
 
     ############################################### bin/lib ##################################################
