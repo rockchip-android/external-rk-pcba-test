@@ -80,6 +80,7 @@ if [ ! -e "device/rockchip/$TARGET_COMMON/app" ] ; then
 	if [ ! -e "$PRODUCT_OUT/recovery/root/system/lib/" ] ; then
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/modules/
+	mkdir $PRODUCT_OUT/recovery/root/system/lib/hw/
 	fi
 	
 	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko" ] ; then
@@ -212,6 +213,7 @@ else
 	if [ ! -e "$PRODUCT_OUT/recovery/root/system/lib/" ] ; then
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/
 	mkdir $PRODUCT_OUT/recovery/root/system/lib/modules/
+	mkdir $PRODUCT_OUT/recovery/root/system/lib/hw/
 	fi
 
 	if [ -e "device/rockchip/$TARGET_COMMON/wifi/lib/$MODULE/esp8089.ko" ] ; then
@@ -303,7 +305,7 @@ else
     fi
 if [ $BT_BLUEDROID = "true" ] ; then
     if [ -e "$PRODUCT_OUT/obj/lib/bluetooth.default.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/bluetooth.default.so $PRODUCT_OUT/recovery/root/system/lib/
+    cp $PRODUCT_OUT/obj/lib/bluetooth.default.so $PRODUCT_OUT/recovery/root/system/lib/hw/
     fi
     if [ -e "$PRODUCT_OUT/obj/lib/libbluetooth_mtk.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libbluetooth_mtk.so $PRODUCT_OUT/recovery/root/system/lib/
@@ -347,5 +349,14 @@ if [ $BT_BLUEDROID = "true" ] ; then
     if [ -e "$PRODUCT_OUT/obj/lib/libz.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libz.so $PRODUCT_OUT/recovery/root/system/lib/
     fi
+    if [ ! -e "$PRODUCT_OUT/recovery/root/vendor/firmware" ] ; then
+    mkdir -p $PRODUCT_OUT/recovery/root/vendor/firmware
+    fi
+    cp -rf device/rockchip/$TARGET_COMMON/bluetooth/lib/firmware/* $PRODUCT_OUT/recovery/root/vendor/firmware/
+    if [ ! -e "$PRODUCT_OUT/recovery/root/etc/bluetooth" ] ; then
+    mkdir $PRODUCT_OUT/recovery/root/etc/bluetooth
+    fi
+    cp external/bluetooth/bluedroid/conf/bt_did.conf $PRODUCT_OUT/recovery/root/etc/bluetooth/
+    cp external/bluetooth/bluedroid/conf/bt_stack.conf $PRODUCT_OUT/recovery/root/etc/bluetooth/
 fi
 fi

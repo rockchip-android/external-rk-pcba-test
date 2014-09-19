@@ -41,6 +41,7 @@
 #define IOCTL_BT_DEV_POWER              _IO(BT_DEV_MAJOR_NUM, 100)
 
 enum WIFI_CHIP_TYPE_LIST{
+    BT_UNKNOWN = -1,
 	BCM4329 = 0,
 	RTL8188CU,
 	RTL8188EU,
@@ -451,8 +452,8 @@ int bluedroid_test()
     }
     
     printf("bluedroid_test: start bdt test:\n");
-	
-	ret = __system("/system/bin/bdt &");
+
+    ret = __system("/system/bin/bdt &");
     if(ret != 0) {
     	printf("bluedroid_test: start bdt failed.\n");
     	return -1;
@@ -475,21 +476,13 @@ int bluedroid_test()
 
 static char bt_chip[64] = "";
 
-void *bt_test(void *argv)
+int bt_test_bluez()
 {
     int dev_id = 0;
 	int sock = 0;
     int i = 0;
 	int ret = 0;
 	char dt[32] = {0};
-	struct testcase_info *tc_info = (struct testcase_info *)argv;
-	
-	/*remind ddr test*/
-	if(tc_info->y <= 0)
-		tc_info->y  = get_cur_print_y();	
-
-	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_BLUETOOTH,PCBA_TESTING);
-
 	chip_type = RK903; 
 	if(script_fetch("bluetooth", "chip_type", (int *)dt, 8) == 0) {
 		printf("script_fetch chip_type = %s.\n", dt);
@@ -572,7 +565,6 @@ void *bt_test(void *argv)
 	if(ret < 0){
 		printf("bluetooth_test main function fail to enable \n");
 		goto fail;
-		return 0;
 	}
 
 	dev_id = hci_get_route(NULL);
@@ -580,7 +572,6 @@ void *bt_test(void *argv)
 	if(dev_id < 0){
 		printf("bluetooth_test main function fail to get dev id\n");
 		goto fail;
-		return 0;
 	}
 	
 	printf("bluetooth_test main function hci_get_route dev_id=%d\n",dev_id);
@@ -589,7 +580,6 @@ void *bt_test(void *argv)
 	if(sock < 0){
 		printf("bluetooth_test main function fail to open bluetooth sock\n");
 		goto fail;
-		return 0;
 	}
 
 	printf("bluetooth_test main function hci_open_dev ok\n");
@@ -606,12 +596,167 @@ void *bt_test(void *argv)
 	}*/
 
 success:
-	ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
-	printf("bluetooth_test main function end\n");
-	return 0;
-	
+    printf("bluetooth_test main function end\n");
+    return 0;
+    
 fail:
-	ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_FAILED);
-	printf("bluetooth_test main function end\n");
+    printf("bluetooth_test main function end\n");
+    return -1;
+}
+
+#define LOG(x...)   printf("[BT_TEST] "x)
+
+static int get_chip_type()
+{
+	char dt[32] = {0};
+	chip_type = RK903; 
+	if(script_fetch("bluetooth", "chip_type", (int *)dt, 8) == 0) {
+		LOG("script_fetch chip_type = %s.\n", dt);
+	}
+	if(strcmp(dt, "rk903") == 0) {
+		chip_type = RK903; 
+	} else if(strcmp(dt, "mt6622") == 0) {
+		chip_type = MT5931; 
+	} else if(strcmp(dt, "rda587x") == 0) {
+		chip_type = RDA587x; 
+	} else if(strcmp(dt, "rda5990") == 0) {
+		chip_type = RDA5990; 
+	} else if(strcmp(dt, "rtk8723as") == 0) {
+		chip_type = RTK8723AS; 
+	} else if(strcmp(dt, "rtk8723bs") == 0) {
+		chip_type = RTK8723BS; 
+	} else if(strcmp(dt, "rtk8723au") == 0) {
+		chip_type = RTK8723AU; 
+	} else if(strcmp(dt, "rtk8723bu") == 0) {
+		chip_type = RTK8723BU; 
+    } else if(strcmp(dt, "bk3515") == 0) {
+        chip_type = BK3515;
+	} else {
+		if (bt_get_chipname(bt_chip, 63) != 0) {
+		    LOG("Can't read BT chip name\n");
+			chip_type = BT_UNKNOWN;
+		}
+		
+		if (!strcmp(bt_chip, "rk903_26M"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "rk903"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6210"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6330"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6476"))
+		    chip_type = RK903; 
+		else if (!strcmp(bt_chip, "ap6493"))
+		    chip_type = RK903; 
+		else {
+		    LOG("Not support BT chip, skip bt test.\n");
+			chip_type = BT_UNKNOWN;
+		}		
+	}
+	
+	LOG("chip type is: %d\n", chip_type);
+
+    return chip_type;
+}
+
+static void change_mode()
+{
+    if (chmod(BTHWCTL_DEV_NAME, 0660) < 0) {
+        LOG("Error changing permissions of %s to 0660: %s\n",
+                BTHWCTL_DEV_NAME, strerror(errno));
+        unlink(BTHWCTL_DEV_NAME);
+    }
+
+    if (chmod("/sys/class/rfkill/rfkill0/state", 0775) < 0) {
+        LOG("Error changing permissions of %s to 0660: %s\n",
+                "/sys/class/rfkill/rfkill0/state", strerror(errno));
+        unlink("/sys/class/rfkill/rfkill0/state");
+    }
+
+    if (chmod("/sys/class/rfkill/rfkill0/type", 0775) < 0) {
+        LOG("Error changing permissions of %s to 0660: %s\n",
+                "/sys/class/rfkill/rfkill0/type", strerror(errno));
+        unlink("/sys/class/rfkill/rfkill0/type");
+    }
+
+    if (chmod("/dev/ttyS0", 0775) < 0) {
+        LOG("Error changing permissions of %s to 0775 %s\n",
+                "/dev/ttyS0", strerror(errno));
+    }
+
+    LOG("Change mode finish\n");
+
+}
+
+static int bt_test_bluedroid()
+{
+    int ret = -1;
+    FILE *fp=NULL;
+    char buf[1024];
+
+    change_mode();
+
+    fp = popen("echo \"enable\ndisable\nquit\" | bdt", "r");
+    if (fp != NULL) {
+        int fd = fileno(fp);
+        int flags = fcntl(fd, F_GETFL, 0);
+        int len = 0;
+        int try = 10;
+        fcntl(fd, F_SETFL, flags|O_NONBLOCK);
+
+        LOG("running bdt for bluetooth test...\n");
+        while (try-->0) {
+            memset(buf, 0, 1024);
+            len=fread(buf, sizeof(char), sizeof(buf), fp);
+            if (len) {
+                LOG("read: %s\n", buf);
+                if (strstr(buf, "ADAPTER STATE UPDATED : ON")) {
+                    LOG("bt test success!\n");
+                    ret = 0;
+                    break;
+                }
+            }
+            LOG("wait %d\n", try);
+            sleep(1);
+        }
+        pclose(fp);
+        if (try<=0)
+            LOG("bt test timeout!\n");
+    } else
+        LOG("run bdt fail!\n");
+
+    return ret;
+}
+
+void *bt_test(void *argv)
+{
+	struct testcase_info *tc_info = (struct testcase_info *)argv;
+    int ret = 0;
+
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();
+
+	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_BLUETOOTH,PCBA_TESTING);
+
+    switch (get_chip_type()) {
+    case RK903:
+    case RTK8723BS:
+    case BK3515:
+        ret = bt_test_bluedroid();
+        break;
+    default:
+        ret = bt_test_bluez();
+        break;
+    }
+
+    if (ret==0)
+        ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
+    else
+        ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_FAILED);
+
 	return 0;
 }
+
+
