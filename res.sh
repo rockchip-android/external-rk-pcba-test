@@ -356,6 +356,7 @@ if [ $BT_BLUEDROID = "true" ] ; then
     if [ ! -e "$PRODUCT_OUT/recovery/root/etc/bluetooth" ] ; then
     mkdir $PRODUCT_OUT/recovery/root/etc/bluetooth
     fi
+    cp $PRODUCT_OUT/obj/EXECUTABLES/bdt_intermediates/bdt $PRODUCT_OUT/recovery/root/system/bin/
     cp external/bluetooth/bluedroid/conf/bt_did.conf $PRODUCT_OUT/recovery/root/etc/bluetooth/
     cp external/bluetooth/bluedroid/conf/bt_stack.conf $PRODUCT_OUT/recovery/root/etc/bluetooth/
 fi
