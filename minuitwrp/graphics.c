@@ -61,6 +61,11 @@
 const unsigned cw_en=10;
 // #define PRINT_SCREENINFO 1 // Enables printing of screen info to log
 
+ 
+#define SCREEN_FILE  "/sys/class/graphics/fb0/screen_info"
+unsigned int xres,yres;
+
+
 typedef struct {
     GGLSurface texture;
     unsigned char *cwidth;
@@ -100,6 +105,57 @@ static void print_fb_var_screeninfo()
 }
 #endif
 
+
+
+int get_screen_info (struct fb_var_screeninfo* lvi)
+{
+	FILE * pFile;
+	char mystring [32];
+	pFile = fopen (SCREEN_FILE, "r");
+	if (pFile == NULL)
+	{
+		printf("Error opening file");
+		return -1;
+	}
+	else 
+	{
+		if ( fgets (mystring , 32 , pFile) != NULL )
+		{
+			puts (mystring);
+			sscanf(mystring,"xres:%d",&xres);
+		}
+		else
+		{
+			close(pFile);
+			return -1;
+		}
+
+		if ( fgets (mystring , 32 , pFile) != NULL )
+		{
+			puts (mystring);
+			sscanf(mystring,"yres:%d",&yres); 
+			fclose (pFile);
+		}
+		else
+		{
+			close(pFile);
+			return -1;
+		}
+		lvi->xres = xres;
+		lvi->yres =yres;
+		lvi->xres_virtual = xres;
+		lvi->yres_virtual =2 * yres;
+		lvi->xoffset =0;
+		lvi->yoffset =yres;
+		lvi->bits_per_pixel =16;
+		//vi.grayscale = 755251200;
+		lvi->grayscale = yres * 1024 * 1024 + xres * 256;
+		return 0;
+	}
+	return -1;
+}
+
+
 static int get_framebuffer(GGLSurface *fb)
 {
 	int fd;
@@ -132,6 +188,11 @@ static int get_framebuffer(GGLSurface *fb)
 	close(fd);
 	return -1;
 	}
+
+#ifdef PRINT_SCREENINFO
+	print_fb_var_screeninfo();
+#endif
+	get_screen_info (&vi);
 
 	fprintf(stderr, "Pixel format: %dx%d @ %dbpp\n", vi.xres, vi.yres, vi.bits_per_pixel);
 
