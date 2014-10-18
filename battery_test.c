@@ -237,14 +237,14 @@ int BatteryPathInit()
 
 		result=getBatteryStatus(Statusbuf);
 		if(result==BATTERY_STATUS_CHARGING){
-			ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
+			ui_display_sync(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
 				PCBA_BATTERY,PCBA_BATTERY_CHARGE,PCBA_BATTERY_VOLTAGE, atoi(Voltagebuf)/1000);
 		}
 		else if(result==BATTERY_STATUS_FULL){
-			ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
+			ui_display_sync(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
 				PCBA_BATTERY,PCBA_BATTERY_FULLCHARGE,PCBA_BATTERY_VOLTAGE,atoi(Voltagebuf)/1000);
 		}else{
-			ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
+			ui_display_sync(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
 				PCBA_BATTERY,PCBA_BATTERY_DISCHARGE,PCBA_BATTERY_VOLTAGE,atoi(Voltagebuf)/1000);
 		}
 		

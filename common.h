@@ -23,7 +23,7 @@ enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT };
 // These are just the defines for the non-const internal variables
 #include "variables.h"
 #define MAX_COLS 96
-#define MAX_ROWS 50
+#define MAX_ROWS 66
 
 
 #define  kMaxTiles  50
@@ -31,8 +31,13 @@ enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT };
 #define MENU_MAX_COLS 50
 #define MENU_MAX_ROWS 500
 
+#ifdef RK3288_PCBA
+#define CHAR_WIDTH 30
+#define CHAR_HEIGHT 60
+#else
 #define CHAR_WIDTH 18
 #define CHAR_HEIGHT 32
+#endif
 
 int ensure_path_mounted(const char* path);
 char** prepend_title(const char** headers);

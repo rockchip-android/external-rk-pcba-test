@@ -52,12 +52,8 @@ LOCAL_SRC_FILES := \
     script_parser.c		\
     screen_test.c		\
     rtc_test.c			\
-    camera_test.c		\
 	et_cc_linux_arm.c	\
     key_test.c			\
-    alsa_mixer.c		\
-    alsa_pcm.c			\
-    codec_test.c		\
     wlan_test.c			\
     bt_test.c			\
 	any_test.c          \
@@ -69,6 +65,24 @@ LOCAL_SRC_FILES := \
     battery_test.c\
 	ddr_test.c \
 	cpu_test.c
+
+
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
+	LOCAL_SRC_FILES += 	rk32_codec/alsa_mixer.c \
+						rk32_codec/alsa_pcm.c \
+						rk32_codec/alsa_route.c \
+						rk32_codec/codec_test.c \
+						rk3288-camera/camera_test.c\				
+else
+	ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk312x)
+ 	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c rk312x-camera/camera_test.c
+ 	else
+ 	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c camera_test.c
+ 	endif
+endif
+
+
+
 
 RECOVERY_API_VERSION := 2
 LOCAL_CFLAGS += -DRECOVERY_API_VERSION=$(RECOVERY_API_VERSION)

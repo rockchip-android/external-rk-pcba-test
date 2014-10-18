@@ -22,8 +22,13 @@
 #include "ui.h"
 #include "../../bootable/recovery/minui/minui.h"
 
+#ifdef RK3288_PCBA
+#define CHAR_WIDTH 36
+#define CHAR_HEIGHT 50
+#else
 #define CHAR_WIDTH 10
 #define CHAR_HEIGHT 18
+#endif
 
 // Implementation of RecoveryUI appropriate for devices with a screen
 // (shows an icon + a progress bar, text logging, menu, etc.)
