@@ -35,7 +35,8 @@
 
 //hkw add
 #include"../../../hardware/rk29/camera/SiliconImage/include/camsys_head.h"
-#include "../language.h"
+#include "../Language/language.h"
+//#include "../language.h"
 // the func is a while loop func , MUST  run in a single thread.
 //return value: 0 is ok ,-1 erro
 

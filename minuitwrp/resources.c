@@ -38,10 +38,11 @@
 // idea how to convince the build system to link with -lm.  We don't
 // need this functionality (it's used for gamma adjustment) so provide
 // a dummy implementation to satisfy the linker.
+#ifndef RK3288_PCBA_FONT
 double pow(double x, double y) {
     return x;
 }
-
+#endif
 int res_create_surface_png(const char* name, gr_surface* pSurface) {
     GGLSurface* surface = NULL;
     int result = 0;

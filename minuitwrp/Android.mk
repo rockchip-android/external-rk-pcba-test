@@ -7,6 +7,9 @@ LOCAL_C_INCLUDES +=\
     external/zlib\
 	external/jpeg
 
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
+LOCAL_CFLAGS += -DRK3288_PCBA_FONT
+endif
 
 ifeq ($(RECOVERY_TOUCHSCREEN_SWAP_XY), true)
 LOCAL_CFLAGS += -DRECOVERY_TOUCHSCREEN_SWAP_XY

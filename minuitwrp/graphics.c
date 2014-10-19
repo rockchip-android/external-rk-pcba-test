@@ -36,7 +36,7 @@
 #ifdef BOARD_USE_CUSTOM_RECOVERY_FONT
 #include BOARD_USE_CUSTOM_RECOVERY_FONT
 #else
-#ifndef RK3288_PCBA
+#ifndef RK3288_PCBA_FONT
 //#include "font/font_cn_18x18.h"
 #include "font/font_cn_20x20.h"
 //#include "font/font_cn_24x24.h"

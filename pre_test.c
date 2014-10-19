@@ -22,7 +22,9 @@
 #include "camera_test.h"
 #include "screen_test.h"
 #include "key_test.h"
-#include "codec_test.h"
+
+
+
 #include "wlan_test.h"
 #include "bt_test.h"
 #include "any_test.h" //zhangwei
@@ -42,9 +44,20 @@
 #include "battery_test.h"
 #include "ddr_test.h"
 #include "cpu_test.h"
-
+#include "codec_test.h"
 #include <signal.h>
 #include "language.h"
+
+#ifdef RK3288_PCBA
+#include "rk3288-camera/camera_test.h"
+#else
+#ifdef RK312X_PCBA
+#include "rk312x-camera/camera_test.h"
+#else
+#include "camera_test.h"
+#endif
+#endif
+
 
 #define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				2			//height of test item

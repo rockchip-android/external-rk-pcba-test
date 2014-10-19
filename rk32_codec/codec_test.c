@@ -11,7 +11,7 @@
 #include "codec_test.h"
 #include "../test_case.h"
 #include "alsa_audio.h"
-#include "../language.h"
+#include "../Language/language.h"
 #include "../common.h"
 #include "../extra-functions.h"
 

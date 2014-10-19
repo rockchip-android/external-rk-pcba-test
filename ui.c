@@ -805,7 +805,7 @@ void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char* fm
     // This can get called before ui_init(), so be careful.
     int temp_row = t_row;
     pthread_mutex_lock(&gUpdateMutex);
-    t_col+=4;
+    t_col+=2;
     if (text_rows > 0 && text_cols > 0) 
     {
 		char *ptr;
