@@ -100,6 +100,9 @@ int scan_key_code()
 									 break;
 								case KEY_F1:
 									 key_code[key_cnt].name = "menu";
+									 #ifdef RK312X_PCBA
+									 key_code[key_cnt].name = "vol+";
+									 #endif
 									 break;
 								case KEY_HOME:
 									 key_code[key_cnt].name = "home";

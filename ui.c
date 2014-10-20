@@ -562,7 +562,7 @@ static void *input_thread(void *cookie)
 				touch_and_hold = 0;
 				touch_repeat = 0;
 				dontwait = 0;
-				if((keyEnd.tv_sec-keyStart.tv_sec) >= 2)
+				if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
 				{
 					break;
 				}

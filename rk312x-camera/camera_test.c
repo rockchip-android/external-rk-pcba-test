@@ -105,11 +105,12 @@ int Camera_Click_Event(int x,int y)
 	x_end = x_start + camera_w;
 	y_start = camera_y;
 	y_end = y_start + camera_h;
-
 	if( (x >= x_start) && (x <= x_end) && (y >= y_start) && (y <= y_end))
 	{
 		
 		printf("Camera_Click_Event : change \r\n");	
+		if(isstoped != 0)
+			return 0;
 		stopCameraTest();
 		usleep(100000);
 		pthread_create(&camera_tid, NULL, startCameraTest, NULL); 
@@ -574,6 +575,8 @@ int DispCreate(int corx ,int cory,int preview_w,int preview_h )
 	var.grayscale = ((preview_h<<20)&0xfff00000) + (( preview_w<<8)&0xfff00) + 0;	//win0 xsize & ysize
 	var.xres = preview_w;	 //win0 show x size
 	var.yres = preview_h;	 //win0 show y size
+	var.xres_virtual = preview_w;
+	var.yres_virtual = preview_h;
 	var.bits_per_pixel = 16;
 	var.activate = FB_ACTIVATE_FORCE;
 	if (ioctl(iDispFd, FBIOPUT_VSCREENINFO, &var) == -1) {
@@ -628,7 +631,9 @@ int TaskStop(void)
 		iCamFd = 0;
 	}
 	for(i = 0; i < 4; i++){
-		memset(m_v4l2Buffer[i], 0x00, ionAllocData.len);
+		memset(m_v4l2buffer_display[i], 0x00, camera_w*camera_h);
+		//memset(m_v4l2buffer_display[i]+camera_w*camera_h, 0xff,
+			//ionAllocData_display.len - camera_w*camera_h);
 	}
 	printf("\n%s: stop ok!\n",__func__);
 	return 0;
