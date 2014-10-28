@@ -33,8 +33,13 @@ void * sdcard_test(void * argv)
 	#endif
 	if(ret)
 		printf("chmod mmctester.sh failed :%d\n",ret);
+
+    #ifdef RK3288_PCBA      
+    ret = __system("/res/emmctester.sh");
+    #else
+    ret = __system("/res/mmctester.sh");
+    #endif
 		
-	ret = __system("/res/mmctester.sh");
 	if(ret < 0) {
 		printf("mmc test failed.\n");
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_FAILED);
