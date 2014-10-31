@@ -287,6 +287,7 @@ else
     ############################################### bin/lib ##################################################
     
     cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/system/bin/
+    cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/sbin/
 
     if [ -e "$PRODUCT_OUT/obj/lib/libc.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libc.so $PRODUCT_OUT/recovery/root/system/lib/
