@@ -436,7 +436,7 @@ int get_cpu_info()
         char *p1 =NULL,* p2=NULL;
 
         memset(command,0,sizeof(command));
-        sprintf(command,"busybox top -n1 | busybox grep idle > data/cpu_idle.txt");
+        sprintf(command,"busybox top -n1  | toolbox grep idle > data/cpu_idle.txt");
         //printf("%s,command:%s\r\n",__FUNCTION__,command);
 
         __system(command);
@@ -495,7 +495,7 @@ int get_boot_mode()
         char *p1 =NULL,* p2=NULL;
 
         memset(command,0,sizeof(command));
-        sprintf(command,"busybox dmesg -s 50000 | busybox grep \"Boot mode:\" > data/boot_mode.txt");
+        sprintf(command,"busybox dmesg -s 50000 | toolbox grep \"Boot mode:\" > data/boot_mode.txt");
         //printf("%s,command:%s\r\n",__FUNCTION__,command);
 
         __system(command);

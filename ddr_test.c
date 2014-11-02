@@ -53,7 +53,7 @@ float get_ddr_msg(int state)
 	float result;
 
         memset(command,0,sizeof(command));
-        sprintf(command,"busybox top -n1 | busybox grep Mem: > %s" , DDR_TXT);        
+        sprintf(command,"busybox top -n1 | toolbox grep Mem: > %s" , DDR_TXT);        
 	__system(command);
 
         fp = fopen(DDR_TXT,"r");

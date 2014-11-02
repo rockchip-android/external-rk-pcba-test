@@ -39,7 +39,7 @@ mmcp=$mmcblk
         break
     done
     
-    capacity=`busybox df | busybox grep "/tmp/extsd" | busybox awk '{printf $2}'`
+    capacity=`busybox df | toolbox grep "/tmp/extsd" | busybox awk '{printf $2}'`
     echo "$mmcp: $capacity"
     
     busybox umount /tmp/extsd

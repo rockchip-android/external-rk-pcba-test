@@ -546,11 +546,11 @@ int bt_test_bluez()
 	
 	if(chip_type == RTK8723AU || chip_type == RTK8723BU) {
 		int ret;
-		ret = __system("busybox dmesg | busybox grep 'hci_register_dev success'");
+		ret = __system("busybox dmesg | toolbox grep 'hci_register_dev success'");
 		printf("a:ret = %d.\n", ret);
         if (ret != 0) {
 		    ret = __system("insmod /res/rtk_btusb.ko"); 
-		    ret = __system("busybox dmesg | busybox grep 'hci_register_dev success'");
+		    ret = __system("busybox dmesg | toolbox grep 'hci_register_dev success'");
         }
 		printf("b:ret = %d.\n", ret);
 		if(ret != 0) {

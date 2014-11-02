@@ -48,7 +48,7 @@
             break
         done
     
-        capacity=`busybox df | busybox grep /tmp/udisk | busybox awk '{printf $2}'`
+        capacity=`busybox df | toolbox grep /tmp/udisk | busybox awk '{printf $2}'`
         #echo "$part: $capacity" >> LOG_FILE
 
         busybox umount /tmp/udisk
