@@ -25,10 +25,10 @@ mmcp=$mmcblk
         fi
         
         mmcp=$mmcblk
-        busybox mount -t vfat $mmcp /tmp/extsd
+        toolbox mount -t vfat $mmcp /tmp/extsd
         if [ $? -ne 0 ]; then
             mmcp=$mmcblk"p1"
-           busybox mount -t vfat $mmcp /tmp/extsd
+           toolbox mount -t vfat $mmcp /tmp/extsd
             if [ $? -ne 0 ]; then
                 exit 0
                 busybox sleep 3
@@ -42,7 +42,7 @@ mmcp=$mmcblk
     capacity=`busybox df | toolbox grep "/tmp/extsd" | busybox awk '{printf $2}'`
     echo "$mmcp: $capacity"
     
-    busybox umount /tmp/extsd
+    toolbox umount /tmp/extsd
     
     echo $capacity > /data/sd_capacity
 
