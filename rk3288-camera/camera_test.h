@@ -16,7 +16,7 @@
 #include <sys/file.h>
 #include <string.h>
 #include <pthread.h>
-#include <linux/videodev.h>
+//#include <linux/videodev.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <errno.h>
@@ -27,7 +27,7 @@
 //#include <linux/ion.h>
 #include "../ion.h"
 
-#include <linux/android_pmem.h>
+//#include <linux/android_pmem.h>
 #include <linux/videodev2.h>
 #include <linux/fb.h>
 #include <linux/version.h>

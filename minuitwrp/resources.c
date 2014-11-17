@@ -28,8 +28,8 @@
 #include <linux/kd.h>
 
 #include <pixelflinger/pixelflinger.h>
-
-#include <png.h>
+#include "../../external/libpng/png.h"
+#include "png.h"
 #include <jpeglib.h>
 
 #include "minui.h"
@@ -44,8 +44,9 @@ double pow(double x, double y) {
 }
 #endif
 int res_create_surface_png(const char* name, gr_surface* pSurface) {
-    GGLSurface* surface = NULL;
     int result = 0;
+#if 0
+    GGLSurface* surface = NULL;
     unsigned char header[8];
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
@@ -172,6 +173,7 @@ exit:
             free(surface);
         }
     }
+#endif
     return result;
 }
 

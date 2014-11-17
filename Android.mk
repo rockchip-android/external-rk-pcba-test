@@ -9,7 +9,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := codec_test
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 #LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
-LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language
+LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language external/libpng/
 
 LOCAL_SRC_FILES := \
     alsa_pcm.c     \
@@ -72,8 +72,8 @@ ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 	LOCAL_SRC_FILES += 	rk32_codec/alsa_mixer.c \
 						rk32_codec/alsa_pcm.c \
 						rk32_codec/alsa_route.c \
-						rk32_codec/codec_test.c \
-						rk3288-camera/camera_test.c  				
+						rk32_codec/codec_test.c #\
+						#rk3288-camera/camera_test.c  				
 else
 	ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk312x)
 	LOCAL_CFLAGS += -DRK312X_PCBA
@@ -203,7 +203,6 @@ LOCAL_STATIC_LIBRARIES += libmtdutils liblog
 
 
 
-
 include $(BUILD_EXECUTABLE)
 
 #added for CM busybox
@@ -229,4 +228,3 @@ commands_recovery_local_path :=
 
 endif   # TARGET_ARCH == arm
 endif    # !TARGET_SIMULATOR
-

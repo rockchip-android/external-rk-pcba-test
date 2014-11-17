@@ -19,7 +19,6 @@
 #include "./minuitwrp/minui.h"
 #include "recovery_ui.h"
 #include "rtc_test.h"
-#include "camera_test.h"
 #include "screen_test.h"
 #include "key_test.h"
 
@@ -47,7 +46,6 @@
 #include "codec_test.h"
 #include <signal.h>
 #include "language.h"
-
 #ifdef RK3288_PCBA
 #include "rk3288-camera/camera_test.h"
 #else
@@ -57,7 +55,6 @@
 #include "camera_test.h"
 #endif
 #endif
-
 
 #define SCRIPT_NAME                     "/res/test_config.cfg"
 #define ITEM_H				2			//height of test item
@@ -339,7 +336,8 @@ int start_test_pthread(struct testcase_info *tc_info)
 		}  
 	}
 	else if(!strcmp(tc_info->base_info->name, "camera"))
-	{
+	{	
+		#if 0
 		tc_info->dev_id = 0;
 		err = pthread_create(&camera_tid, NULL, camera_test,tc_info); //
 		if(err != 0)
@@ -348,7 +346,7 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
-		
+		#endif
 	}
 	else if(!strcmp(tc_info->base_info->name, "wifi"))
 	{
@@ -478,7 +476,7 @@ int init_manual_test_item(struct testcase_info *tc_info)
 
 int start_manual_test_item(int x,int y)
 {
-	return Camera_Click_Event(x,y); 
+	return 1;Camera_Click_Event(x,y); 
 }
 
 int start_auto_test_item(struct testcase_info *tc_info)
@@ -689,7 +687,7 @@ int main(int argc, char **argv)
 	//while(1);
 	gui_start();
 	start_input_thread();
-
+#if 0
 	//prompt_and_wait();
 	stopCameraTest();
 	list_for_each(pos, &auto_test_list_head) {
@@ -701,7 +699,7 @@ int main(int argc, char **argv)
 		}
 	}
 	finishCameraTest();
-
+#endif
 	/*if(g_codec_pid > 0){
 		kill(g_codec_pid,SIGKILL);
 		printf("pcba-test-over\n");
