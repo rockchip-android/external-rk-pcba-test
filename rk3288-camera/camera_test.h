@@ -34,7 +34,7 @@
 #include "../test_case.h"
 
 //hkw add
-#include"../../../hardware/rk29/camera/SiliconImage/include/camsys_head.h"
+#include"../../../hardware/rockchip/camera/SiliconImage/include/camsys_head.h"
 #include "../Language/language.h"
 //#include "../language.h"
 // the func is a while loop func , MUST  run in a single thread.

@@ -13,7 +13,7 @@
 #include <cutils/log.h>
 
 #include <linux/input.h>
-#include "../../hardware/rk29/sensor/st/mma8452_kernel.h"             
+#include "../../hardware/rockchip/sensor/st/mma8452_kernel.h"             
 
 #include "test_case.h"
 #include "common.h"

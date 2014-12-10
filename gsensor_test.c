@@ -26,7 +26,7 @@
 
 #include <linux/input.h>
 #include "gsensor_test.h"
-#include "../../hardware/rk29/sensor/st/mma8452_kernel.h"              // 声明驱动为 HAL 提供的功能接口. 应该用更加抽象的文件名.
+#include "../../hardware/rockchip/sensor/st/mma8452_kernel.h"              // 声明驱动为 HAL 提供的功能接口. 应该用更加抽象的文件名.
 #include "common.h"
 #include "test_case.h"
 #include "language.h"
