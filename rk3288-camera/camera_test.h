@@ -25,7 +25,8 @@
 #include <sys/time.h>
 #include <signal.h>
 //#include <linux/ion.h>
-#include "../ion.h"
+//#include "../ion.h"
+#include "../../../system/core/libion/kernel-headers/linux/rockchip_ion.h"
 
 //#include <linux/android_pmem.h>
 #include <linux/videodev2.h>

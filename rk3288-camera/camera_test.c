@@ -16,7 +16,7 @@
 
 static void *m_v4l2Buffer[4];
 static int v4l2Buffer_phy_addr = 0;
-static int iCamFd, iPmemFd, iDispFd =-1;
+static int iCamFd, iDispFd =-1;
 static int preview_w,preview_h;
 
 static char videodevice[20] ={0};
@@ -34,6 +34,8 @@ static int iIonFd = -1;
 struct ion_allocation_data ionAllocData;
 struct ion_fd_data fd_data;
 struct ion_handle_data handle_data;
+struct ion_phys_data  phys_data;
+struct ion_custom_data data;
 #define RK30_PLAT 1
 #define RK29_PLAT 0
 static int is_rk30_plat = RK30_PLAT;
@@ -493,7 +495,6 @@ int Camera_Click_Event(int x,int y)
 int CameraCreate(void)
 {
     int err,size;
-	struct pmem_region sub;
 	struct v4l2_format format;
 
     if (iCamFd == 0) {
@@ -554,7 +555,8 @@ int CameraCreate(void)
             }
             ionAllocData.len = 0x200000;
             ionAllocData.align = 4*1024;
-            ionAllocData.flags = 1 << 0;
+	        ionAllocData.heap_id_mask = 1 << 1;
+			ionAllocData.flags = 0;
               err = ioctl(iIonFd, ION_IOC_ALLOC, &ionAllocData);
             if(err) {
                 printf("%s: ION_IOC_ALLOC failed to alloc 0x%x bytes with error - %s", 
@@ -584,9 +586,14 @@ int CameraCreate(void)
                 ioctl(iIonFd, ION_IOC_FREE, &handle_data);
                 goto exit2;
             }
-        	err = ioctl(fd_data.fd, PMEM_GET_PHYS, &sub);
-        	if (err < 0) {
-            	printf(" PMEM_GET_PHY_ADDR failed, limp mode\n");
+	    	//err = ioctl(fd_data.fd, PMEM_GET_PHYS, &sub);yzm
+	    	phys_data.handle = ionAllocData.handle;
+			phys_data.phys = 0;
+	    	data.cmd = ION_IOC_GET_PHYS;
+			data.arg = (unsigned long)&phys_data;
+	    	err = ioctl(iIonFd, ION_IOC_CUSTOM, &data);
+	    	if (err < 0) {
+	        	printf(" ion get phys_data fail !!!!\n");
                 ioctl(iIonFd, ION_IOC_FREE, &handle_data);
                 goto exit2;
         	}
@@ -598,29 +605,9 @@ int CameraCreate(void)
         	}else
             	printf("%s: Successfully allocated 0x%x bytes, mIonFd=%d, SharedFd=%d",
             			__FUNCTION__,ionAllocData.len, iIonFd, fd_data.fd);
-        }else{
-            iPmemFd = open(PMEM_DEV_NAME, O_RDWR|O_CLOEXEC, 0);
-            if (iPmemFd < 0) {
-            	printf(" Could not open pmem device(%s)\n",PMEM_DEV_NAME);
-        		err = -1;
-                goto exit1;
-            }
-
-        	size = sub.len = 0x200000; 
-        	m_v4l2Buffer[0] =(unsigned char *) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, iPmemFd, 0);
-        	if (m_v4l2Buffer[0] == MAP_FAILED) {
-            	printf(" m_v4l2Buffer[0] mmap failed\n");
-        		err = -1;
-                goto exit2;
-        	}
-        	err = ioctl(iPmemFd, PMEM_GET_PHYS, &sub);
-        	if (err < 0) {
-            	printf(" PMEM_GET_PHY_ADDR failed, limp mode\n");
-                goto exit3;
-        	}
+			v4l2Buffer_phy_addr = phys_data.phys;
         }
     memset(m_v4l2Buffer[0], 0x00, size);
-	v4l2Buffer_phy_addr = sub.offset;
 suc_alloc:   
           err = ioctl(iCamFd, VIDIOC_QUERYCAP, &mCamDriverCapability);
         if (err < 0) {
@@ -632,10 +619,7 @@ suc_alloc:
 exit3:
 	munmap(m_v4l2Buffer[0], size);
 exit2:
-    if(iPmemFd > 0){
-    	close(iPmemFd);
-    	iPmemFd = -1;
-        }
+
     if(iIonFd > 0){
     	close(iIonFd);
     	iIonFd = -1;
@@ -1008,10 +992,6 @@ int stopCameraTest(){
 }
 void finishCameraTest(){
 		TaskStop();
-		if (iPmemFd > 0) {
-			close(iPmemFd);
-			iPmemFd = -1;
-		}
 	
 		if(iIonFd > 0){
 			munmap(m_v4l2Buffer[0], ionAllocData.len);

@@ -20,7 +20,7 @@ static int v4l2Buffer_phy_addr[4] = {0};
 static int v4l2Buffer_phy_addr_display;
 static int SharedFd_display[4];
 
-static int iCamFd = 0, iPmemFd, iDispFd =-1;
+static int iCamFd = 0, iDispFd =-1;
 static int preview_w,preview_h;
 
 static char videodevice[20] ={0};
@@ -124,7 +124,6 @@ int Camera_Click_Event(int x,int y)
 int CameraCreate(void)
 {
     int err,size,i;
-	struct pmem_region sub;
 	struct v4l2_format format;
 
     if (iCamFd == 0) {
@@ -190,7 +189,7 @@ int CameraCreate(void)
 		{
 	        ionAllocData.len = 0x100000;
 	        ionAllocData.align = 4*1024;
-	        ionAllocData.heap_mask = 1 << 1;
+	        ionAllocData.heap_id_mask = 1 << 1;
 			ionAllocData.flags = 0;
 
 	          err = ioctl(iIonFd, ION_IOC_ALLOC, &ionAllocData);
@@ -252,7 +251,7 @@ int CameraCreate(void)
 		{
 			ionAllocData_display.len = 0x100000;
 			ionAllocData_display.align = 4*1024;
-			ionAllocData_display.heap_mask = 1 << 1;
+			ionAllocData_display.heap_id_mask = 1 << 1;
 			ionAllocData_display.flags = 0;
 			
 			  err = ioctl(iIonFd, ION_IOC_ALLOC, &ionAllocData_display);
@@ -308,27 +307,7 @@ int CameraCreate(void)
 						__FUNCTION__,ionAllocData_display.len, iIonFd, fd_data_display.fd);
 		
 		}
-	}else{
-        iPmemFd = open(PMEM_DEV_NAME, O_RDWR|O_CLOEXEC, 0);
-        if (iPmemFd < 0) {
-        	printf(" Could not open pmem device(%s)\n",PMEM_DEV_NAME);
-    		err = -1;
-            goto exit1;
-        }
-
-    	size = sub.len = 0x300000; 
-    	m_v4l2Buffer[0] =(unsigned char *) mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, iPmemFd, 0);
-    	if (m_v4l2Buffer[0] == MAP_FAILED) {
-        	printf(" m_v4l2Buffer[0] mmap failed\n");
-    		err = -1;
-            goto exit2;
-    	}
-    	err = ioctl(iPmemFd, PMEM_GET_PHYS, &sub);
-    	if (err < 0) {
-        	printf(" PMEM_GET_PHY_ADDR failed, limp mode\n");
-            goto exit3;
-    	}
-    }
+	}
 
 	//v4l2Buffer_phy_addr = phys_data.phys;
 	//v4l2Buffer_phy_addr_display = phys_data_display.phys;
@@ -347,10 +326,7 @@ exit3:
 		munmap(m_v4l2buffer_display[i], ionAllocData_display.len);
 	}
 exit2:
-    if(iPmemFd > 0){
-    	close(iPmemFd);
-    	iPmemFd = -1;
-        }
+
     if(iIonFd > 0){
     	close(iIonFd);
     	iIonFd = -1;
@@ -839,10 +815,6 @@ int stopCameraTest(){
 void finishCameraTest(){
 		int i = 0;
 		TaskStop();
-		if (iPmemFd > 0) {
-			close(iPmemFd);
-			iPmemFd = -1;
-		}
 	
 		if(iIonFd > 0){
 			
