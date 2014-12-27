@@ -189,7 +189,7 @@ int CameraCreate(void)
 		{
 	        ionAllocData.len = 0x100000;
 	        ionAllocData.align = 4*1024;
-	        ionAllocData.heap_id_mask = 1 << 1;
+	        ionAllocData.heap_id_mask = ION_HEAP(ION_CMA_HEAP_ID);
 			ionAllocData.flags = 0;
 
 	          err = ioctl(iIonFd, ION_IOC_ALLOC, &ionAllocData);
