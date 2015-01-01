@@ -693,25 +693,33 @@ static int bt_test_bluedroid()
 {
     int ret = -1;
     FILE *fp=NULL;
-    char buf[1024];
+    int try = 20, bytes_for_second = 10*1024;
+    char *result_buf, *buf;
+    int result_size = try * bytes_for_second; 
+
+    result_buf = malloc(result_size);
+    if (result_buf == NULL) {
+        LOG("malloc result_buf fail\n");
+        return ret;
+    }
+    buf = result_buf;
 
     change_mode();
 
-    fp = popen("echo \"enable\ndisable\nquit\" | bdt", "r");
+    fp = popen("echo \"enable\" | bdt", "r");
     if (fp != NULL) {
         int fd = fileno(fp);
         int flags = fcntl(fd, F_GETFL, 0);
         int len = 0;
-        int try = 10;
         fcntl(fd, F_SETFL, flags|O_NONBLOCK);
 
         LOG("running bdt for bluetooth test...\n");
         while (try-->0) {
-            memset(buf, 0, 1024);
-            len=fread(buf, sizeof(char), sizeof(buf), fp);
+            buf += len;
+            len = fread(buf, sizeof(char), bytes_for_second, fp);
             if (len) {
-                LOG("read: %s\n", buf);
-                if (strstr(buf, "ADAPTER STATE UPDATED : ON")) {
+                //LOG("read: %s\n", buf);
+                if (strstr(result_buf, "ADAPTER STATE UPDATED : ON")) {
                     LOG("bt test success!\n");
                     ret = 0;
                     break;
@@ -726,6 +734,7 @@ static int bt_test_bluedroid()
     } else
         LOG("run bdt fail!\n");
 
+    free(result_buf);
     return ret;
 }
 
