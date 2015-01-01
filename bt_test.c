@@ -756,7 +756,7 @@ void *bt_test(void *argv)
         ret = bt_test_bluedroid();
         break;
     default:
-        ret = bt_test_bluez();
+        ret = bt_test_bluedroid();//bt_test_bluez();
         break;
     }
 
