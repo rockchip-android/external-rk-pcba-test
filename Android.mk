@@ -72,12 +72,12 @@ ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 	LOCAL_SRC_FILES += 	rk32_codec/alsa_mixer.c \
 						rk32_codec/alsa_pcm.c \
 						rk32_codec/alsa_route.c \
-						rk32_codec/codec_test.c #\
+						rk32_codec/codec_test.c 
 						#rk3288-camera/camera_test.c  				
 else
 	ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk312x)
 	LOCAL_CFLAGS += -DRK312X_PCBA
- 	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c 
+ 	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c #rk312x-camera/camera_test.c  				
  	else
  	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c camera_test.c
  	endif

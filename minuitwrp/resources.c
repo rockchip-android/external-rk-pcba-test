@@ -28,10 +28,11 @@
 #include <linux/kd.h>
 
 #include <pixelflinger/pixelflinger.h>
-#include "../../external/libpng/png.h"
-#include "png.h"
+#include <png.h>
 #include <jpeglib.h>
-
+#include <pngconf.h>
+#include <pngusr.h>
+#include <pngpriv.h>
 #include "minui.h"
 
 // libpng gives "undefined reference to 'pow'" errors, and I have no

@@ -623,6 +623,7 @@ void ui_init(void)
     if (text_cols > MAX_COLS - 1) text_cols = MAX_COLS - 1;
 
     int i;
+	#if 0
     for (i = 0; BITMAPS[i].name != NULL; ++i) {
         int result = res_create_surface(BITMAPS[i].name, BITMAPS[i].surface);
         if (result < 0) {
@@ -634,7 +635,7 @@ void ui_init(void)
             *BITMAPS[i].surface = NULL;
         }
     }
-
+	#endif
     pthread_t t;
     pthread_create(&t, NULL, progress_thread, NULL);
     pthread_create(&t, NULL, input_thread, NULL);

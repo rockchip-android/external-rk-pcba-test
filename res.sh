@@ -286,7 +286,7 @@ else
 
     ############################################### bin/lib ##################################################
     
-    cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/system/bin/
+    cp -rf $PCBA_PATH/sbin/busybox $PRODUCT_OUT/recovery/root/system/bin/busybox
     cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/sbin/
 
     if [ -e "$PRODUCT_OUT/obj/lib/libselinux.so" ] ; then
