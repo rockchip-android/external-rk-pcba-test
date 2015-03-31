@@ -24,6 +24,7 @@ mkdir -p $PRODUCT_OUT/recovery/root/system/etc/
 mkdir -p $PRODUCT_OUT/recovery/root/system/etc/firmware/
 mkdir -p $PRODUCT_OUT/recovery/root/etc/firmware/
 mkdir -p $PRODUCT_OUT/recovery/root/vendor/firmware
+mkdir -p $PRODUCT_OUT/recovery/root/lib/firmware
 mkdir -p $PRODUCT_OUT/recovery/root/system/etc/bluetooth
 if [ -e "$PRODUCT_OUT/system/etc/firmware/" ] ; then
 cp $PRODUCT_OUT/system/etc/firmware/ $PRODUCT_OUT/recovery/root/system/etc/ -a
@@ -32,6 +33,12 @@ if [ -e "$PRODUCT_OUT/system/vendor/firmware/" ] ; then
 cp $PRODUCT_OUT/system/vendor/firmware/ $PRODUCT_OUT/recovery/root/vendor/ -a
 fi
 
+if [ -e "$PRODUCT_OUT/system/etc/firmware/rtl8723b_fw" ] ; then
+cp $PRODUCT_OUT/system/etc/firmware/rtl8723b_fw $PRODUCT_OUT/recovery/root/lib/firmware/rtl8723b_fw
+cp $PRODUCT_OUT/system/etc/firmware/rtl8723bu_config $PRODUCT_OUT/recovery/root/lib/firmware/rtl8723bu_config
+cp $PRODUCT_OUT/system/etc/firmware/rtl8723a_fw $PRODUCT_OUT/recovery/root/lib/firmware/rtl8723a_fw
+cp $PRODUCT_OUT/system/etc/firmware/rtl8723a_config $PRODUCT_OUT/recovery/root/lib/firmware/rtl8723a_config
+fi
 ############################################### ko ##################################################
 
 if [ -e "device/rockchip/$TARGET_COMMON/ipp/lib/rk29-ipp.ko" ] ; then
@@ -92,6 +99,12 @@ if [ $BT_BLUEDROID = "true" ] ; then
     fi
     if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
     fi
     if [ -e "$PRODUCT_OUT/obj/lib/libcorkscrew.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libcorkscrew.so $PRODUCT_OUT/recovery/root/system/lib/

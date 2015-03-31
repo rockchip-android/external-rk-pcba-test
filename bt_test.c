@@ -680,6 +680,11 @@ static void change_mode()
         unlink("/sys/class/rfkill/rfkill0/type");
     }
 
+    if (chmod("/dev/rtk_btusb", 0775) < 0) {
+        LOG("Error changing permissions of %s to 0660: %s\n",
+                "/dev/rtk_btusb", strerror(errno));
+    }
+
     if (chmod("/dev/ttyS0", 0775) < 0) {
         LOG("Error changing permissions of %s to 0775 %s\n",
                 "/dev/ttyS0", strerror(errno));
