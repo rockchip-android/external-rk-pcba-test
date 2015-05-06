@@ -730,11 +730,19 @@ extern "C" int gui_loadResources()
 
 		//theme_path += "/TWRP/theme/ui.zip";
 		check =1 ;
+		#ifdef SOFIA3GR_PCBA
+		theme_path = "/system/etc/ui.zip";
+		#else
 		theme_path = "/res/ui.zip";
+		#endif
 		PageManager::LoadPackage("TWRP", theme_path, "main");
 		if (check || PageManager::LoadPackage("TWRP", theme_path, "main"))
 		{
+			#ifdef SOFIA3GR_PCBA
+			if (PageManager::LoadPackage("TWRP", "/system/etc/ui.xml", "main"))
+			#else
 			if (PageManager::LoadPackage("TWRP", "/res/ui.xml", "main"))
+			#endif
 			{
 				LOGE("Failed to load base packages.\n");
 				goto error;

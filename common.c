@@ -20,7 +20,12 @@
 #include <sys/wait.h>
 
 #undef _PATH_BSHELL
+
+#ifdef SOFIA3GR_PCBA
+#define _PATH_BSHELL "/system/bin/sh"
+#else
 #define _PATH_BSHELL "/sbin/busybox sh"
+#endif
 
 int __system(const char *command)
 {

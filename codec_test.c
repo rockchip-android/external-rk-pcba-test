@@ -17,7 +17,13 @@
 
 #define AUDIO_HW_OUT_PERIOD_MULT 8 // (8 * 128 = 1024 frames)
 #define AUDIO_HW_OUT_PERIOD_CNT 4
+#ifdef SOFIA3GR_PCBA
+#define FILE_PATH "/system/etc/codectest.pcm"
+#define RECORD_FILE_PATH "/system/etc/record.pcm"
+#else
 #define FILE_PATH "/res/codectest.pcm"
+#define RECORD_FILE_PATH "/res/record.pcm"
+#endif
 #define REC_DUR 3 //the unit is second
 pthread_t rec_disp_tid;  
 int codec_err = -1;
@@ -526,7 +532,7 @@ void* codec_test(void *argv)
 	{  
 	   printf("create rec_volum_display thread error: %s/n",strerror(codec_err));  
 	} 
-
+	#if 0
 	{
 	    printf ("\r\nBEGIN CODEC TEST ---------------- \r\n");
 	    if(strcmp(dt, "case2") == 0) {
@@ -537,6 +543,6 @@ void* codec_test(void *argv)
 	    printf ("\r\nEND CODEC TEST\r\n");
 	}
 	//printf("pcba-test codec pid %d\n",g_codec_pid);
-	
+	#endif
     return NULL;
 }

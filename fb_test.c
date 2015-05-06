@@ -20,7 +20,12 @@
 
 
 #define FB_PATH "/dev/graphics/fb0"
-#define HZK_PATH "/res/images/HZK16"
+
+#ifdef SOFIA3GR_PCBA
+	#define HZK_PATH "/system/etc/images/HZK16"
+#else
+	#define HZK_PATH "/res/images/HZK16"
+#endif
 
 #define MIN(x,y)  (((x)<(y))?(x):(y))
 #define MAX(x,y)  (((x)>(y))?(x):(y))

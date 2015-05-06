@@ -56,7 +56,11 @@ int res_create_surface_png(const char* name, gr_surface* pSurface) {
     if (fp == NULL) {
         char resPath[256];
 
-        snprintf(resPath, sizeof(resPath)-1, "/res/images/%s.png", name);
+		#ifdef SOFIA3GR_PCBA
+			snprintf(resPath, sizeof(resPath)-1, "/system/etc/images/%s.png", name);
+		#else
+			snprintf(resPath, sizeof(resPath)-1, "/res/images/%s.png", name);
+		#endif
         resPath[sizeof(resPath)-1] = '\0';
         fp = fopen(resPath, "rb");
         if (fp == NULL)

@@ -27,11 +27,22 @@ void * udisk_test(void * argv)
 	y = tc_info->y;
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s \n",PCBA_UCARD);
 
-	ret =  __system("busybox chmod 777 /res/udisktester.sh");
+	#if 0
+	
+	#ifdef SOFIA3GR_PCBA
+		ret =  __system("busybox chmod 777 /system/etc/udisktester.sh");
+	#else
+		ret =  __system("busybox chmod 777 /res/udisktester.sh");
+	#endif
+
 	if(ret)
 		printf("chmod udisktester.sh failed :%d\n",ret);
-		
-	ret = __system("/res/udisktester.sh");
+
+	#ifdef SOFIA3GR_PCBA
+		ret = __system("/system/etc/udisktester.sh");
+	#else
+		ret = __system("/res/udisktester.sh");
+	#endif
 	if(ret < 0) {
 		printf("udisk test failed.\n");
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_UCARD,PCBA_FAILED);
@@ -60,7 +71,7 @@ void * udisk_test(void * argv)
         ui_print_xy_rgba(0,y,0,0,255,255,"%s:[%s]\n",PCBA_UCARD,PCBA_FAILED);
 
         fclose(fp);
-
+	#endif
 	return argv;
 	
 }

@@ -1,9 +1,13 @@
 ifneq ($(TARGET_SIMULATOR),true)
-ifeq ($(TARGET_ARCH),arm)
+
+#ifeq ($(TARGET_ARCH),arm)
 
 LOCAL_PATH := $(call my-dir)
-
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+NO_CODEC_TEST_BIN=true
+else
 NO_CODEC_TEST_BIN=false
+endif
 ifneq ($(NO_CODEC_TEST_BIN), true)
 include $(CLEAR_VARS)
 LOCAL_MODULE := codec_test
@@ -18,7 +22,7 @@ LOCAL_SRC_FILES := \
     codec_main.c
 
 
-LOCAL_MODULE_TAGS := eng
+LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES := libc libcutils liblog
 LOCAL_SHARED_LIBRARIES := 
 
@@ -218,6 +222,15 @@ include $(BUILD_EXECUTABLE)
 #$(shell cp -rf $(commands_recovery_local_path)/res/* $(TARGET_ROOT_OUT_SBIN)/)
 #ALL_DEFAULT_INSTALLED_MODULES += $(RECOVERY_BUSYBOX_SYMLINKS) 
 
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+LOCAL_CFLAGS += -DSOFIA3GR_PCBA
+$(shell cp -rf $(commands_recovery_local_path)/res/* $(TARGET_OUT)/etc/)
+$(shell mv -f $(TARGET_OUT)/etc/emmctester_sofia.sh $(TARGET_OUT)/etc/emmctester.sh)
+$(shell mv -f $(TARGET_OUT)/etc/mmctester_sofia.sh $(TARGET_OUT)/etc/mmctester.sh)
+$(shell mv -f $(TARGET_OUT)/etc/test_config_sofia.cfg $(TARGET_OUT)/etc/test_config.cfg)
+$(shell mv -f $(TARGET_OUT)/etc/udisktester_sofia.sh $(TARGET_OUT)/etc/udisktester.sh)
+$(shell mv -f $(TARGET_OUT)/etc/wifi_sofia.sh $(TARGET_OUT)/etc/wifi.sh)
+endif
 
 include $(commands_recovery_local_path)/minuitwrp/Android.mk
 include $(commands_recovery_local_path)/gui/Android.mk
@@ -226,5 +239,5 @@ include $(commands_recovery_local_path)/minziptwrp/Android.mk
 include $(commands_recovery_local_path)/libbluetooth/Android.mk
 commands_recovery_local_path :=
 
-endif   # TARGET_ARCH == arm
+#endif   # TARGET_ARCH == arm
 endif    # !TARGET_SIMULATOR

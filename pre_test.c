@@ -56,7 +56,13 @@
 #endif
 #endif
 
+#ifdef SOFIA3GR_PCBA
+#define SCRIPT_NAME                     "/system/etc/test_config.cfg"
+#else
 #define SCRIPT_NAME                     "/res/test_config.cfg"
+#endif
+
+
 #define ITEM_H				2			//height of test item
 #define ITEM_X				0			//x positon of test item
 
@@ -625,17 +631,29 @@ int main(int argc, char **argv)
 	struct list_head *pos;
 	int success = 0;
 	
-	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
-	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
+	printf("%s line=%d SCRIPT_NAME=%s\n", __FUNCTION__, __LINE__, SCRIPT_NAME);
 
-    	
+	
+	#ifdef SOFIA3GR_PCBA
+		//freopen("/dev/ttyS1", "a", stdout); setbuf(stdout, NULL);
+		//freopen("/dev/ttyS1", "a", stderr); setbuf(stderr, NULL);
+	#else
+		freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
+		freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
+	#endif
+
+	printf("wjh1111111111111111111%s line=%d \n", __FUNCTION__, __LINE__);
+	
 	if (gui_init())
 	{
 		ui_init();
 		ui_set_background(BACKGROUND_ICON_INSTALLING);
 	}
+	printf("wjh22222222222222222222222%s line=%d \n", __FUNCTION__, __LINE__);
 	ui_print_init();
+	printf("wjh3333333333333333333333333%s line=%d \n", __FUNCTION__, __LINE__);
 	gui_loadResources();
+	printf("wjh444444444444444444444444%s line=%d \n", __FUNCTION__, __LINE__);
 #if 1
 	w =  gr_fb_width() >> 1;
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_VERSION_NAME);
@@ -645,19 +663,21 @@ int main(int argc, char **argv)
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	script_buf = parse_script(SCRIPT_NAME);
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	if (!script_buf)
 	{
 		   printf("parse script failed\n");
 		   return -1;
 	}
-	
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	ret = init_script(script_buf);
 	if (ret) {
 		   db_error("core: init script failed(%d)\n", ret);
 		   return -1;
 	}
-	
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	ret = parse_testcase();
 	if (ret < 0) {
 		db_error("core: parse all test case from script failed(%d)\n", ret);
@@ -667,23 +687,25 @@ int main(int argc, char **argv)
 		db_warn("core: NO TEST CASE to be run\n");
 		return -1;
 	}
-
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	printf("manual testcase:\n");
 	list_for_each(pos, &manual_test_list_head) {
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
 		init_manual_test_item(tc_info);
 		
 	}
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),manual_p_y+1,255,255,0,255,"%s\n",PCBA_AUTO_TEST);
         drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+1)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
-		start_auto_test_item(tc_info);
+		//start_auto_test_item(tc_info);
 	}
 	
 #endif
+	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	//while(1);
 	gui_start();
 	start_input_thread();

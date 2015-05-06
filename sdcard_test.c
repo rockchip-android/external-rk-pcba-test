@@ -29,7 +29,11 @@ void * sdcard_test(void * argv)
 	#ifdef RK3288_PCBA
 	ret =  __system("busybox chmod 777 /res/emmctester.sh");
 	#else
-	ret =  __system("busybox chmod 777 /res/mmctester.sh");
+		#ifdef SOFIA3GR_PCBA
+		ret =  __system("busybox chmod 777 /system/etc/mmctester.sh");
+		#else
+		ret =  __system("busybox chmod 777 /res/mmctester.sh");
+		#endif
 	#endif
 	if(ret)
 		printf("chmod mmctester.sh failed :%d\n",ret);
@@ -37,7 +41,11 @@ void * sdcard_test(void * argv)
     #ifdef RK3288_PCBA      
     ret = __system("/res/emmctester.sh");
     #else
-    ret = __system("/res/mmctester.sh");
+		#ifdef SOFIA3GR_PCBA
+		ret = __system("/system/etc/mmctester.sh");
+		#else
+		ret = __system("/res/mmctester.sh");
+		#endif
     #endif
 		
 	if(ret < 0) {
@@ -57,7 +65,12 @@ void * sdcard_test(void * argv)
 	}
 
 	
-	/*if(stat("/res/images/wifi_scan.txt", &stat_ret) < 0) {
+	/*
+		#ifdef SOFIA3GR_PCBA
+		if(stat("/system/etc/images/wifi_scan.txt", &stat_ret) < 0) {
+		#else
+		if(stat("/res/images/wifi_scan.txt", &stat_ret) < 0) {
+		#endif
 		LOG( "error getting file stat.\n");				 
 		return -1;
 	}*/

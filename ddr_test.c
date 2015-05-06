@@ -219,7 +219,7 @@ void *ddr_test(void *argv)
 		tc_info->y  = get_cur_print_y();	
 
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_DDR,PCBA_TESTING);
-
+	#if 0
 	/*Get ddr total size*/
 	total_size = get_ddr_msg(GET_TOTAL_SIZE);
 
@@ -236,7 +236,7 @@ void *ddr_test(void *argv)
 		ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s] {%s}\n",PCBA_DDR,PCBA_FAILED,PCBA_ERR_FREQ);	
 		goto ERR;
 	}
-	
+	#endif
 	tc_info->result = 1;	
 	ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s] { %d MB }\n",PCBA_DDR,PCBA_SECCESS,((int)total_size)/1024);
 	return argv;

@@ -45,30 +45,57 @@ int tw_reboot(RebootCommand command)
 
    // ensure_path_unmounted("/sdcard");
 
-    switch (command)
-    {
-    case rb_current:
-    case rb_system:
-        //finish_recovery("s");
-		sync();
-		check_and_run_script("/sbin/rebootsystem.sh", "reboot system");
-        return reboot(RB_AUTOBOOT);
-    case rb_recovery:
-		check_and_run_script("/sbin/rebootrecovery.sh", "reboot recovery");
-        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "recovery");
-    case rb_bootloader:
-		check_and_run_script("/sbin/rebootbootloader.sh", "reboot bootloader");
-        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "bootloader");
-    case rb_poweroff:
-		check_and_run_script("/sbin/poweroff.sh", "power off");
-        return reboot(RB_POWER_OFF);
-    case rb_download:
-		check_and_run_script("/sbin/rebootdownload.sh", "reboot download");
-		return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "download");
-	return 1;
-    default:
-        return -1;
-    }
+	#ifdef SOFIA3GR_PCBA
+		switch (command)
+	    {
+	    case rb_current:
+	    case rb_system:
+	        //finish_recovery("s");
+			sync();
+			check_and_run_script("/system/etc/rebootsystem.sh", "reboot system");
+	        return reboot(RB_AUTOBOOT);
+	    case rb_recovery:
+			check_and_run_script("/system/etc/rebootrecovery.sh", "reboot recovery");
+	        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "recovery");
+	    case rb_bootloader:
+			check_and_run_script("/system/etc/rebootbootloader.sh", "reboot bootloader");
+	        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "bootloader");
+	    case rb_poweroff:
+			check_and_run_script("/system/etc/poweroff.sh", "power off");
+	        return reboot(RB_POWER_OFF);
+	    case rb_download:
+			check_and_run_script("/system/etc/rebootdownload.sh", "reboot download");
+			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "download");
+		return 1;
+	    default:
+	        return -1;
+	    }
+	#else
+		switch (command)
+	    {
+	    case rb_current:
+	    case rb_system:
+	        //finish_recovery("s");
+			sync();
+			check_and_run_script("/sbin/rebootsystem.sh", "reboot system");
+	        return reboot(RB_AUTOBOOT);
+	    case rb_recovery:
+			check_and_run_script("/sbin/rebootrecovery.sh", "reboot recovery");
+	        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "recovery");
+	    case rb_bootloader:
+			check_and_run_script("/sbin/rebootbootloader.sh", "reboot bootloader");
+	        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "bootloader");
+	    case rb_poweroff:
+			check_and_run_script("/sbin/poweroff.sh", "power off");
+	        return reboot(RB_POWER_OFF);
+	    case rb_download:
+			check_and_run_script("/sbin/rebootdownload.sh", "reboot download");
+			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "download");
+		return 1;
+	    default:
+	        return -1;
+	    }
+	#endif
     return -1;
 }
 

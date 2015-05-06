@@ -225,7 +225,11 @@ int GUIAction::flash_zip(std::string filename, std::string pageName, const int s
 
 		// Now, check if we need to ensure TWRP remains installed...
 		struct stat st;
+		#ifdef SOFIA3GR_PCBA
+		if (stat("/system/bin/installTwrp", &st) == 0)
+		#else
 		if (stat("/sbin/installTwrp", &st) == 0)
+		#endif
 		{
 			DataManager::SetValue("tw_operation", "Configuring TWRP");
 			DataManager::SetValue("tw_partition", "");
@@ -380,7 +384,11 @@ int GUIAction::doAction(Action action, int isThreaded /* = 0 */)
 		{
 			// Loading the custom theme failed - try loading the stock theme
 			LOGI("Attempting to reload stock theme...\n");
-			if (PageManager::ReloadPackage("TWRP", "/res/ui.xml"))
+			#ifdef SOFIA3GR_PCBA
+				if (PageManager::ReloadPackage("TWRP", "/system/etc/ui.xml"))
+			#else
+				if (PageManager::ReloadPackage("TWRP", "/res/ui.xml"))
+			#endif
 			{
 				LOGE("Failed to load base packages.\n");
 				ret_val = 1;
@@ -1045,7 +1053,11 @@ int GUIAction::doAction(Action action, int isThreaded /* = 0 */)
 								{
 									// Loading the custom theme failed - try loading the stock theme
 									LOGI("Attempting to reload stock theme...\n");
-									if (PageManager::ReloadPackage("TWRP", "/res/ui.xml"))
+									#ifdef SOFIA3GR_PCBA
+										if (PageManager::ReloadPackage("TWRP", "/system/etc/ui.xml"))
+									#else
+										if (PageManager::ReloadPackage("TWRP", "/res/ui.xml"))
+									#endif
 									{
 										LOGE("Failed to load base packages.\n");
 									}

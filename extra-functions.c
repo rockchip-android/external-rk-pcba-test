@@ -58,7 +58,12 @@
 
 //kang system() from bionic/libc/unistd and rename it __system() so we can be even more hackish :)
 #undef _PATH_BSHELL
+
+#ifdef SOFIA3GR_PCBA
+#define _PATH_BSHELL "/system/bin/sh"
+#else
 #define _PATH_BSHELL "/sbin/sh"
+#endif
 
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 extern char **environ;
@@ -428,7 +433,11 @@ int check_md5(char* path) {
 	get_path(dirpath);
 	chdir(dirpath);
 	file = basename(md5file);
+	#ifdef SOFIA3GR_PCBA
+	sprintf(cmd, "/system/bin/busybox md5sum -c '%s'", file);
+	#else
 	sprintf(cmd, "/sbin/busybox md5sum -c '%s'", file);
+	#endif
 	FILE * cs = __popen(cmd, "r");
 	char cs_s[PATH_MAX + 50];
 	fgets(cs_s, PATH_MAX + 50, cs);
@@ -2452,10 +2461,15 @@ void run_script(const char *str1, const char *str2, const char *str3, const char
                 	ui_print("%s", str2);
 		        pid_t pid = fork();
                 	if (pid == 0) {
-                		char *args[] = { "/sbin/sh", "-c", (char*)str3, "1>&2", NULL };
-                	        execv("/sbin/sh", args);
-                	        fprintf(stderr, str4, strerror(errno));
-                	        _exit(-1);
+						#ifdef SOFIA3GR_PCBA
+							char *args[] = { "/system/bin/sh", "-c", (char*)str3, "1>&2", NULL };
+            	        	execv("/system/bin/sh", args);
+						#else
+							char *args[] = { "/sbin/sh", "-c", (char*)str3, "1>&2", NULL };
+            	        	execv("/sbin/sh", args);
+						#endif
+            	        fprintf(stderr, str4, strerror(errno));
+            	        _exit(-1);
                 	}
 			int status;
 			while (waitpid(pid, &status, WNOHANG) == 0) {

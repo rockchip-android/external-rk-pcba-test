@@ -753,7 +753,7 @@ void *bt_test(void *argv)
 		tc_info->y  = get_cur_print_y();
 
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_BLUETOOTH,PCBA_TESTING);
-
+	#if 0
     switch (get_chip_type()) {
     case RK903:
     case RTK8723BS:
@@ -764,6 +764,8 @@ void *bt_test(void *argv)
         ret = bt_test_bluedroid();//bt_test_bluez();
         break;
     }
+
+	#endif
 
     if (ret==0)
         ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);

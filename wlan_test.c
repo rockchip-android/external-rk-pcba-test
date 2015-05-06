@@ -153,12 +153,21 @@ void* wlan_test(void* argv)
 
 	y = tc_info->y;
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_WIFI,PCBA_TESTING);
-	
-	ret =  __system("busybox chmod 777 /res/wifi.sh");
+
+#if 0
+	#ifdef SOFIA3GR_PCBA
+		ret =  __system("busybox chmod 777 /system/etc/wifi.sh");
+	#else
+		ret =  __system("busybox chmod 777 /res/wifi.sh");
+	#endif
 	if(ret)
 		LOG("chmod wifi.sh failed :%d\n",ret);
-		
-	ret = __system("/res/wifi.sh");
+
+	#ifdef SOFIA3GR_PCBA
+		ret = __system("/system/etc/wifi.sh");
+	#else
+		ret = __system("/res/wifi.sh");
+	#endif
 	if(ret <= 0) {
 		LOG("wifi test failed.\n");
 		goto error_exit;
@@ -226,6 +235,6 @@ error_exit:
 	
 	ui_print_xy_rgba(0,y,225,0,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_FAILED,ssid);
 	tc_info->result = -1;
-		
+#endif
   return argv;
 }

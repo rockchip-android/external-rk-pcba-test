@@ -162,7 +162,7 @@ int openInput(const char* inputName)
 		//g_msg->y = get_cur_print_y();
 	}
         */
-	
+	#if 0
  	fd = openInput("gsensor");
 	if(fd < 0)
 	{
@@ -204,7 +204,7 @@ int openInput(const char* inputName)
 
     close(fd);
     close(fd_dev);
-
+	#endif
     ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_SECCESS);
 	return argv;
  }

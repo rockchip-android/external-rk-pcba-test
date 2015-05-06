@@ -166,7 +166,7 @@ void* rtc_test(void *argc)
 	
 	y = tc_info->y;	
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_RTC,PCBA_TESTING);
-
+	return argc;//wjh
 
 	s = malloc(32);
 	 if(script_fetch("rtc", "module_args", (int *)dt, 8) == 0)
