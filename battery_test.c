@@ -213,8 +213,6 @@ int BatteryPathInit()
 		tc_info->y  = get_cur_print_y();	
 
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s \n",PCBA_BATTERY);
-
-	#if	0
 	
  	if(BatteryPathInit()<0)
  	{
@@ -255,7 +253,7 @@ int BatteryPathInit()
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 		sleep(1);
 	}
-	#endif
+
     ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
 	return argv;
  }

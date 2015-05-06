@@ -331,7 +331,7 @@ int start_test_pthread(struct testcase_info *tc_info)
                    return -1;
 
                 }
-        }else if(!strcmp(tc_info->base_info->name, "Key"))
+    }else if(!strcmp(tc_info->base_info->name, "Key"))
 	{
 		err = pthread_create(&key_tid, NULL, key_test,tc_info); //
 		if(err != 0)
@@ -631,29 +631,22 @@ int main(int argc, char **argv)
 	struct list_head *pos;
 	int success = 0;
 	
-	printf("%s line=%d SCRIPT_NAME=%s\n", __FUNCTION__, __LINE__, SCRIPT_NAME);
-
-	
 	#ifdef SOFIA3GR_PCBA
-		//freopen("/dev/ttyS1", "a", stdout); setbuf(stdout, NULL);
-		//freopen("/dev/ttyS1", "a", stderr); setbuf(stderr, NULL);
+		freopen("/dev/ttyS1", "a", stdout); setbuf(stdout, NULL);
+		freopen("/dev/ttyS1", "a", stderr); setbuf(stderr, NULL);
 	#else
 		freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 		freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
 	#endif
-
-	printf("wjh1111111111111111111%s line=%d \n", __FUNCTION__, __LINE__);
 	
 	if (gui_init())
 	{
 		ui_init();
 		ui_set_background(BACKGROUND_ICON_INSTALLING);
 	}
-	printf("wjh22222222222222222222222%s line=%d \n", __FUNCTION__, __LINE__);
+	printf("[%s] Function=%s line=%d \n", __TIME__, __FUNCTION__, __LINE__);
 	ui_print_init();
-	printf("wjh3333333333333333333333333%s line=%d \n", __FUNCTION__, __LINE__);
 	gui_loadResources();
-	printf("wjh444444444444444444444444%s line=%d \n", __FUNCTION__, __LINE__);
 #if 1
 	w =  gr_fb_width() >> 1;
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_VERSION_NAME);
@@ -663,21 +656,19 @@ int main(int argc, char **argv)
 	cur_p_y = (gr_fb_height()/CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	script_buf = parse_script(SCRIPT_NAME);
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	if (!script_buf)
 	{
 		   printf("parse script failed\n");
 		   return -1;
 	}
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
+	
 	ret = init_script(script_buf);
 	if (ret) {
 		   db_error("core: init script failed(%d)\n", ret);
 		   return -1;
 	}
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
+	
 	ret = parse_testcase();
 	if (ret < 0) {
 		db_error("core: parse all test case from script failed(%d)\n", ret);
@@ -701,7 +692,7 @@ int main(int argc, char **argv)
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
-		//start_auto_test_item(tc_info);
+		start_auto_test_item(tc_info);
 	}
 	
 #endif

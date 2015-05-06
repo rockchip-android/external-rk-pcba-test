@@ -134,6 +134,19 @@ void process_ssid(char *dst, char *src, char *src2)
 	sprintf(dst, "{ %s \"%d\" }", &ssids[index][0], rssi);
 }
 
+//-------------------------add wjh------------------------------------------//
+void parse_ssid_level(char *dst, char *src, char *src2)
+{
+	int rssi = 0;
+	char *temp = &rssis[0][0];
+	*temp++ = *src2++; //'-'
+	*temp++ = *src2++; //'9'
+	*temp++ = *src2++; //'0'
+	*temp++ = '\0';
+	rssi = calcSingleLevel(atoi(&rssis[0][1])*(-1));
+	sprintf(dst, "{ %s %s %d %s }", src, PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1);
+}
+
 // ---------------------------------------------------------------------------
 
 void* wlan_test(void* argv)
@@ -154,17 +167,34 @@ void* wlan_test(void* argv)
 	y = tc_info->y;
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_WIFI,PCBA_TESTING);
 
-#if 0
+	return argv;
+	
 	#ifdef SOFIA3GR_PCBA
-		ret =  __system("busybox chmod 777 /system/etc/wifi.sh");
+		ret =  __system("busybox chmod 777 /system/bin/wifi.sh");
 	#else
 		ret =  __system("busybox chmod 777 /res/wifi.sh");
 	#endif
+	
 	if(ret)
 		LOG("chmod wifi.sh failed :%d\n",ret);
 
 	#ifdef SOFIA3GR_PCBA
-		ret = __system("/system/etc/wifi.sh");
+		int counts = 0;
+		while(fp == NULL || fp2 == NULL) {
+			ret = system("sh system/etc/wifi.sh");
+			if(ret < 0) {
+				printf("wlan_test::wlan_test: cmd: /system/bin/wifi.sh\t error: %s", strerror(errno));
+			}
+
+			if(counts > 3) {
+				ret=-1;
+				break;
+			}
+
+			fp = fopen(SCAN_RESULT_FILE, "r");
+			fp2 = fopen(SCAN_RESULT_FILE2, "r");
+			counts++;
+		}
 	#else
 		ret = __system("/res/wifi.sh");
 	#endif
@@ -185,21 +215,27 @@ void* wlan_test(void* argv)
 		goto error_exit;
 	}
 	
+	#ifndef SOFIA3GR_PCBA
 	fp = fopen(SCAN_RESULT_FILE, "r");
 	if(fp == NULL) {
 		LOG("can not open %s.\n", SCAN_RESULT_FILE);
 		goto error_exit;
 	}
+	#endif
+	
 	memset(results, 0, SCAN_RESULT_LENGTH);
 	fread(results,SCAN_RESULT_LENGTH,1,fp);
 	results[SCAN_RESULT_LENGTH-1] = '\0';
 	//LOG("%s.\n", results);
 	
+	#ifndef SOFIA3GR_PCBA
 	fp2 = fopen(SCAN_RESULT_FILE2, "r");
 	if(fp2 == NULL) {
 		LOG("can not open %s.\n", SCAN_RESULT_FILE2);
 		goto error_exit;
 	}
+	#endif
+	
 	memset(results2, 0, SCAN_RESULT_LENGTH);
 	fread(results2,SCAN_RESULT_LENGTH,1,fp2);
 	results2[SCAN_RESULT_LENGTH-1] = '\0';
@@ -207,10 +243,29 @@ void* wlan_test(void* argv)
 	
 	memset(ssid, 0, 100);
 	
-	process_ssid(ssid, results, results2);
+	#ifdef SOFIA3GR_PCBA
+		parse_ssid_level(ssid, results, results2);
+	#else
+		process_ssid(ssid, results, results2);
+	#endif
 	ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_SECCESS,ssid);
 	
 	LOG("wlan_test success.\n");
+	if(fp != NULL) {
+		fclose(fp);
+	}
+	
+	if(fp2 != NULL) {
+		fclose(fp2);
+	}
+	
+	if(results != NULL) {
+		free(results);
+	}
+	
+	if(results2 != NULL) {
+		free(results2);
+	}
 	return 0;
 
 error_exit:
@@ -235,6 +290,5 @@ error_exit:
 	
 	ui_print_xy_rgba(0,y,225,0,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_FAILED,ssid);
 	tc_info->result = -1;
-#endif
   return argv;
 }

@@ -52,19 +52,19 @@ int tw_reboot(RebootCommand command)
 	    case rb_system:
 	        //finish_recovery("s");
 			sync();
-			check_and_run_script("/system/etc/rebootsystem.sh", "reboot system");
+			check_and_run_script("/system/bin/rebootsystem.sh", "reboot system");
 	        return reboot(RB_AUTOBOOT);
 	    case rb_recovery:
-			check_and_run_script("/system/etc/rebootrecovery.sh", "reboot recovery");
+			check_and_run_script("/system/bin/rebootrecovery.sh", "reboot recovery");
 	        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "recovery");
 	    case rb_bootloader:
-			check_and_run_script("/system/etc/rebootbootloader.sh", "reboot bootloader");
+			check_and_run_script("/system/bin/rebootbootloader.sh", "reboot bootloader");
 	        return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "bootloader");
 	    case rb_poweroff:
-			check_and_run_script("/system/etc/poweroff.sh", "power off");
+			check_and_run_script("/system/bin/poweroff.sh", "power off");
 	        return reboot(RB_POWER_OFF);
 	    case rb_download:
-			check_and_run_script("/system/etc/rebootdownload.sh", "reboot download");
+			check_and_run_script("/system/bin/rebootdownload.sh", "reboot download");
 			return __reboot(LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, (void*) "download");
 		return 1;
 	    default:

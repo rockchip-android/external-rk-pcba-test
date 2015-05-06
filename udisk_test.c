@@ -30,7 +30,7 @@ void * udisk_test(void * argv)
 	#if 0
 	
 	#ifdef SOFIA3GR_PCBA
-		ret =  __system("busybox chmod 777 /system/etc/udisktester.sh");
+		ret =  __system("busybox chmod 777 /system/bin/udisktester.sh");
 	#else
 		ret =  __system("busybox chmod 777 /res/udisktester.sh");
 	#endif
@@ -39,7 +39,7 @@ void * udisk_test(void * argv)
 		printf("chmod udisktester.sh failed :%d\n",ret);
 
 	#ifdef SOFIA3GR_PCBA
-		ret = __system("/system/etc/udisktester.sh");
+		ret = __system("/system/bin/udisktester.sh");
 	#else
 		ret = __system("/res/udisktester.sh");
 	#endif

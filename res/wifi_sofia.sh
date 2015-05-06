@@ -1,5 +1,6 @@
 #!/system/bin/busybox sh
 
+wlan_nvm=/system/vendor/firmware/nvmData
 result_file=/data/scan_result.txt
 result_file2=/data/scan_result2.txt
 result_file3=/data/scan_result3.txt
@@ -26,6 +27,19 @@ fi
 if [ -e $result_file2 ] ; then
 busybox rm -f $result_file2
 fi
+
+dd=0
+while [ $dd -lt 5 ];
+do
+    if [ -e $wlan_nvm ]; then
+        rmmod iwlxvt
+        busybox sleep 1
+        insmod system/lib/modules/iwlmvm.ko
+        break
+    fi
+    dd=$((dd+1))
+    busybox sleep 1
+done
 
 echo "get scan results"
 while [ $j -lt $jmax ]; 
@@ -64,6 +78,18 @@ do
 	if [ -e $wpa_supplicant_file ] ; then
 		busybox rm -f $wpa_supplicant_file
 	fi
+				m=0
+				while [ $m -lt 5 ];
+				do
+				    if [ -e $wlan_nvm ]; then
+				    		rmmod iwlmvm.ko
+				    		busybox sleep 1
+				        insmod system/lib/modules/iwlxvt.ko
+				        break
+				    fi
+				    m=$((m+1))
+				    busybox sleep 1
+				done
         exit 1
     fi
 done
@@ -72,5 +98,19 @@ echo "wlan test failed"
 if [ -e $wpa_supplicant_file ] ; then
 	busybox rm -f $wpa_supplicant_file
 fi
+
+n=0
+while [ $n -lt 5 ];
+do
+    if [ -e $wlan_nvm ]; then
+        rmmod iwlmvm.ko
+    		busybox sleep 1
+        insmod system/lib/modules/iwlxvt.ko
+        break
+    fi
+    n=$((n+1))
+    busybox sleep 1
+done
+				
 exit 0
 

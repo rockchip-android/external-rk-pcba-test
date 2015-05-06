@@ -30,7 +30,7 @@ void * sdcard_test(void * argv)
 	ret =  __system("busybox chmod 777 /res/emmctester.sh");
 	#else
 		#ifdef SOFIA3GR_PCBA
-		ret =  __system("busybox chmod 777 /system/etc/mmctester.sh");
+		ret =  __system("busybox chmod 777 /system/bin/mmctester.sh");
 		#else
 		ret =  __system("busybox chmod 777 /res/mmctester.sh");
 		#endif
@@ -42,7 +42,7 @@ void * sdcard_test(void * argv)
     ret = __system("/res/emmctester.sh");
     #else
 		#ifdef SOFIA3GR_PCBA
-		ret = __system("/system/etc/mmctester.sh");
+		ret = __system("/system/bin/mmctester.sh");
 		#else
 		ret = __system("/res/mmctester.sh");
 		#endif
