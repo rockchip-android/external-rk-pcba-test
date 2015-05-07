@@ -43,6 +43,12 @@ endif
 ifneq ($(RECOVERY_SDCARD_ON_DATA),)
 	LOCAL_CFLAGS += -DRECOVERY_SDCARD_ON_DATA
 endif
+
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+LOCAL_CFLAGS += -DSOFIA3GR_PCBA
+
+endif
+
 DEVICE_RESOLUTION := 800x480
 LOCAL_C_INCLUDES += bionic external/stlport/stlport $(commands_recovery_local_path)/gui/devices/$(DEVICE_RESOLUTION)
 
