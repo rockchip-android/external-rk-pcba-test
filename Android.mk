@@ -228,7 +228,6 @@ include $(BUILD_EXECUTABLE)
 #ALL_DEFAULT_INSTALLED_MODULES += $(RECOVERY_BUSYBOX_SYMLINKS) 
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
-<<<<<<< HEAD
 $(shell cp -rf $(commands_recovery_local_path)/res/test_config_sofia.cfg $(TARGET_OUT)/etc/)
 $(shell cp -rf $(commands_recovery_local_path)/res/*.pcm $(TARGET_OUT)/etc/)
 $(shell cp -rf $(commands_recovery_local_path)/res/*.sh $(TARGET_OUT)/bin/)
@@ -236,11 +235,6 @@ $(shell mv -f $(TARGET_OUT)/bin/emmctester_sofia.sh $(TARGET_OUT)/bin/emmctester
 $(shell mv -f $(TARGET_OUT)/bin/mmctester_sofia.sh $(TARGET_OUT)/bin/mmctester.sh)
 $(shell mv -f $(TARGET_OUT)/bin/udisktester_sofia.sh $(TARGET_OUT)/bin/udisktester.sh)
 $(shell mv -f $(TARGET_OUT)/bin/wifi_sofia.sh $(TARGET_OUT)/bin/wifi.sh)
-=======
-$(shell cp -rf $(commands_recovery_local_path)/res/* $(TARGET_OUT)/etc/)
-$(shell mv -f $(TARGET_OUT)/etc/emmctester_sofia.sh $(TARGET_OUT)/etc/emmctester.sh)
-$(shell mv -f $(TARGET_OUT)/etc/mmctester_sofia.sh $(TARGET_OUT)/etc/mmctester.sh)
->>>>>>> pcba: change LOCAL_MODULE_FLAG to optional and define sofia3gr local Cflag
 $(shell mv -f $(TARGET_OUT)/etc/test_config_sofia.cfg $(TARGET_OUT)/etc/test_config.cfg)
 endif
 
