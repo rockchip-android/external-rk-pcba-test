@@ -207,6 +207,7 @@ void* rtc_test(void *argc)
 	{
 	    sleep(1);
 //	    y=get_cur_print_y();
+#ifndef SOFIA3GR_PCBA
 		while(1)
 		{
 			t = get_system_time(dt);
@@ -221,7 +222,7 @@ void* rtc_test(void *argc)
 			ui_display_sync(0,y,0,255,0,255,"%s:[%s] { %04d/%02d/%02d %02d:%02d:%02d }\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
 			sleep(1);
 		}
-/*
+#else
 		t = get_system_time(dt);
 		if(t < 0)
 		{
@@ -243,14 +244,19 @@ void* rtc_test(void *argc)
 				ret = 0;
 			}
 		}
-*/
+#endif
 	}
 	
 	if(ret == 0)
 	{
 		tc_info->result = 0;
+	#ifdef SOFIA3GR_PCBA
+		p = localtime(&t);
+		ui_display_sync(0,y,0,255,0,255,"%s:[%s] { %04d/%02d/%02d %02d:%02d:%02d }\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
+	#else
 	//	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc: ok!   { %s }\n",dt);
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_SECCESS);
+	#endif
 	}
 	else
 	{

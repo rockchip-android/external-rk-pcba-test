@@ -251,7 +251,11 @@ int BatteryPathInit()
 		
 					
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
+		#ifndef SOFIA3GR_PCBA
 		sleep(1);
+		#else
+		sleep(1);
+		#endif
 	}
 
     ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
