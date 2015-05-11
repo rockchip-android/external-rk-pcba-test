@@ -48,6 +48,11 @@ LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
 
 endif
 
+ifeq ($(strip $(BOARD_SENSOR_MPU)), true)
+LOCAL_CFLAGS += -DSOFIA3GR_SENSOR_MPU
+
+endif
+
 LOCAL_SRC_FILES := \
     pre_test.c\
     ui.c \
@@ -69,6 +74,7 @@ LOCAL_SRC_FILES := \
     sdcard_test.c		\
     udisk_test.c        \
     gsensor_test.c 		\
+    gsensor_test_mpu.c 		\
     hdmi_test.c       \
     sim_test.c \
     battery_test.c\

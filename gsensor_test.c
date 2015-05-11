@@ -39,10 +39,10 @@
 
 #define  CTL_DEV_PATH    "/dev/mma8452_daemon"
 
-float g_x = 0;
-float g_y = 0;
-float g_z = 0;
-int openInput(const char* inputName)
+static float g_x = 0;
+static float g_y = 0;
+static float g_z = 0;
+static int openInput(const char* inputName)
 {
     int fd = -1;
     const char *dirname = "/dev/input";
@@ -84,7 +84,7 @@ int openInput(const char* inputName)
     return fd;
 }
 
- int  processEvent(int code, int value)
+static int  processEvent(int code, int value)
  {
  
 	 float v;
@@ -107,7 +107,7 @@ int openInput(const char* inputName)
 	 return 0;
   }
 
- int readEvents(int fd)
+ static int readEvents(int fd)
  {
 
 	struct input_event  event;

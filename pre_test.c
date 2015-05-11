@@ -56,6 +56,7 @@
 #endif
 #endif
 
+
 #ifdef SOFIA3GR_PCBA
 #define SCRIPT_NAME                     "/system/etc/test_config.cfg"
 #else
@@ -390,6 +391,15 @@ int start_test_pthread(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "gsensor"))
 	{
+#ifdef SOFIA3GR_SENSOR_MPU
+		err = pthread_create(&gsensor_tid, NULL, gsensor_test_mpu,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create camera test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		} 
+#else
 		err = pthread_create(&gsensor_tid, NULL, gsensor_test,tc_info); //
 		if(err != 0)
 		{  
@@ -397,6 +407,7 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
+#endif
 	}
 	else if(!strcmp(tc_info->base_info->name, "udisk"))
 	{
