@@ -402,14 +402,14 @@ void* sim_test(void *argc)
 
 		if(simcard1 && simcard2){
 			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]  IMSI[sim]=%s  IMSI[sim2]=%s\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]  IMSI[sim]=%s  IMSI[sim2]=%s\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
 			return argc;
 		}
 
 		if(simcard1)
 		{
 			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]  IMSI[sim]=%s",PCBA_SIM,PCBA_SECCESS, ISMI1);
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]  IMSI[sim]=%s",PCBA_SIM,PCBA_SECCESS, ISMI1);
 			return argc;
 		}
 	#endif
