@@ -43,10 +43,10 @@ LOCAL_FORCE_STATIC_EXECUTABLE := true
 #LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
 LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language
 
-ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+#ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
 
-endif
+#endif
 
 ifeq ($(strip $(BOARD_SENSOR_MPU)), true)
 LOCAL_CFLAGS += -DSOFIA3GR_SENSOR_MPU

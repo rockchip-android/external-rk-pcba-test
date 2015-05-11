@@ -146,6 +146,8 @@ int isAtResponse = 0;
 int isResponseSuc = 0;
 int isAtSended = 0;
 char gAtAck_command[100]={"ERROR"};
+char ISMI[30]={"\0"};
+
 
 static void *readerLoop(void *arg){
 	 const char  *line;
@@ -161,6 +163,17 @@ static void *readerLoop(void *arg){
 			if(line != NULL){
 				
 				//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"line:%s\n",line);
+				#ifdef SOFIA3GR_PCBA
+				if(line != NULL && strstr(line,"AT+CIMI")!=NULL){
+					line = readline();
+					if(line != NULL && strstr(line,"ERROR")==NULL){
+						sprintf(ISMI,"%s",line);
+						isResponseSuc = 1;
+						isAtResponse = 1;
+						isAtSended =0;
+					}
+  				}
+				#endif
 				
 				if(strstr(line,gAtAck_command)!=NULL){
 					isResponseSuc = 1;
@@ -250,7 +263,6 @@ for(j=0;j<3;j++){
 	return -1;
 }
 
-
 void* sim_test(void *argc)
 
 {
@@ -271,35 +283,33 @@ void* sim_test(void *argc)
 	y = tc_info->y;
 	
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_SIM,PCBA_TESTING);
-	
-	#ifdef SOFIA3GR_PCBA
-		modem_fd = open("/dev/vmodem", O_RDWR); 
-	#else
-		modem_fd = open("/dev/voice_modem", O_RDWR); 
-	#endif
- 	if(modem_fd > 0){
- 		//sleep(5);
-		//ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
-		//sleep(2);
-   	 	ioctl(modem_fd,BP_IOCTL_POWON,&arg);
-		sleep(2);     
-  	}else{
-  		ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		printf("modem open fail !\n");
-		tc_info->result = -1; 
-		return argc;
-  	} 
-	err = ioctl(modem_fd,BP_IOCTL_GET_BPID,&biID);
-	if(err < 0){
-		ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		printf("biID fail !\n");
-		tc_info->result = -1;
-		return argc;
-	}
 
+	#ifndef SOFIA3GR_PCBA
+		modem_fd = open("/dev/voice_modem", O_RDWR); 
+	 	if(modem_fd > 0){
+	 		//sleep(5);
+			//ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
+			//sleep(2);
+	   	 	ioctl(modem_fd,BP_IOCTL_POWON,&arg);
+			sleep(2);     
+	  	}else{
+	  		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+			printf("modem open fail !\n");
+			tc_info->result = -1; 
+			return argc;
+	  	} 
+		err = ioctl(modem_fd,BP_IOCTL_GET_BPID,&biID);
+		if(err < 0){
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+			printf("biID fail !\n");
+			tc_info->result = -1;
+			return argc;
+		}
+	#endif
+	
     do{
 	   	#ifdef SOFIA3GR_PCBA
-			serial_fd = open("/dev/mvpipe-at",O_RDWR );
+			serial_fd = open("/dev/mvpipe-atc",O_RDWR );
 		#else
 			serial_fd = open(atChannelTab[biID],O_RDWR );
 		#endif
@@ -311,7 +321,7 @@ void* sim_test(void *argc)
 
 	if(serial_fd <0)
 	{
-		ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 		printf("open at port fail!\n");
 		tc_info->result = -1;
 		return argc;
@@ -342,7 +352,7 @@ void* sim_test(void *argc)
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
     if(pthread_create(&s_tid_reader, &attr, readerLoop, &attr)<0)
-     	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+     	ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
      	printf("pthread_create err\n");
      	
      	//while(1){sleep(5);write (gFd, "AT+CPIN?\r\n", 10);}
@@ -359,24 +369,27 @@ void* sim_test(void *argc)
 		memset(ISMI2, 0, 50);
 		if(at_send(serial_fd,"AT+CFUN=1\r\n","OK") < 0){
 			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_FAILED);
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+			printf("execute AT+CFUN=1 fail\n");
 			return argc;
 		}
 
 		if(at_send(serial_fd,"AT+XSIMSEL=0\r\n","OK") < 0){
 			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_FAILED);
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+			printf("execute AT+XSIMSEL=0 fail\n");
 			return argc;
 		}
 
 		if(at_send(serial_fd,"AT+CIMI\r\n","OK") < 0){
 			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_FAILED);
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+			printf("execute AT+CIMI fail\n");
 			return argc;
 		}
 
 		simcard1 = 1;
-		sprintf(ISMI1,"%s", readline());
+		sprintf(ISMI1,"%s", ISMI);
 
 		if(at_send(serial_fd,"AT+XSIMSEL=1\r\n","OK") < 0){
 			return argc;
@@ -384,29 +397,29 @@ void* sim_test(void *argc)
 
 		if(at_send(serial_fd,"AT+CIMI\r\n","OK") >= 0){
 			simcard2 = 1;
-			sprintf(ISMI2,"%s", readline());
+			sprintf(ISMI2,"%s", ISMI);
 		}
 
 		if(simcard1 && simcard2){
 			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]  Sim1[IMSI]=%s  Sim2[IMSI]=%s\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]  IMSI[sim]=%s  IMSI[sim2]=%s\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
 			return argc;
 		}
 
 		if(simcard1)
 		{
 			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]  Sim[IMSI]=%s",PCBA_SIM,PCBA_SECCESS, ISMI1);
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]  IMSI[sim]=%s",PCBA_SIM,PCBA_SECCESS, ISMI1);
 			return argc;
 		}
 	#endif
 	
 	if(at_send(serial_fd,"AT+CPIN?\r\n","READY") >= 0){
 		tc_info->result = 0;
-		ui_print_xy_rgba(0,get_cur_print_y(),0,255,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_SECCESS);
+		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_SECCESS);
 	}else{
 		tc_info->result = -1;
-		ui_print_xy_rgba(0,get_cur_print_y(),255,0,0,255,"%s:[%s]\n",PCBA_SIM,PCBA_FAILED);
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 	}
 	ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
 	return argc;
