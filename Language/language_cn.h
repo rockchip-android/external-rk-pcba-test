@@ -11,6 +11,7 @@
 #define PCBA_KEY "按键"
 #define PCBA_RTC "时钟"
 #define PCBA_SIM "SIM卡"
+#define PCBA_SIM2 "SIM卡2"
 #define PCBA_SDCARD  "SD卡"
 #define PCBA_UCARD  "U盘"
 #define PCBA_WIFI   "网络"
@@ -28,5 +29,6 @@
 
 #define PCBA_ERR_CHECK "检测错误"
 #define PCBA_ERR_FREQ "变频错误"
+#define PCBA_SDCARD_NOINSERT "没有插入sd卡"
 
 #endif

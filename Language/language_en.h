@@ -11,6 +11,7 @@
 #define PCBA_KEY "Key"
 #define PCBA_RTC "Rtc"
 #define PCBA_SIM "Sim"
+#define PCBA_SIM2 "Sim2"
 #define PCBA_SDCARD  "SDCard"
 #define PCBA_UCARD  "UDisk"
 #define PCBA_WIFI   "Wifi"
@@ -23,4 +24,5 @@
 #define PCBA_BATTERY_VOLTAGE  "Voltage"
 #define PCBA_RECORD "Record Volum"
 #define PCBA_DDR "DDR"
+#define PCBA_SDCARD_NOINSERT "no sdcard"
 #endif

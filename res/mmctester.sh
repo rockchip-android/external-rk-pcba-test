@@ -1,8 +1,12 @@
 mmcblk="/dev/block/mmcblk1p1"
 mmcp=$mmcblk
 
+if [ ! -d "/data/sd_insert_info" ]; then
+    busybox mkdir -p /data/sd_insert_info
+fi
+
 if [ ! -b "$mmcblk" ]; then
-	busybox echo "not card insert"
+	busybox echo "not card insert" > /data/sd_insert_info
 	exit 0
 fi        
 

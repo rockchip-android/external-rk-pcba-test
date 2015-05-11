@@ -9,6 +9,7 @@
 
 #define SCAN_RESULT_LENGTH 128
 #define SCAN_RESULT_FILE "/data/sd_capacity"
+#define SD_INSERT_RESULT_FILE "/data/sd_insert_info"
 
 void * sdcard_test(void * argv)
 {
@@ -24,7 +25,7 @@ void * sdcard_test(void * argv)
 		tc_info->y  = get_cur_print_y();	
 
 	y = tc_info->y;
-	ui_print_xy_rgba(0,y,255,255,0,255,"%s \n",PCBA_SDCARD);
+	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_SDCARD,PCBA_TESTING);
 
 	#ifdef RK3288_PCBA
 	ret =  __system("busybox chmod 777 /res/emmctester.sh");
@@ -54,6 +55,14 @@ void * sdcard_test(void * argv)
 				if(fp != NULL)
 				{
 					break;
+				}
+				else
+				{
+					if(fopen(SD_INSERT_RESULT_FILE, "r") != NULL);
+					printf("has not insert sd card.\n");
+					ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_SDCARD_NOINSERT);
+					tc_info->result = -1;
+					return argv;
 				}
 				
 				if(testCounts++ > 5)
