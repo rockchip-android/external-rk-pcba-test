@@ -46,7 +46,6 @@ endif
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_CFLAGS += -DSOFIA3GR_PCBA
-
 endif
 
 DEVICE_RESOLUTION := 800x480

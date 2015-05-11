@@ -678,14 +678,14 @@ int main(int argc, char **argv)
 		db_warn("core: NO TEST CASE to be run\n");
 		return -1;
 	}
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
+	
 	printf("manual testcase:\n");
 	list_for_each(pos, &manual_test_list_head) {
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
 		init_manual_test_item(tc_info);
 		
 	}
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
+
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),manual_p_y+1,255,255,0,255,"%s\n",PCBA_AUTO_TEST);
         drawline_4(255,255,0,255,0,(CHAR_HEIGHT*(manual_p_y+1)-CHAR_HEIGHT/4),w,CHAR_HEIGHT,3); 
 
@@ -696,7 +696,6 @@ int main(int argc, char **argv)
 	}
 	
 #endif
-	printf("%s line=%d \n", __FUNCTION__, __LINE__);
 	//while(1);
 	gui_start();
 	start_input_thread();

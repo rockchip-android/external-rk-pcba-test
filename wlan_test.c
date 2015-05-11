@@ -144,7 +144,7 @@ void parse_ssid_level(char *dst, char *src, char *src2)
 	*temp++ = *src2++; //'0'
 	*temp++ = '\0';
 	rssi = calcSingleLevel(atoi(&rssis[0][1])*(-1));
-	sprintf(dst, "{ %s %s %d %s }", src, PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1);
+	sprintf(dst, "{ %s %s: %d%s Level=%ddB }", src, PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1, atoi(&rssis[0][1])*(-1));
 }
 
 // ---------------------------------------------------------------------------
@@ -166,11 +166,9 @@ void* wlan_test(void* argv)
 
 	y = tc_info->y;
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_WIFI,PCBA_TESTING);
-
-	return argv;
 	
 	#ifdef SOFIA3GR_PCBA
-		ret =  __system("busybox chmod 777 /system/bin/wifi.sh");
+		//ret =  __system("busybox chmod 777 /system/bin/wifi.sh");
 	#else
 		ret =  __system("busybox chmod 777 /res/wifi.sh");
 	#endif
@@ -181,12 +179,12 @@ void* wlan_test(void* argv)
 	#ifdef SOFIA3GR_PCBA
 		int counts = 0;
 		while(fp == NULL || fp2 == NULL) {
-			ret = system("sh system/etc/wifi.sh");
+			ret = system("sh system/bin/wifi.sh");
 			if(ret < 0) {
 				printf("wlan_test::wlan_test: cmd: /system/bin/wifi.sh\t error: %s", strerror(errno));
 			}
 
-			if(counts > 3) {
+			if(counts > 4) {
 				ret=-1;
 				break;
 			}

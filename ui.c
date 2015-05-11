@@ -611,8 +611,8 @@ void start_input_thread(void){
 
 void ui_init(void)
 {
-    gr_init();
-    ev_init();
+    //gr_init();//hide by wjh
+    //ev_init();
 
     text_col = text_row = 0;
     text_rows = gr_fb_height() / CHAR_HEIGHT;
@@ -806,7 +806,7 @@ void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char* fm
     // This can get called before ui_init(), so be careful.
     int temp_row = t_row;
     pthread_mutex_lock(&gUpdateMutex);
-    t_col+=2;
+    t_col+=2; 
     if (text_rows > 0 && text_cols > 0) 
     {
 		char *ptr;

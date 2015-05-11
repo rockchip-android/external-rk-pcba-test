@@ -1,60 +1,33 @@
 #!/system/bin/sh
 
-#source send_cmd_pipe.sh
+result_file=/data/sd_capacity
 
-nr="0"
-mmcblk="/dev/block/mmcblk$nr"
+if [ -e $result_file ] ; then
+busybox rm -f $result_file
+fi
+
+if [ ! -b "/dev/block/mmcblk1p1" ]; then
+	busybox echo "not card insert"
+	exit 0
+fi        
+
+if [ ! -d "/tmp/extsd" ]; then
+    busybox mkdir -p /tmp/extsd
+fi
+
+umount /tmp/extsd
+
 mmcp=$mmcblk
+su root
 
-#while true; do
-    while true; do
-        while true; do
-            if [ -b "$mmcblk" ]; then
-              busybox  sleep 1
-                if [ -b "$mmcblk" ]; then
-                    echo "card$nr insert"
-                    break
-                fi
-            else
-               busybox sleep 1
-            fi
-        done
-        
-        if [ ! -d "/tmp/extsd" ]; then
-            busybox mkdir -p /tmp/extsd
-        fi
-        
-        mmcp=$mmcblk
-        busybox mount -t vfat $mmcp /tmp/extsd
-        if [ $? -ne 0 ]; then
-            mmcp=$mmcblk"p1"
-           busybox mount -t vfat $mmcp /tmp/extsd
-            if [ $? -ne 0 ]; then
-                exit 0
-                busybox sleep 3
-                continue 2
-            fi
-        fi
+mount -t vfat /dev/block/mmcblk1p1 /tmp/extsd
 
-        break
-    done
-    
-    capacity=`busybox df | busybox grep "/tmp/extsd" | busybox awk '{printf $2}'`
-    echo "$mmcp: $capacity"
-    
-    busybox umount /tmp/extsd
-    
-    echo $capacity > /data/sd_capacity
+capacity=`df | grep "/tmp/extsd" | busybox awk '{printf $2}'`
+busybox echo "$mmcp: $capacity"
 
-	exit 1
-#    while true; do
- #       if [ -b "$mmcblk" ]; then
-#            echo "please remove card$nr"
-#            busybox sleep 1
- #       else
-  #          echo "card$nr remove"
-  #          break
-   #     fi
-    #done
-#done
+busybox sleep 1
+
+umount /tmp/extsd
+busybox echo $capacity > /data/sd_capacity
+exit 1
 

@@ -228,6 +228,7 @@ include $(BUILD_EXECUTABLE)
 #ALL_DEFAULT_INSTALLED_MODULES += $(RECOVERY_BUSYBOX_SYMLINKS) 
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+$(shell cp -rf $(commands_recovery_local_path)/gui/basicTheme/* $(TARGET_OUT)/etc/)
 $(shell cp -rf $(commands_recovery_local_path)/res/test_config_sofia.cfg $(TARGET_OUT)/etc/)
 $(shell cp -rf $(commands_recovery_local_path)/res/*.pcm $(TARGET_OUT)/etc/)
 $(shell cp -rf $(commands_recovery_local_path)/res/*.sh $(TARGET_OUT)/bin/)

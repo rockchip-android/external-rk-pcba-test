@@ -58,6 +58,7 @@ enum WIFI_CHIP_TYPE_LIST{
     RTK8723AU,
     RTK8723BU,
     BK3515,
+    SOFIA_3GR, 
 };
 
 static int rfkill_id = -1;
@@ -631,6 +632,8 @@ static int get_chip_type()
 		chip_type = RTK8723BU; 
     } else if(strcmp(dt, "bk3515") == 0) {
         chip_type = BK3515;
+	} else if(strcmp(dt, "Sofia-3gr") == 0) {
+        chip_type = SOFIA_3GR;
 	} else {
 		if (bt_get_chipname(bt_chip, 63) != 0) {
 		    LOG("Can't read BT chip name\n");
@@ -743,6 +746,74 @@ static int bt_test_bluedroid()
     return ret;
 }
 
+int check_Sofia3gr_bluedroid_test()//add by wjh
+{	
+	LOG("Sofia3gr_bluedroid_test: start check bdt test result.\n");
+
+	int ret = -1;
+    FILE *fp=NULL;
+    int try = 10, bytes_for_second = 10*1024;
+    char *result_buf, *buf;
+    int result_size = try * bytes_for_second; 
+
+    result_buf = malloc(result_size);
+    if (result_buf == NULL) {
+        LOG("malloc result_buf fail\n");
+        return ret;
+    }
+    buf = result_buf;
+
+	fp = popen("echo \"enable\" | bdt", "r");
+    if (fp != NULL) {
+        int fd = fileno(fp);
+        int flags = fcntl(fd, F_GETFL, 0);
+        int len = 0;
+        fcntl(fd, F_SETFL, flags|O_NONBLOCK);
+
+        LOG("running bdt for bluetooth test...\n");
+        while (try-->0) {
+            buf += len;
+            len = fread(buf, sizeof(char), bytes_for_second, fp);
+            if (len) {
+                //LOG("read: %s\n", buf);
+                if (strstr(result_buf, "ADAPTER STATE UPDATED : ON")) {
+                    LOG("bt test success!\n");
+                    ret = 0;
+                    break;
+                }
+            }
+            LOG("wait %d\n", try);
+            sleep(1);
+        }
+        pclose(fp);
+        if (try<=0)
+            LOG("bt test timeout!\n");
+    } else
+        LOG("run bdt fail!\n");
+
+    free(result_buf);
+	popen("echo \"quite\" | bdt", "r");
+    return ret;
+}
+
+
+int Sofia3gr_bluedroid_test()//add by wjh
+{	
+	int ret, counts = 3;
+
+	LOG("Sofia3gr_bluedroid_test: start bdt.\n");
+	while(counts-- > 0) 
+	{		 	
+		ret = check_Sofia3gr_bluedroid_test();    	
+		if(ret == 0) 
+		{    		
+			break;    	
+		}    	   
+	}        
+	return ret;
+}
+
+
 void *bt_test(void *argv)
 {
 	struct testcase_info *tc_info = (struct testcase_info *)argv;
@@ -753,19 +824,19 @@ void *bt_test(void *argv)
 		tc_info->y  = get_cur_print_y();
 
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_BLUETOOTH,PCBA_TESTING);
-	#if 0
     switch (get_chip_type()) {
     case RK903:
     case RTK8723BS:
     case BK3515:
         ret = bt_test_bluedroid();
         break;
+	case SOFIA_3GR:
+		ret = Sofia3gr_bluedroid_test();
+        break;
     default:
         ret = bt_test_bluedroid();//bt_test_bluez();
         break;
     }
-
-	#endif
 
     if (ret==0)
         ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
