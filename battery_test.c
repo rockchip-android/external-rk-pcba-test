@@ -212,7 +212,7 @@ int BatteryPathInit()
 	if(tc_info->y <= 0)
 		tc_info->y  = get_cur_print_y();	
 
-	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s \n",PCBA_BATTERY);
+	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_TESTING);
 	
  	if(BatteryPathInit()<0)
  	{
