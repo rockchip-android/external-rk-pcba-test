@@ -43,10 +43,10 @@ LOCAL_FORCE_STATIC_EXECUTABLE := true
 #LOCAL_MODULE_PATH:=$(TARGET_ROOT_OUT_SBIN)
 LOCAL_C_INCLUDES += bionic external/stlport/stlport $(LOCAL_PATH)/Language
 
-#ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
 
-#endif
+endif
 
 ifeq ($(strip $(BOARD_SENSOR_MPU)), true)
 LOCAL_CFLAGS += -DSOFIA3GR_SENSOR_MPU
@@ -94,7 +94,14 @@ else
 	LOCAL_CFLAGS += -DRK312X_PCBA
  	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c #rk312x-camera/camera_test.c  				
  	else
- 	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c camera_test.c
+ 		ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+ 			LOCAL_SRC_FILES += 	sofia_codec/alsa_mixer.c \
+						sofia_codec/alsa_pcm.c \
+						sofia_codec/alsa_route.c \
+						sofia_codec/codec_test.c 
+ 		else
+ 			LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c camera_test.c
+ 		endif
  	endif
 endif
 

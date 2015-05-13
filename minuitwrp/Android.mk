@@ -7,6 +7,11 @@ LOCAL_C_INCLUDES +=\
     external/zlib\
 	external/jpeg
 
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
+LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
+
+endif
+
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 LOCAL_CFLAGS += -DRK3288_PCBA_FONT
 endif

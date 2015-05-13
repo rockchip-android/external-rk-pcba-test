@@ -40,9 +40,11 @@
 // need this functionality (it's used for gamma adjustment) so provide
 // a dummy implementation to satisfy the linker.
 #ifndef RK3288_PCBA_FONT
+#ifndef SOFIA3GR_PCBA
 double pow(double x, double y) {
     return x;
 }
+#endif
 #endif
 int res_create_surface_png(const char* name, gr_surface* pSurface) {
     int result = 0;
