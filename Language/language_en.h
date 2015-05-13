@@ -25,4 +25,6 @@
 #define PCBA_RECORD "Record Volum"
 #define PCBA_DDR "DDR"
 #define PCBA_SDCARD_NOINSERT "no sdcard"
+#define PCBA_INTEL_PTEST_MODE "Intel PTEST MODE"
+#define PCBA_BOOT_IN_ANDROID_FUCTION "Click power button 5 times to exit ptest!"
 #endif

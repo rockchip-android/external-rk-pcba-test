@@ -21,8 +21,7 @@
 #include "rtc_test.h"
 #include "screen_test.h"
 #include "key_test.h"
-
-
+#include "cutils/android_reboot.h"
 
 #include "wlan_test.h"
 #include "bt_test.h"
@@ -642,14 +641,65 @@ int main(int argc, char **argv)
 	struct list_head *pos;
 	int success = 0;
 	
-	#ifdef SOFIA3GR_PCBA
-		freopen("/dev/ttyS1", "a", stdout); setbuf(stdout, NULL);
-		freopen("/dev/ttyS1", "a", stderr); setbuf(stderr, NULL);
-	#else
-		freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
-		freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
-	#endif
+#ifdef SOFIA3GR_PCBA
+	freopen("/dev/ttyS1", "a", stdout); setbuf(stdout, NULL);
+	freopen("/dev/ttyS1", "a", stderr); setbuf(stderr, NULL);
+
+	ui_init();
 	
+	ui_print_init();
+
+	w =  gr_fb_width() >> 1;
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",PCBA_INTEL_PTEST_MODE);
+	ui_print_xy_rgba(0,0,0,255,0,255,"%s\n",PCBA_BOOT_IN_ANDROID_FUCTION);
+
+	gui_start();
+	start_input_thread();
+
+	//prompt_and_wait();
+	LOGD("wait key...\n");
+	int key_code, key_count = 0, key_power = 0, key_vol_plus = 0, key_vol_cut = 0;
+	while(key_code = ui_wait_key()) {
+		LOGD("get key_code = %d\n, I want to check %d", key_code, KEY_POWER);
+		switch(key_code) {
+			case KEY_POWER:
+				key_count++;
+				key_power++;
+				if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
+					break;
+				}
+				if(key_count >= 5) {
+					//reboot and set nvm state
+					LOGD("Pre_test: power key 5 times setBootMode\n");
+					android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
+    				if(ret < 0) {
+        				LOGD("Pre_test::main: pcba test over reboot error: %s", strerror(errno));
+    				}
+				}
+				break;
+			case KEY_VOLUMEUP:
+				key_vol_plus++;
+				if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
+					break;
+				}
+				break;
+			case KEY_VOLUMEDOWN:
+				key_vol_cut++;
+				if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
+					break;
+				}
+				break;
+			default:
+				key_count = 0;
+				break;
+		}
+	}
+
+	LOGD("exit wait key...\n");
+	
+#else
+	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
+	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
 	if (gui_init())
 	{
 		ui_init();
@@ -658,6 +708,10 @@ int main(int argc, char **argv)
 	printf("[%s] Function=%s line=%d \n", __TIME__, __FUNCTION__, __LINE__);
 	ui_print_init();
 	gui_loadResources();
+#endif
+
+
+
 #if 1
 	w =  gr_fb_width() >> 1;
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_VERSION_NAME);
@@ -707,9 +761,13 @@ int main(int argc, char **argv)
 	}
 	
 #endif
+
+#ifndef SOFIA3GR_PCBA
 	//while(1);
 	gui_start();
 	start_input_thread();
+#endif
+	
 #if 0
 	//prompt_and_wait();
 	stopCameraTest();
