@@ -174,6 +174,10 @@ int cpu_err = -1;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
+#ifdef SOFIA3GR_PCBA
+extern void ptest_set_key_wait_status(int key_wait);
+#endif
+
 int get_cur_print_y(void)
 {
 	int tmp;
@@ -654,49 +658,49 @@ int main(int argc, char **argv)
 	ui_print_xy_rgba(0,0,0,255,0,255,"%s\n",PCBA_BOOT_IN_ANDROID_FUCTION);
 
 	gui_start();
-	start_input_thread();
+	start_input_thread_for_key_check();
 
 	//prompt_and_wait();
-	LOGD("wait key...\n");
+	printf("ptest wait key...\n");
 	int key_code, key_count = 0, key_power = 0, key_vol_plus = 0, key_vol_cut = 0;
 	while(key_code = ui_wait_key()) {
-		LOGD("get key_code = %d\n, I want to check %d", key_code, KEY_POWER);
+		printf("get key_code = %d\n, I want to check %d \n", key_code, KEY_POWER);
 		switch(key_code) {
 			case KEY_POWER:
+				printf("Power key is press! \n");
 				key_count++;
 				key_power++;
-				if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
-					break;
-				}
 				if(key_count >= 5) {
 					//reboot and set nvm state
-					LOGD("Pre_test: power key 5 times setBootMode\n");
+					printf("Pre_test: power key 5 times setBootMode\n");
 					android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
     				if(ret < 0) {
-        				LOGD("Pre_test::main: pcba test over reboot error: %s", strerror(errno));
+        				printf("Pre_test::main: pcba test over reboot error: %s", strerror(errno));
     				}
 				}
 				break;
 			case KEY_VOLUMEUP:
-				key_vol_plus++;
-				if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
-					break;
-				}
+				printf("Volueme up key is press! \n");
+				key_vol_plus++;				
 				break;
 			case KEY_VOLUMEDOWN:
+				printf("Voluem down key is press! \n");
 				key_vol_cut++;
-				if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
-					break;
-				}
 				break;
 			default:
 				key_count = 0;
 				break;
 		}
+
+		if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
+			break;
+		}
 	}
 
-	LOGD("exit wait key...\n");
-	
+	printf("exit wait key...\n");
+	ptest_set_key_wait_status(1);
+
+	//gui_init(); //clear origin text
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
@@ -762,8 +766,12 @@ int main(int argc, char **argv)
 	
 #endif
 
-#ifndef SOFIA3GR_PCBA
+
 	//while(1);
+	
+#ifdef SOFIA3GR_PCBA
+	start_input_thread();
+#else
 	gui_start();
 	start_input_thread();
 #endif

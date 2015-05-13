@@ -120,6 +120,24 @@ static pthread_cond_t key_queue_cond = PTHREAD_COND_INITIALIZER;
 static int key_queue[256], key_queue_len = 0;
 static volatile char key_pressed[KEY_MAX + 1];
 static int touch_tp_state = 0;
+#ifdef SOFIA3GR_PCBA
+static pthread_t g_t_ui;
+static int g_exit_from_ptest_key_wait = 0;
+#endif
+
+
+#ifdef SOFIA3GR_PCBA
+void ptest_set_key_wait_status(int key_wait)
+{
+	g_exit_from_ptest_key_wait = key_wait;
+}
+
+int ptest_get_key_wait_status(void)
+{
+	return g_exit_from_ptest_key_wait;
+}
+#endif
+
 
 // Clear the screen and draw the currently selected background icon (if any).
 // Should only be called with gUpdateMutex locked.
@@ -336,13 +354,18 @@ static void *progress_thread(void *cookie)
     }
     return NULL;
 }
-/*
+#ifdef SOFIA3GR_PCBA
 // Reads input events, handles special hot keys, and adds to the key queue.
-static void *input_thread(void *cookie)
+static void *input_thread_for_key_check(void *cookie)
 {
     int rel_sum = 0;
     int fake_key = 0;
     for (;;) {
+		if(ptest_get_key_wait_status())
+		{
+			printf("%s line=%d exit input_thread_for_key_check \n", __FUNCTION__, __LINE__);
+			break;
+		}
         // wait for the next key event
         struct input_event ev;
         do {
@@ -404,9 +427,11 @@ static void *input_thread(void *cookie)
             tw_reboot(rb_system);
         }
     }
+
+	printf("%s line=%d exit input_thread_for_key_check is done!\n", __FUNCTION__, __LINE__);
     return NULL;
 }
-*/
+#endif
 
 
 #undef _EVENT_LOGGING
@@ -576,6 +601,8 @@ static void *input_thread(void *cookie)
     return NULL;
 }
 
+
+
 void ui_print_init(void)  //add by yxj
 {
 	int i = 0;
@@ -603,16 +630,26 @@ void ui_print_init(void)  //add by yxj
 	gUiInitialized = 1;
 }
 
+#ifdef SOFIA3GR_PCBA
+void start_input_thread_for_key_check(void){
+    pthread_create(&g_t_ui, NULL, input_thread_for_key_check, NULL);
+}
+#endif
+
 void start_input_thread(void){
     pthread_t t;
     pthread_create(&t, NULL, input_thread, NULL);
 	pthread_join(t,NULL);
 }
 
+
+
+
+
 void ui_init(void)
 {
-    //gr_init();//hide by wjh
-    //ev_init();
+    gr_init();
+    ev_init();
 
     text_col = text_row = 0;
     text_rows = gr_fb_height() / CHAR_HEIGHT;
