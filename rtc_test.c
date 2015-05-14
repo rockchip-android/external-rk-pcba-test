@@ -206,9 +206,9 @@ void* rtc_test(void *argc)
 	}
 	else
 	{
+#ifndef SOFIA3GR_PCBA
 	    sleep(1);
 //	    y=get_cur_print_y();
-#ifndef SOFIA3GR_PCBA
 		while(1)
 		{
 			t = get_system_time(dt);
