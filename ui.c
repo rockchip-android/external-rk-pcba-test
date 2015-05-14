@@ -122,6 +122,7 @@ static volatile char key_pressed[KEY_MAX + 1];
 static int touch_tp_state = 0;
 #ifdef SOFIA3GR_PCBA
 static pthread_t g_t_ui;
+static pthread_t g_input_ui;
 static int g_exit_from_ptest_key_wait = 0;
 #endif
 
@@ -515,7 +516,7 @@ static void *input_thread(void *cookie)
 			touch_tp_state = 0;
 
 			start_manual_test_item(x,y);
-
+					
                     NotifyTouch(TOUCH_RELEASE, x, y);
 					touch_and_hold = 0;
 					touch_repeat = 0;
@@ -634,13 +635,25 @@ void ui_print_init(void)  //add by yxj
 void start_input_thread_for_key_check(void){
     pthread_create(&g_t_ui, NULL, input_thread_for_key_check, NULL);
 }
-#endif
+
+void start_input_thread(void){ 
+    pthread_create(&g_input_ui, NULL, input_thread, NULL);
+}
+
+void join_input_thread(void){
+	pthread_join(g_input_ui,NULL);
+}
+#else
 
 void start_input_thread(void){
     pthread_t t;
     pthread_create(&t, NULL, input_thread, NULL);
 	pthread_join(t,NULL);
 }
+
+#endif
+
+
 
 
 
@@ -673,9 +686,13 @@ void ui_init(void)
         }
     }
 	#endif
+
+#ifndef SOFIA3GR_PCBA
+
     pthread_t t;
     pthread_create(&t, NULL, progress_thread, NULL);
     pthread_create(&t, NULL, input_thread, NULL);
+#endif
 
     gUiInitialized = 1;
 }

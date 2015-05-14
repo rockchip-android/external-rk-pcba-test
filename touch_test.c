@@ -64,6 +64,9 @@ int draw_line(int x1, int y1, int x2, int y2)
 }
 
 int last_x = 0, last_y = 0;
+#ifdef SOFIA3GR_PCBA
+extern int sync_screen_for_prompt(void);
+#endif
 
 int NotifyTouch(int action, int x, int y)
 {
@@ -87,6 +90,9 @@ int NotifyTouch(int action, int x, int y)
 		pthread_mutex_lock(&gUpdateMutex);
                 gr_flip();
                 pthread_mutex_unlock(&gUpdateMutex);
+		#ifdef SOFIA3GR_PCBA
+				sync_screen_for_prompt();
+		#endif
 		break;
 	case TOUCH_HOLD:
 		break;

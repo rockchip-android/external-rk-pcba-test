@@ -637,6 +637,19 @@ get_menu_selection(char** headers, char** items, int menu_only,
 	}
 
 
+#ifdef SOFIA3GR_PCBA
+int sync_screen_for_prompt(void)
+{
+	if(ptest_get_key_wait_status())
+	{
+		return 0;
+	}
+	
+	ui_print_xy_rgba(0,0,0,255,0,255,"%s\n",PCBA_BOOT_IN_ANDROID_FUCTION);
+
+	return 0;
+}
+#endif
 
 int main(int argc, char **argv)
 {
@@ -659,6 +672,7 @@ int main(int argc, char **argv)
 
 	gui_start();
 	start_input_thread_for_key_check();
+	start_input_thread();
 
 	//prompt_and_wait();
 	printf("ptest wait key...\n");
@@ -700,7 +714,7 @@ int main(int argc, char **argv)
 	printf("exit wait key...\n");
 	ptest_set_key_wait_status(1);
 
-	//gui_init(); //clear origin text
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",""); //clear ptest mode
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
@@ -770,7 +784,8 @@ int main(int argc, char **argv)
 	//while(1);
 	
 #ifdef SOFIA3GR_PCBA
-	start_input_thread();
+	//start_input_thread();
+	join_input_thread();
 #else
 	gui_start();
 	start_input_thread();
