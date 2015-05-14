@@ -27,7 +27,7 @@ void * udisk_test(void * argv)
 	y = tc_info->y;
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s \n",PCBA_UCARD);
 
-	#if 0
+
 	
 	#ifdef SOFIA3GR_PCBA
 		ret =  __system("busybox chmod 777 /system/bin/udisktester.sh");
@@ -71,7 +71,7 @@ void * udisk_test(void * argv)
         ui_print_xy_rgba(0,y,0,0,255,255,"%s:[%s]\n",PCBA_UCARD,PCBA_FAILED);
 
         fclose(fp);
-	#endif
+	
 	return argv;
 	
 }

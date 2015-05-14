@@ -563,8 +563,6 @@ void* cpu_test(void* argv)
 
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"cpu:[%s..] \n",PCBA_TESTING);
 
-	return argv;
-
 	//check last boot mode
 	bootmode = get_boot_mode();
 	if(bootmode == BOOT_MODE_PANIC || bootmode == BOOT_MODE_WATCHDOG){

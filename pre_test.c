@@ -21,7 +21,9 @@
 #include "rtc_test.h"
 #include "screen_test.h"
 #include "key_test.h"
+#ifdef SOFIA3GR_PCBA
 #include "cutils/android_reboot.h"
+#endif
 
 #include "wlan_test.h"
 #include "bt_test.h"
@@ -723,7 +725,6 @@ int main(int argc, char **argv)
 		ui_init();
 		ui_set_background(BACKGROUND_ICON_INSTALLING);
 	}
-	printf("[%s] Function=%s line=%d \n", __TIME__, __FUNCTION__, __LINE__);
 	ui_print_init();
 	gui_loadResources();
 #endif

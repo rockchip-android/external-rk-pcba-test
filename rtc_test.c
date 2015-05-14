@@ -167,14 +167,15 @@ void* rtc_test(void *argc)
 	y = tc_info->y;	
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_RTC,PCBA_TESTING);
 
+
 	s = malloc(32);
 	 if(script_fetch("rtc", "module_args", (int *)dt, 8) == 0)
 	 {
-	 	printf("%s>>>args:%s\n",__func__,s);
+	 	//printf("%s>>>args:%s\n",__func__,s);
                 strncpy(s, dt, 32);
 	}
 
-	printf("%s>>>%s\n",__func__,s);
+	//printf("%s>>>%s\n",__func__,s);
 	day = atoi(s);
 
 	while (*s && *s != '.')
