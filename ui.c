@@ -30,6 +30,9 @@
 #include "recovery_ui.h"
 #include "themes.h"
 #include "data.h"
+#ifdef SOFIA3GR_PCBA
+#include "cutils/android_reboot.h"
+#endif
 
 
 
@@ -569,8 +572,16 @@ static void *input_thread(void *cookie)
  		}	
 			if (ev.value != 0 && ev.code != 143) 
 			{
+			#ifdef SOFIA3GR_PCBA
+				if(ptest_get_key_wait_status())
+				{
+					gettimeofday(&keyStart, NULL);
+					printf("key down:%lu\n",keyStart.tv_sec);
+				}
+			#else
 				gettimeofday(&keyStart, NULL);
 				printf("key down:%lu\n",keyStart.tv_sec);
+			#endif
 				key_repeat = 0;
 				touch_and_hold = 0;
 				touch_repeat = 0;
@@ -580,18 +591,37 @@ static void *input_thread(void *cookie)
 			else if (ev.code != 143)  
 			{
 				// This is a key release
+				#ifdef SOFIA3GR_PCBA
+				if(ptest_get_key_wait_status())
+				{
+					gettimeofday(&keyEnd, NULL);
+					printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
+				}
+				#else
 				gettimeofday(&keyEnd, NULL);
 				printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
+				#endif
 				if(g_key_test)
 					set_gKey(ev.code);
 				key_repeat = 0;
 				touch_and_hold = 0;
 				touch_repeat = 0;
 				dontwait = 0;
+				#ifdef SOFIA3GR_PCBA
+				if(ptest_get_key_wait_status())
+				{
+					if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
+					{
+						printf("%s line=%d press key longer than 5 seconds ,now exit ptest mode \n", __FUNCTION__, __LINE__);
+						android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
+					}
+				}
+				#else
 				if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
 				{
 					break;
 				}
+				#endif
 			}
         }
 	//printf("tp touch : state : %d\r\n",state);
