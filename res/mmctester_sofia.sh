@@ -11,23 +11,23 @@ if [ ! -b "/dev/block/mmcblk1p1" ]; then
 	exit 0
 fi        
 
-if [ ! -d "/tmp/extsd" ]; then
-    busybox mkdir -p /tmp/extsd
-fi
+#if [ ! -d "/tmp/extsd" ]; then
+#    busybox mkdir -p /tmp/extsd
+#fi
 
-umount /tmp/extsd
+#umount /tmp/extsd
 
 mmcp=$mmcblk
 su root
 
-mount -t vfat /dev/block/mmcblk1p1 /tmp/extsd
+mount -t vfat /dev/block/mmcblk1p1 /mnt/external_sd
 
-capacity=`df | grep "/tmp/extsd" | busybox awk '{printf $2}'`
+capacity=`df | grep "/mnt/external_sd" | busybox awk '{printf $2}'`
 busybox echo "$mmcp: $capacity"
 
 busybox sleep 1
 
-umount /tmp/extsd
+umount /mnt/external_sd
 busybox echo $capacity > /data/sd_capacity
 exit 1
 
