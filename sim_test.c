@@ -55,6 +55,22 @@ static pthread_t s_tid_reader;
 static char s_ATBuffer[MAX_AT_RESPONSE+1];
 static char *s_ATBufferCur = s_ATBuffer;
 static int s_readCount = 0;
+#ifdef SOFIA3GR_PCBA
+static int is_sim_test_done = 0;
+#endif
+
+#ifdef SOFIA3GR_PCBA
+int get_is_sim_test_done(void)
+{
+	return is_sim_test_done;
+}
+
+void set_is_sim_test_done(int is_done)
+{
+	is_sim_test_done = is_done;
+}
+#endif
+
 static char * findNextEOL(char *cur)
 {
     if (cur[0] == '>' && cur[1] == ' ' && cur[2] == '\0') {
@@ -156,6 +172,14 @@ static void *readerLoop(void *arg){
 	int cur=0;
 
 	while(1){
+		#ifdef SOFIA3GR_PCBA
+		//printf("%s line=%d  reader loop  \n", __FUNCTION__, __LINE__);
+		if(get_is_sim_test_done())
+		{
+			printf("%s line=%d sim_text_is_done! exit readerLoop \n", __FUNCTION__, __LINE__);
+			return NULL;
+		}
+		#endif
 		line = readline();
 		pthread_mutex_lock(&s_commandmutex);
 		
@@ -272,7 +296,11 @@ void* sim_test(void *argc)
 	int serial_fd;
 	int err;
 	int biID =-1;
+#ifdef SOFIA3GR_PCBA
+	int loop = 3;
+#else
 	int loop = 10;
+#endif
 	struct testcase_info *tc_info = (struct testcase_info*)argc;
 	int arg = 1; 
 	int y;
@@ -281,6 +309,10 @@ void* sim_test(void *argc)
 		tc_info->y  = get_cur_print_y();	
 
 	y = tc_info->y;
+
+#ifdef SOFIA3GR_PCBA
+	set_is_sim_test_done(0);
+#endif
 	
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_SIM,PCBA_TESTING);
 
@@ -310,10 +342,14 @@ void* sim_test(void *argc)
     do{
 	   	#ifdef SOFIA3GR_PCBA
 			serial_fd = open("/dev/mvpipe-atc",O_RDWR );
+			if(serial_fd < 0)
+			{
+				sleep(1);
+			}
 		#else
 			serial_fd = open(atChannelTab[biID],O_RDWR );
+			sleep(1);
 		#endif
-		sleep(1);
 		loop --;
 		if(loop<0)break;
 	}while(serial_fd < 0);
@@ -321,6 +357,9 @@ void* sim_test(void *argc)
 
 	if(serial_fd <0)
 	{
+		#ifdef SOFIA3GR_PCBA
+			set_is_sim_test_done(1);
+		#endif
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 		printf("open at port fail!\n");
 		tc_info->result = -1;
@@ -352,13 +391,21 @@ void* sim_test(void *argc)
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
     if(pthread_create(&s_tid_reader, &attr, readerLoop, &attr)<0)
+    {
      	ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-     	printf("pthread_create err\n");
-     	
+     	printf("%s line=%d pthread_create err\n", __FUNCTION__, __LINE__);
+		#ifdef SOFIA3GR_PCBA
+			set_is_sim_test_done(1);
+			close(serial_fd);
+			return argc;
+		#endif
+    }
      	//while(1){sleep(5);write (gFd, "AT+CPIN?\r\n", 10);}
 	}
 
+#ifndef SOFIA3GR_PCBA
 	sleep(5);
+#endif
 
 	#ifdef SOFIA3GR_PCBA
 		int simcard1 = 0;
@@ -367,24 +414,37 @@ void* sim_test(void *argc)
 		char ISMI2[50];
 		memset(ISMI1, 0, 50);
 		memset(ISMI2, 0, 50);
+
 		if(at_send(serial_fd,"AT+CFUN=1\r\n","OK") < 0){
+			#ifdef SOFIA3GR_PCBA
+				set_is_sim_test_done(1);
+				close(serial_fd);
+			#endif
 			tc_info->result = -1;
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("execute AT+CFUN=1 fail\n");
+			printf("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
 			return argc;
 		}
 
 		if(at_send(serial_fd,"AT+XSIMSEL=0\r\n","OK") < 0){
+			#ifdef SOFIA3GR_PCBA
+				set_is_sim_test_done(1);
+				close(serial_fd);
+			#endif
 			tc_info->result = -1;
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("execute AT+XSIMSEL=0 fail\n");
+			printf("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
 			return argc;
 		}
 
 		if(at_send(serial_fd,"AT+CIMI\r\n","OK") < 0){
+			#ifdef SOFIA3GR_PCBA
+				set_is_sim_test_done(1);
+				close(serial_fd);
+			#endif
 			tc_info->result = -1;
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("execute AT+CIMI fail\n");
+			printf("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
 			return argc;
 		}
 
@@ -403,6 +463,10 @@ void* sim_test(void *argc)
 		if(simcard1 && simcard2){
 			tc_info->result = 0;
 			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
+			#ifdef SOFIA3GR_PCBA
+				set_is_sim_test_done(1);
+				close(serial_fd);
+			#endif
 			return argc;
 		}
 
@@ -410,10 +474,15 @@ void* sim_test(void *argc)
 		{
 			tc_info->result = 0;
 			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1);
+			#ifdef SOFIA3GR_PCBA
+				set_is_sim_test_done(1);
+				close(serial_fd);
+			#endif
 			return argc;
 		}
 	#endif
-	
+
+#ifndef SOFIA3GR_PCBA
 	if(at_send(serial_fd,"AT+CPIN?\r\n","READY") >= 0){
 		tc_info->result = 0;
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_SECCESS);
@@ -422,6 +491,7 @@ void* sim_test(void *argc)
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 	}
 	ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
+#endif
 	return argc;
 
 }
