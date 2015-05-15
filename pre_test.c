@@ -673,7 +673,7 @@ int main(int argc, char **argv)
 	ui_print_xy_rgba(0,0,0,255,0,255,"%s\n",PCBA_BOOT_IN_ANDROID_FUCTION);
 
 	gui_start();
-	start_input_thread_for_key_check();
+	//start_input_thread_for_key_check();
 	start_input_thread();
 
 	//prompt_and_wait();

@@ -127,12 +127,14 @@ static int touch_tp_state = 0;
 static pthread_t g_t_ui;
 static pthread_t g_input_ui;
 static int g_exit_from_ptest_key_wait = 0;
+static int first_time_exit_key_wait = 0;
 #endif
 
 
 #ifdef SOFIA3GR_PCBA
 void ptest_set_key_wait_status(int key_wait)
 {
+	first_time_exit_key_wait = 1;
 	g_exit_from_ptest_key_wait = key_wait;
 }
 
@@ -450,6 +452,10 @@ static void *input_thread(void *cookie)
 	static struct timeval touchStart;
 	static struct timeval keyStart, keyEnd;
 	LOGE("start input thread!\n");
+
+	memset(&keyStart, 0, sizeof(struct timeval));
+	memset(&keyEnd, 0, sizeof(struct timeval));
+	
     for (;;) 
 	{
 
@@ -561,6 +567,16 @@ static void *input_thread(void *cookie)
         }
         else if (ev.type == EV_KEY)
         {
+        #ifdef SOFIA3GR_PCBA
+        	if(first_time_exit_key_wait)
+        	{
+        		printf("%s line=%d first time exit from key wait! \n", __FUNCTION__, __LINE__);
+				first_time_exit_key_wait = 0;
+				gettimeofday(&keyStart, NULL);
+        		//memset(&keyStart, 0, sizeof(struct timeval));
+				//memset(&keyEnd, 0, sizeof(struct timeval));
+        	}
+        #endif
             // Handle key-press here
 #ifdef _EVENT_LOGGING
             LOGE("TOUCH_KEY: %d\n", ev.code);
@@ -576,7 +592,7 @@ static void *input_thread(void *cookie)
 				if(ptest_get_key_wait_status())
 				{
 					gettimeofday(&keyStart, NULL);
-					printf("key down:%lu\n",keyStart.tv_sec);
+					printf("%s line=%d key down:%lu, keyStart is compute!\n", __FUNCTION__, __LINE__, keyStart.tv_sec);
 				}
 			#else
 				gettimeofday(&keyStart, NULL);
@@ -595,7 +611,7 @@ static void *input_thread(void *cookie)
 				if(ptest_get_key_wait_status())
 				{
 					gettimeofday(&keyEnd, NULL);
-					printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
+					printf("%s line=%d key hold time:%lu, g_key_test=%d keyEnd=%lu  keystart=%lu \n",__FUNCTION__, __LINE__, keyEnd.tv_sec-keyStart.tv_sec, g_key_test, keyEnd.tv_sec, keyStart.tv_sec);
 				}
 				#else
 				gettimeofday(&keyEnd, NULL);
@@ -612,7 +628,7 @@ static void *input_thread(void *cookie)
 				{
 					if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
 					{
-						printf("%s line=%d press key longer than 5 seconds ,now exit ptest mode \n", __FUNCTION__, __LINE__);
+						printf("%s line=%d press key longer than 5 seconds ,now exit ptest mode keyStart=%lu keyEnd=%lu\n", __FUNCTION__, __LINE__, keyStart.tv_sec, keyEnd.tv_sec);
 						android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
 					}
 				}
@@ -623,6 +639,22 @@ static void *input_thread(void *cookie)
 				}
 				#endif
 			}
+
+		#ifdef SOFIA3GR_PCBA
+		/*record key press event for PTEST SCREEN*/
+		if(!ptest_get_key_wait_status())
+		{
+			pthread_mutex_lock(&key_queue_mutex);
+			printf("%s line=%d key press, ev_code=%d ev_value=%d \n", __FUNCTION__, __LINE__, ev.code, ev.value);
+			key_pressed[ev.code] = ev.value;
+			const int queue_max = sizeof(key_queue) / sizeof(key_queue[0]);
+        	if (ev.value > 0 && key_queue_len < queue_max) {
+            	key_queue[key_queue_len++] = ev.code;
+            	pthread_cond_signal(&key_queue_cond);
+        	}
+        	pthread_mutex_unlock(&key_queue_mutex);
+		}
+		#endif
         }
 	//printf("tp touch : state : %d\r\n",state);
 	//touch_tp_state = state;
