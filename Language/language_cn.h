@@ -32,4 +32,6 @@
 #define PCBA_SDCARD_NOINSERT "没有插入sd卡"
 #define PCBA_INTEL_PTEST_MODE "Intel ptest模式"
 #define PCBA_BOOT_IN_ANDROID_FUCTION "连续按5次power键，退出ptest模式!"
+#define PCBA_BOOT_IN_CORE_FUNCTION	"power, vol+, vol- 各按一次进入PCBA模式"
+#define PCBA_BOOT_IN_TOUCH_FUNCTION	"在该界面画线进行触摸屏测试"
 #endif

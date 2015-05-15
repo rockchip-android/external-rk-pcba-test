@@ -671,6 +671,8 @@ int main(int argc, char **argv)
 	w =  gr_fb_width() >> 1;
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",PCBA_INTEL_PTEST_MODE);
 	ui_print_xy_rgba(0,0,0,255,0,255,"%s\n",PCBA_BOOT_IN_ANDROID_FUCTION);
+	ui_print_xy_rgba(0,1,0,255,0,255,"%s\n",PCBA_BOOT_IN_CORE_FUNCTION);
+	ui_print_xy_rgba(0,2,0,255,0,255,"%s\n",PCBA_BOOT_IN_TOUCH_FUNCTION);
 
 	gui_start();
 	//start_input_thread_for_key_check();
@@ -717,6 +719,8 @@ int main(int argc, char **argv)
 	ptest_set_key_wait_status(1);
 
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",""); //clear ptest mode
+	ui_print_xy_rgba(0,1,0,255,0,255,"%s\n","");
+	ui_print_xy_rgba(0,2,0,255,0,255,"%s\n","");
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
