@@ -246,17 +246,7 @@ include $(BUILD_EXECUTABLE)
 #$(shell cp -rf $(commands_recovery_local_path)/res/* $(TARGET_ROOT_OUT_SBIN)/)
 #ALL_DEFAULT_INSTALLED_MODULES += $(RECOVERY_BUSYBOX_SYMLINKS) 
 
-ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
-$(shell cp -rf $(commands_recovery_local_path)/gui/basicTheme/* $(TARGET_OUT)/etc/)
-$(shell cp -rf $(commands_recovery_local_path)/res/test_config_sofia.cfg $(TARGET_OUT)/etc/)
-$(shell cp -rf $(commands_recovery_local_path)/res/*.pcm $(TARGET_OUT)/etc/)
-$(shell cp -rf $(commands_recovery_local_path)/res/*.sh $(TARGET_OUT)/bin/)
-$(shell mv -f $(TARGET_OUT)/bin/emmctester_sofia.sh $(TARGET_OUT)/bin/emmctester.sh)
-$(shell mv -f $(TARGET_OUT)/bin/mmctester_sofia.sh $(TARGET_OUT)/bin/mmctester.sh)
-$(shell mv -f $(TARGET_OUT)/bin/udisktester_sofia.sh $(TARGET_OUT)/bin/udisktester.sh)
-$(shell mv -f $(TARGET_OUT)/bin/wifi_sofia.sh $(TARGET_OUT)/bin/wifi.sh)
-$(shell mv -f $(TARGET_OUT)/etc/test_config_sofia.cfg $(TARGET_OUT)/etc/test_config.cfg)
-endif
+
 
 include $(commands_recovery_local_path)/minuitwrp/Android.mk
 include $(commands_recovery_local_path)/gui/Android.mk
