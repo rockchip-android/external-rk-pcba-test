@@ -557,6 +557,8 @@ void* cpu_test(void* argv)
 	int i = 0,ret = 0,bootmode =0;
  	pthread_t pid_stress[__MAX],freq_tid;
 
+#ifndef SOFIA3GR_PCBA
+
 	/*remind ddr test*/
 	if(tc_info->y <= 0)
 		tc_info->y  = get_cur_print_y();	
@@ -605,6 +607,7 @@ void* cpu_test(void* argv)
 		
 	 	sleep(2);
  	}
+#endif
 
 	return argv;
 }

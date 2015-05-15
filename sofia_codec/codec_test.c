@@ -411,6 +411,7 @@ void* codec_test(void *argv)
     int ret = -1;
     char dt[32] = {0};
 
+#if 0
 	tc_info = (struct testcase_info *)argv;
 			
 	if(tc_info->y <= 0)
@@ -423,7 +424,7 @@ void* codec_test(void *argv)
 		printf("script_fetch program = %s.\n", dt);
 	}	
 
-#if 0	
+	
 	codec_err = pthread_create(&rec_disp_tid, NULL, rec_volum_display,NULL); //
 	if(codec_err != 0)
 	{  

@@ -214,6 +214,8 @@ void *ddr_test(void *argv)
 	int ret = 0;
 	struct testcase_info *tc_info = (struct testcase_info *)argv;
 
+#ifndef SOFIA3GR_PCBA
+
 	/*remind ddr test*/
 	if(tc_info->y <= 0)
 		tc_info->y  = get_cur_print_y();	
@@ -243,6 +245,7 @@ void *ddr_test(void *argv)
 
 ERR:	
 	tc_info->result =-1;
+#endif
 	return argv;
 }
 
