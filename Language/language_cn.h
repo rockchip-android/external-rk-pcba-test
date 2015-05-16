@@ -34,4 +34,5 @@
 #define PCBA_BOOT_IN_ANDROID_FUCTION "连续按5次power键，退出ptest模式!"
 #define PCBA_BOOT_IN_CORE_FUNCTION	"power, vol+, vol- 各按一次进入PCBA模式"
 #define PCBA_BOOT_IN_TOUCH_FUNCTION	"在该界面画线进行触摸屏测试"
+#define PCBA_TIP_IN_PCBA_FUNCTION	"按任意键(power, vol+, vol-)超5秒退出PTEST模式"
 #endif

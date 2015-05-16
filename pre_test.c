@@ -737,7 +737,12 @@ int main(int argc, char **argv)
 
 #if 1
 	w =  gr_fb_width() >> 1;
+
+#ifdef SOFIA3GR_PCBA
+	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_TIP_IN_PCBA_FUNCTION);
+#else
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_VERSION_NAME);
+#endif
 //	ui_print_xy_rgba(0,1,255,0,0,255,"%s %s\n",__DATE__,__TIME__);
 #ifndef SOFIA3GR_PCBA
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-3),1,255,255,0,255,"%s\n",PCBA_MANUAL_TEST);

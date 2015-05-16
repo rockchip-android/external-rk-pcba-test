@@ -29,5 +29,7 @@
 #define PCBA_BOOT_IN_ANDROID_FUCTION "Click power button 5 times to exit ptest!"
 #define PCBA_BOOT_IN_CORE_FUNCTION	"Clik each key(power, vol+, vol-) 1 time to go to pcba core"
 #define PCBA_BOOT_IN_TOUCH_FUNCTION	"Please draw line in this screen to execute TP test"
+#define PCBA_TIP_IN_PCBA_FUNCTION	"Press any key(power, vol+, vol-) longer than 5 seconds to exit PTEST mode"
+
 
 #endif
