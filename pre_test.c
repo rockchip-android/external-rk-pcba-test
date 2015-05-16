@@ -349,7 +349,6 @@ int start_test_pthread(struct testcase_info *tc_info)
 	}
 	else if(!strcmp(tc_info->base_info->name, "camera"))
 	{	
-		#if 0
 		tc_info->dev_id = 0;
 		err = pthread_create(&camera_tid, NULL, camera_test,tc_info); //
 		if(err != 0)
@@ -358,7 +357,6 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
-		#endif
 	}
 	else if(!strcmp(tc_info->base_info->name, "wifi"))
 	{

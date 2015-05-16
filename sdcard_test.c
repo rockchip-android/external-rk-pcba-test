@@ -25,23 +25,26 @@ void * sdcard_test(void * argv)
 		tc_info->y  = get_cur_print_y();	
 
 	y = tc_info->y;
-	#ifdef SOFIA3GR_PCBA
+#ifdef SOFIA3GR_PCBA
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_SDCARD,PCBA_TESTING);
-	#else
+#else
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s \n",PCBA_SDCARD);
-	#endif
+#endif
 
-	#ifdef RK3288_PCBA
+#ifdef RK3288_PCBA
 	ret =  __system("busybox chmod 777 /res/emmctester.sh");
+#else
+	#ifdef SOFIA3GR_PCBA
+	//ret =  __system("busybox chmod 777 /system/bin/mmctester.sh");
 	#else
-		#ifdef SOFIA3GR_PCBA
-		//ret =  __system("busybox chmod 777 /system/bin/mmctester.sh");
-		#else
-		ret =  __system("busybox chmod 777 /res/mmctester.sh");
-		#endif
+	ret =  __system("busybox chmod 777 /res/mmctester.sh");
 	#endif
+#endif
+
+#ifndef SOFIA3GR_PCBA
 	if(ret)
 		printf("chmod mmctester.sh failed :%d\n",ret);
+#endif
 	
     #ifdef RK3288_PCBA      
     ret = __system("/res/emmctester.sh");
@@ -62,11 +65,13 @@ void * sdcard_test(void * argv)
 				}
 				else
 				{
-					if(fopen(SD_INSERT_RESULT_FILE, "r") != NULL);
-					printf("has not insert sd card.\n");
-					ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_SDCARD_NOINSERT);
-					tc_info->result = -1;
-					return argv;
+					if(fopen(SD_INSERT_RESULT_FILE, "r") != NULL)
+					{
+						printf("has not insert sd card.\n");
+						ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_SDCARD_NOINSERT);
+						tc_info->result = -1;
+						return argv;
+					}
 				}
 				
 				if(testCounts++ > 5)
@@ -112,17 +117,6 @@ void * sdcard_test(void * argv)
 		tc_info->result = -1;
 		return argv;
 	}
-
-	
-	/*
-		#ifdef SOFIA3GR_PCBA
-		if(stat("/system/etc/images/wifi_scan.txt", &stat_ret) < 0) {
-		#else
-		if(stat("/res/images/wifi_scan.txt", &stat_ret) < 0) {
-		#endif
-		LOG( "error getting file stat.\n");				 
-		return -1;
-	}*/
 
   	memset(results, 0, SCAN_RESULT_LENGTH);
 	//fread(results, 1, SCAN_RESULT_LENGTH, fp);

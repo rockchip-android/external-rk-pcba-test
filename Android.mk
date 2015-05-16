@@ -101,7 +101,8 @@ else
  			LOCAL_SRC_FILES += 	sofia_codec/alsa_mixer.c \
 						sofia_codec/alsa_pcm.c \
 						sofia_codec/alsa_route.c \
-						sofia_codec/codec_test.c 
+						sofia_codec/codec_test.c \
+						sofia_camera/camera_test.c
  		else
  			LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c camera_test.c
  		endif

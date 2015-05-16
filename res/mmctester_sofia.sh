@@ -1,13 +1,18 @@
 #!/system/bin/sh
 
 result_file=/data/sd_capacity
+insert_sd_info=/data/sd_insert_info
 
 if [ -e $result_file ] ; then
 busybox rm -f $result_file
 fi
 
+if [ -e insert_sd_info ] ; then
+busybox rm -f insert_sd_info
+fi
+
 if [ ! -b "/dev/block/mmcblk1p1" ]; then
-	busybox echo "not card insert"
+	busybox echo "not card insert" > /data/sd_insert_info
 	exit 0
 fi        
 
@@ -15,7 +20,7 @@ fi
 #    busybox mkdir -p /tmp/extsd
 #fi
 
-#umount /tmp/extsd
+umount /mnt/external_sd
 
 mmcp=$mmcblk
 su root
