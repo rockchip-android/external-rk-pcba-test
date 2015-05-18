@@ -131,6 +131,48 @@ int set_system_time(struct timeval *tv)
 		return 1;    
 	}
 	#else
+
+	#ifdef SOFIA3GR_PCBA
+	struct rtc_time rtc;   
+	struct tm tm, *gmtime_res;    
+	//int fd;    
+	int res;    
+	res = settimeofday(tv, NULL);
+	if (res < 0) {        
+		printf("settimeofday() failed: %s\n", strerror(errno));        
+		return -1;    
+	}    
+	fd = open("/dev/rtc0", O_RDWR);    
+	if (fd < 0) {        
+		printf("Unable to open RTC driver: %s\n", strerror(errno));        
+		return res;    
+	}    
+	gmtime_res = gmtime_r(&tv->tv_sec, &tm);    
+	if (!gmtime_res) 
+	{        
+		printf("gmtime_r() failed: %s\n", strerror(errno));        
+		res = -1;        
+		goto done;   
+	}    
+	memset(&rtc, 0, sizeof(rtc));   
+	rtc.tm_sec = tm.tm_sec;    
+	rtc.tm_min = tm.tm_min;   
+	rtc.tm_hour = tm.tm_hour;    
+	rtc.tm_mday = tm.tm_mday;    
+	rtc.tm_mon = tm.tm_mon;    
+	rtc.tm_year = tm.tm_year;    
+	rtc.tm_wday = tm.tm_wday;    
+	rtc.tm_yday = tm.tm_yday;    
+	rtc.tm_isdst = tm.tm_isdst;    
+	res = ioctl(fd, RTC_SET_TIME, &rtc);    
+	if (res < 0)       
+		printf("RTC_SET_TIME ioctl failed: %s\n", strerror(errno));
+
+	done:    
+		close(fd);    
+		return res;
+	
+	#else
 	fd = open("/dev/alarm", O_RDWR);
 	if(fd < 0)
 	{
@@ -143,6 +185,8 @@ int set_system_time(struct timeval *tv)
 		printf("set rtc failed:%s\n" ,strerror(errno));
 		return -1;
 	}
+	#endif
+	
 	#endif
 	return 0;
 }  
@@ -202,6 +246,7 @@ void* rtc_test(void *argc)
 	if(ret < 0)
 	{
 		//rtc_msg->result = -1;
+		printf("test rtc failed:set_system_time failed \n");
 		ret = -1;
 	}
 	else
@@ -228,6 +273,7 @@ void* rtc_test(void *argc)
 		if(t < 0)
 		{
 			//rtc_msg->result = -1;
+			printf("test rtc failed:get_system_time failed \n");
 			ret = -1;
 		}
 		else
