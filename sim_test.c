@@ -408,16 +408,10 @@ void* sim_test(void *argc)
 #endif
 
 #ifdef SOFIA3GR_PCBA
-
-	int test_counts = 1;
 	int simcard1 = 0;
 	int simcard2 = 0;
 	char ISMI1[50];
 	char ISMI2[50];
-
-
-START_TEST_SIMCARD:
-	
 	memset(ISMI1, 0, 50);
 	memset(ISMI2, 0, 50);
 
@@ -426,18 +420,12 @@ START_TEST_SIMCARD:
 		{
 			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
-
-		if(test_counts>= 5){
-			set_is_sim_test_done(1);
-			close(serial_fd);
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
-			return argc;
-		}
-		printf("%s line=%d %d times execute AT+CFUN=1 fail!\n", __FUNCTION__, __LINE__, test_counts);
-		test_counts++;
-		goto START_TEST_SIMCARD;
+		set_is_sim_test_done(1);
+		close(serial_fd);
+		tc_info->result = -1;
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		printf("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
+		return argc;
 	}
 
 	if(at_send(serial_fd,"AT+XSIMSEL=0\r\n","OK") < 0){
@@ -445,19 +433,12 @@ START_TEST_SIMCARD:
 		{
 			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
-
-		if(test_counts>= 5){
-			set_is_sim_test_done(1);
-			close(serial_fd);
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
-			return argc;
-		}
-
-		printf("%s line=%d %d times execute AT+XSIMSEL=0 fail!\n", __FUNCTION__, __LINE__, test_counts);
-		test_counts++;
-		goto START_TEST_SIMCARD;
+		set_is_sim_test_done(1);
+		close(serial_fd);
+		tc_info->result = -1;
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		printf("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
+		return argc;
 	}
 
 	if(at_send(serial_fd,"AT+CIMI\r\n","OK") < 0){
@@ -465,18 +446,12 @@ START_TEST_SIMCARD:
 		{
 			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
-
-		if(test_counts>= 5){
-			set_is_sim_test_done(1);
-			close(serial_fd);
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
-			return argc;
-		}
-		printf("%s line=%d %d times execute AT+CIMI fail!\n", __FUNCTION__, __LINE__, test_counts);
-		test_counts++;
-		goto START_TEST_SIMCARD;
+		set_is_sim_test_done(1);
+		close(serial_fd);
+		tc_info->result = -1;
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		printf("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
+		return argc;
 	}
 
 	simcard1 = 1;
