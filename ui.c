@@ -573,6 +573,7 @@ static void *input_thread(void *cookie)
         		printf("%s line=%d first time exit from key wait! \n", __FUNCTION__, __LINE__);
 				first_time_exit_key_wait = 0;
 				gettimeofday(&keyStart, NULL);
+				gettimeofday(&keyEnd, NULL);
         		//memset(&keyStart, 0, sizeof(struct timeval));
 				//memset(&keyEnd, 0, sizeof(struct timeval));
         	}
@@ -586,7 +587,11 @@ static void *input_thread(void *cookie)
  		{
 		 continue;
  		}	
-			if (ev.value != 0 && ev.code != 143) 
+		#ifdef SOFIA3GR_PCBA
+			if (ev.value != 0 && ev.code != 143 && ev.code != KEY_POWER)
+		#else
+			if (ev.value != 0 && ev.code != 143)
+		#endif
 			{
 			#ifdef SOFIA3GR_PCBA
 				if(ptest_get_key_wait_status())
@@ -604,7 +609,11 @@ static void *input_thread(void *cookie)
 				dontwait = 0;
 
 			} 
-			else if (ev.code != 143)  
+		#ifdef SOFIA3GR_PCBA
+			else if (ev.code != 143 && ev.code != KEY_POWER) 
+		#else
+			else if (ev.code != 143) 
+		#endif
 			{
 				// This is a key release
 				#ifdef SOFIA3GR_PCBA
