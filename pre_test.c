@@ -714,11 +714,13 @@ int main(int argc, char **argv)
 	}
 
 	printf("exit wait key...\n");
-	ptest_set_key_wait_status(1);
 
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",""); //clear ptest mode
 	ui_print_xy_rgba(0,1,0,255,0,255,"%s\n","");
 	ui_print_xy_rgba(0,2,0,255,0,255,"%s\n","");
+
+	printf("set key wait status to exit \n");
+	ptest_set_key_wait_status(1);
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
