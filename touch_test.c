@@ -89,7 +89,7 @@ int NotifyTouch(int action, int x, int y)
 	case TOUCH_RELEASE:
 		pthread_mutex_lock(&gUpdateMutex);
                 gr_flip();
-                pthread_mutex_unlock(&gUpdateMutex);
+        pthread_mutex_unlock(&gUpdateMutex);
 		#ifdef SOFIA3GR_PCBA
 				sync_screen_for_prompt();
 		#endif

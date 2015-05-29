@@ -11,6 +11,8 @@
 #define SCAN_RESULT_FILE "/data/sd_capacity"
 #define SD_INSERT_RESULT_FILE "/data/sd_insert_info"
 
+#define LOG(x...)   printf("[SDCard_TEST] "x)
+
 void * sdcard_test(void * argv)
 {
 	
@@ -43,7 +45,7 @@ void * sdcard_test(void * argv)
 
 #ifndef SOFIA3GR_PCBA
 	if(ret)
-		printf("chmod mmctester.sh failed :%d\n",ret);
+		LOG("chmod mmctester.sh failed :%d\n",ret);
 #endif
 	
     #ifdef RK3288_PCBA      
@@ -67,7 +69,7 @@ void * sdcard_test(void * argv)
 				{
 					if(fopen(SD_INSERT_RESULT_FILE, "r") != NULL)
 					{
-						printf("has not insert sd card.\n");
+						LOG("has not insert sd card.\n");
 						ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_SDCARD_NOINSERT);
 						tc_info->result = -1;
 						return argv;
@@ -76,7 +78,7 @@ void * sdcard_test(void * argv)
 				
 				if(testCounts++ > 5)
 				{
-					printf("can not open %s.\n", SCAN_RESULT_FILE);
+					LOG("can not open %s.\n", SCAN_RESULT_FILE);
 					ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_FAILED);
 					tc_info->result = -1;
 					return argv;
@@ -103,7 +105,7 @@ void * sdcard_test(void * argv)
     #endif
 		
 	if(ret < 0) {
-		printf("mmc test failed.\n");
+		LOG("mmc test failed.\n");
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_FAILED);
 		tc_info->result = -1;
 		return argv;
@@ -112,7 +114,7 @@ void * sdcard_test(void * argv)
 	
 	fp = fopen(SCAN_RESULT_FILE, "r");
 	if(fp == NULL) {
-		printf("can not open %s.\n", SCAN_RESULT_FILE);
+		LOG("can not open %s.\n", SCAN_RESULT_FILE);
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_FAILED);
 		tc_info->result = -1;
 		return argv;

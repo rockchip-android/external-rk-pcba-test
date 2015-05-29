@@ -53,7 +53,11 @@
 #ifdef RK312X_PCBA
 #include "rk312x-camera/camera_test.h"
 #else
+#ifdef SOFIA3GR_PCBA
+#include "sofia_camera/camera_test.h"
+#else
 #include "camera_test.h"
+#endif
 #endif
 #endif
 
@@ -93,7 +97,7 @@ struct manual_item m_item[] = {
 
 int manual_p_y = 1;
 
-
+static int breakFirstUi = 0;
 int cur_p_y;		//current position for auto test tiem in y direction
 pthread_t rtc_tid;  
 char *rtc_res;
@@ -329,14 +333,14 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   
 		}  
 	}else if(!strcmp(tc_info->base_info->name, "Codec"))
-        {
-                err = pthread_create(&codec_tid, NULL, codec_test,tc_info); //
-                if(err != 0)
-                {
-                   printf("create codec test thread error: %s/n",strerror(err));
-                   return -1;
+    {
+            err = pthread_create(&codec_tid, NULL, codec_test,tc_info); //
+            if(err != 0)
+            {
+               printf("create codec test thread error: %s/n",strerror(err));
+               return -1;
 
-                }
+            }
     }else if(!strcmp(tc_info->base_info->name, "Key"))
 	{
 		err = pthread_create(&key_tid, NULL, key_test,tc_info); //
@@ -640,13 +644,12 @@ get_menu_selection(char** headers, char** items, int menu_only,
 #ifdef SOFIA3GR_PCBA
 int sync_screen_for_prompt(void)
 {
-	if(ptest_get_key_wait_status())
+	if(breakFirstUi)
 	{
 		return 0;
 	}
-	
-	ui_print_xy_rgba(0,0,0,255,0,255,"%s\n",PCBA_BOOT_IN_ANDROID_FUCTION);
 
+	ui_print_xy_rgba(0,4,0,255,0,255,"\n");
 	return 0;
 }
 #endif
@@ -718,9 +721,9 @@ int main(int argc, char **argv)
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",""); //clear ptest mode
 	ui_print_xy_rgba(0,1,0,255,0,255,"%s\n","");
 	ui_print_xy_rgba(0,2,0,255,0,255,"%s\n","");
+	breakFirstUi = 1;
 
 	printf("set key wait status to exit \n");
-	ptest_set_key_wait_status(1);
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);

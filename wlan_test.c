@@ -34,7 +34,7 @@
 #include "test_case.h"
 #include "language.h"
 
-#define LOG(x...) printf(x)
+#define LOG(x...) printf("[Wifi_TEST] "x)
 
 #define MAX_SCAN_COUNTS (64)
 #define SCAN_RESULT_LENGTH (128*MAX_SCAN_COUNTS)
@@ -181,7 +181,7 @@ void* wlan_test(void* argv)
 		while(fp == NULL || fp2 == NULL) {
 			ret = system("sh system/bin/wifi.sh");
 			if(ret < 0) {
-				printf("wlan_test::wlan_test: cmd: /system/bin/wifi.sh\t error: %s", strerror(errno));
+				LOG("wlan_test::wlan_test: cmd: /system/bin/wifi.sh\t error: %s", strerror(errno));
 			}
 
 			if(counts > 4) {

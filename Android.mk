@@ -99,8 +99,8 @@ else
  	else
  		ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
  			LOCAL_SRC_FILES += 	sofia_codec/alsa_mixer.c \
-						sofia_codec/alsa_pcm.c \
-						sofia_codec/alsa_route.c \
+ 						sofia_codec/alsa_pcm.c \
+                        sofia_codec/alsa_route.c \
 						sofia_codec/codec_test.c \
 						sofia_camera/camera_test.c
  		else

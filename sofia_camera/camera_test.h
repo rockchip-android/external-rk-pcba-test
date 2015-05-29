@@ -24,31 +24,14 @@
 #include <time.h>
 #include <sys/time.h>
 #include <signal.h>
-//#include <linux/ion.h>
-//#include "ion.h"
-#include "../../system/core/libion/kernel-headers/linux/rockchip_ion.h"
-//#include <linux/android_pmem.h>
 #include <linux/videodev2.h>
 #include <linux/fb.h>
-#include <linux/version.h>
 #include "test_case.h"
-// the func is a while loop func , MUST  run in a single thread.
-//return value: 0 is ok ,-1 erro
-
-struct camera_msg {
-	struct testcase_info *tc_info;
-	int result;
-	int id;
-	int x;
-	int y;
-	int w;
-	int h;
-};
+#include <linux/ion.h>
+#include <sys/poll.h>
 
 extern void* camera_test(void *argc);
 //return value: 0 is ok ,-1 erro
-extern int stopCameraTest();
-extern void finishCameraTest();
 extern int Camera_Click_Event(int x,int y);
 extern int startCameraTest();
 #endif

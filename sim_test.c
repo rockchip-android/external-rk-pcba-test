@@ -25,6 +25,8 @@
 #define BP_IOCTL_GET_BPID  _IOR(BP_IOCTL_BASE, 0x07, int)
 #define MODEM_DEV_PATH	  "/dev/voice_modem"
 
+#define LOG(x...) printf("[Sim_TEST] "x)
+
 enum bp_id{ 
 	BP_ID_INVALID = 0,//no bp 
 	BP_ID_MT6229,  //USI MT6229 WCDMA 
@@ -173,10 +175,10 @@ static void *readerLoop(void *arg){
 
 	while(1){
 		#ifdef SOFIA3GR_PCBA
-		//printf("%s line=%d  reader loop  \n", __FUNCTION__, __LINE__);
+		//LOG("%s line=%d  reader loop  \n", __FUNCTION__, __LINE__);
 		if(get_is_sim_test_done())
 		{
-			printf("%s line=%d sim_text_is_done! exit readerLoop \n", __FUNCTION__, __LINE__);
+			LOG("%s line=%d sim_text_is_done! exit readerLoop \n", __FUNCTION__, __LINE__);
 			return NULL;
 		}
 		#endif
@@ -326,14 +328,14 @@ void* sim_test(void *argc)
 			sleep(2);     
 	  	}else{
 	  		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("modem open fail !\n");
+			LOG("modem open fail !\n");
 			tc_info->result = -1; 
 			return argc;
 	  	} 
 		err = ioctl(modem_fd,BP_IOCTL_GET_BPID,&biID);
 		if(err < 0){
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			printf("biID fail !\n");
+			LOG("biID fail !\n");
 			tc_info->result = -1;
 			return argc;
 		}
@@ -393,7 +395,7 @@ void* sim_test(void *argc)
     if(pthread_create(&s_tid_reader, &attr, readerLoop, &attr)<0)
     {
      	ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-     	printf("%s line=%d pthread_create err\n", __FUNCTION__, __LINE__);
+     	LOG("%s line=%d pthread_create err\n", __FUNCTION__, __LINE__);
 		#ifdef SOFIA3GR_PCBA
 			set_is_sim_test_done(1);
 			close(serial_fd);
@@ -418,39 +420,39 @@ void* sim_test(void *argc)
 	if(at_send(serial_fd,"AT+CFUN=1\r\n","OK") < 0){
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
 		{
-			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
 		close(serial_fd);
 		tc_info->result = -1;
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		printf("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
+		LOG("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
 		return argc;
 	}
 
 	if(at_send(serial_fd,"AT+XSIMSEL=0\r\n","OK") < 0){
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
 		{
-			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
 		close(serial_fd);
 		tc_info->result = -1;
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		printf("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
+		LOG("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
 		return argc;
 	}
 
 	if(at_send(serial_fd,"AT+CIMI\r\n","OK") < 0){
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
 		{
-			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
 		close(serial_fd);
 		tc_info->result = -1;
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		printf("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
+		LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
 		return argc;
 	}
 
@@ -471,7 +473,7 @@ void* sim_test(void *argc)
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
 		{
-			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
 		close(serial_fd);
@@ -484,7 +486,7 @@ void* sim_test(void *argc)
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1);
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
 		{
-			printf("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
 		close(serial_fd);
