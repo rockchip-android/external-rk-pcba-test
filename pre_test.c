@@ -98,6 +98,8 @@ struct manual_item m_item[] = {
 int manual_p_y = 1;
 
 static int breakFirstUi = 0;
+static int hasCodec = 0;
+
 int cur_p_y;		//current position for auto test tiem in y direction
 pthread_t rtc_tid;  
 char *rtc_res;
@@ -334,6 +336,7 @@ int start_test_pthread(struct testcase_info *tc_info)
 		}  
 	}else if(!strcmp(tc_info->base_info->name, "Codec"))
     {
+    		hasCodec = 1;
             err = pthread_create(&codec_tid, NULL, codec_test,tc_info); //
             if(err != 0)
             {
@@ -724,6 +727,7 @@ int main(int argc, char **argv)
 	breakFirstUi = 1;
 
 	printf("set key wait status to exit \n");
+
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
@@ -766,7 +770,7 @@ int main(int argc, char **argv)
 		   db_error("core: init script failed(%d)\n", ret);
 		   return -1;
 	}
-	
+
 	ret = parse_testcase();
 	if (ret < 0) {
 		db_error("core: parse all test case from script failed(%d)\n", ret);
@@ -802,6 +806,9 @@ int main(int argc, char **argv)
 	
 #ifdef SOFIA3GR_PCBA
 	//start_input_thread();
+	if(!hasCodec) {
+		ptest_set_key_wait_status(1);
+	}
 	join_input_thread();
 #else
 	gui_start();
