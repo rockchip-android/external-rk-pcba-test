@@ -25,6 +25,7 @@
 #define PCBA_RECORD "Record Volum"
 #define PCBA_CODEC "Codec"
 #define PCBA_CODEC_INFO "Vol+:INT_MIC/LS Vol-:EXT_MIC/HS Power:EP"
+#define PCBA_WITHOUT_EP_CODEC_INFO "Vol+:INT_MIC/LS Vol-:EXT_MIC/HS"
 #define PCBA_CODEC_VOL_UP "INT_MIC/LS testing"
 #define PCBA_CODEC_VOL_DOWN "EXT_MIC/HS testing"
 #define PCBA_CODEC_VOL_POWER "EP testing"

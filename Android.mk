@@ -56,6 +56,11 @@ LOCAL_CFLAGS += -DSOFIA3GR_SENSOR_MPU
 
 endif
 
+ifeq ($(strip $(AUD_WITHOUT_EARPIECE)), true)
+LOCAL_CFLAGS += -DSOFIA3GR_AUD_WITHOUT_EARPIEC
+
+endif
+
 LOCAL_SRC_FILES := \
     pre_test.c\
     ui.c \

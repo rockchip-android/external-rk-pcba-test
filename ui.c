@@ -129,7 +129,6 @@ static pthread_t g_input_ui;
 static pthread_t g_codec_input_ui;
 static int g_exit_from_ptest_key_wait = 0;
 static int first_time_exit_key_wait = 0;
-static int g_exit_from_codec_key_wait = 0;
 #endif
 
 
@@ -143,16 +142,6 @@ void ptest_set_key_wait_status(int key_wait)
 int ptest_get_key_wait_status(void)
 {
 	return g_exit_from_ptest_key_wait;
-}
-
-void ptest_set_codec_key_wait_status(int key_wait)
-{
-	g_exit_from_codec_key_wait = key_wait;
-}
-
-int ptest_get_codec_key_wait_status(void)
-{
-	return g_exit_from_codec_key_wait;
 }
 
 #endif
@@ -580,72 +569,54 @@ static void *input_thread(void *cookie)
         }
         else if (ev.type == EV_KEY)
         {
-        #ifdef SOFIA3GR_PCBA
-        	if(first_time_exit_key_wait)
-        	{
-        		printf("%s line=%d first time exit from key wait! \n", __FUNCTION__, __LINE__);
-				first_time_exit_key_wait = 0;
-				gettimeofday(&keyStart, NULL);
-				gettimeofday(&keyEnd, NULL);
-        		//memset(&keyStart, 0, sizeof(struct timeval));
-				//memset(&keyEnd, 0, sizeof(struct timeval));
-        	}
-        #endif
             // Handle key-press here
-#ifdef _EVENT_LOGGING
-            LOGE("TOUCH_KEY: %d\n", ev.code);
-#endif
- LOGE("TOUCH_KEY: %d\n", ev.code);
- 		if (ev.code==330)
- 		{
-		 continue;
- 		}	
-		#ifdef SOFIA3GR_PCBA
-			if (ev.value != 0 && ev.code != 143 && ev.code != KEY_POWER)
-		#else
-			if (ev.value != 0 && ev.code != 143)
-		#endif
-			{
-			#ifdef SOFIA3GR_PCBA
-				if(ptest_get_key_wait_status())
-				{
-					gettimeofday(&keyStart, NULL);
-					printf("%s line=%d key down:%lu, keyStart is compute!\n", __FUNCTION__, __LINE__, keyStart.tv_sec);
-				}
-			#else
-				gettimeofday(&keyStart, NULL);
-				printf("key down:%lu\n",keyStart.tv_sec);
+			#ifdef _EVENT_LOGGING
+    			LOGE("TOUCH_KEY: %d\n", ev.code);
 			#endif
-				key_repeat = 0;
-				touch_and_hold = 0;
-				touch_repeat = 0;
-				dontwait = 0;
 
-			} 
-		#ifdef SOFIA3GR_PCBA
-			else if (ev.code != 143 && ev.code != KEY_POWER) 
-		#else
-			else if (ev.code != 143) 
-		#endif
-			{
-				// This is a key release
-				#ifdef SOFIA3GR_PCBA
-				if(ptest_get_key_wait_status())
-				{
+	 		if (ev.code==330)
+	 		{
+			 	continue;
+	 		}
+
+			#ifdef SOFIA3GR_PCBA
+	        	if(first_time_exit_key_wait)
+	        	{
+	        		printf("%s line=%d first time exit from key wait! \n", __FUNCTION__, __LINE__);
+					first_time_exit_key_wait = 0;
+					gettimeofday(&keyStart, NULL);
 					gettimeofday(&keyEnd, NULL);
-					printf("%s line=%d key hold time:%lu, g_key_test=%d keyEnd=%lu  keystart=%lu \n",__FUNCTION__, __LINE__, keyEnd.tv_sec-keyStart.tv_sec, g_key_test, keyEnd.tv_sec, keyStart.tv_sec);
+	        		//memset(&keyStart, 0, sizeof(struct timeval));
+					//memset(&keyEnd, 0, sizeof(struct timeval));
+	        	}
+				
+				if (ev.value != 0 && ev.code != 143 && ev.code != KEY_POWER)
+				{
+					if(ptest_get_key_wait_status())
+					{
+						gettimeofday(&keyStart, NULL);
+						printf("%s line=%d key down:%lu, keyStart is compute!\n", __FUNCTION__, __LINE__, keyStart.tv_sec);
+					}
+					key_repeat = 0;
+					touch_and_hold = 0;
+					touch_repeat = 0;
+					dontwait = 0;
 				}
-				#else
-				gettimeofday(&keyEnd, NULL);
-				printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
-				#endif
-				if(g_key_test)
+				else if (ev.code != 143 && ev.code != KEY_POWER) 
+				{
+					if(ptest_get_key_wait_status())
+					{
+						gettimeofday(&keyEnd, NULL);
+						printf("%s line=%d key hold time:%lu, g_key_test=%d keyEnd=%lu  keystart=%lu \n",__FUNCTION__, __LINE__, keyEnd.tv_sec-keyStart.tv_sec, g_key_test, keyEnd.tv_sec, keyStart.tv_sec);
+					}
+					if(g_key_test)
 					set_gKey(ev.code);
-				key_repeat = 0;
-				touch_and_hold = 0;
-				touch_repeat = 0;
-				dontwait = 0;
-				#ifdef SOFIA3GR_PCBA
+					key_repeat = 0;
+					touch_and_hold = 0;
+					touch_repeat = 0;
+					dontwait = 0;
+				}
+
 				if(ptest_get_key_wait_status())
 				{
 					if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
@@ -654,204 +625,50 @@ static void *input_thread(void *cookie)
 						android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
 					}
 				}
-				#else
-				if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
+
+				/*record key press event for PTEST SCREEN*/
+				if(!ptest_get_key_wait_status())
 				{
-					break;
+					pthread_mutex_lock(&key_queue_mutex);
+					printf("%s line=%d key press, ev_code=%d ev_value=%d \n", __FUNCTION__, __LINE__, ev.code, ev.value);
+					key_pressed[ev.code] = ev.value;
+					const int queue_max = sizeof(key_queue) / sizeof(key_queue[0]);
+		        	if (ev.value > 0 && key_queue_len < queue_max) {
+		            	key_queue[key_queue_len++] = ev.code;
+		            	pthread_cond_signal(&key_queue_cond);
+		        	}
+		        	pthread_mutex_unlock(&key_queue_mutex);
 				}
-				#endif
-			}
 
-		#ifdef SOFIA3GR_PCBA
-		/*record key press event for PTEST SCREEN*/
-		if(!ptest_get_key_wait_status())
-		{
-			pthread_mutex_lock(&key_queue_mutex);
-			printf("%s line=%d key press, ev_code=%d ev_value=%d \n", __FUNCTION__, __LINE__, ev.code, ev.value);
-			key_pressed[ev.code] = ev.value;
-			const int queue_max = sizeof(key_queue) / sizeof(key_queue[0]);
-        	if (ev.value > 0 && key_queue_len < queue_max) {
-            	key_queue[key_queue_len++] = ev.code;
-            	pthread_cond_signal(&key_queue_cond);
-        	}
-        	pthread_mutex_unlock(&key_queue_mutex);
-		}
-		#endif
-        }
-	//printf("tp touch : state : %d\r\n",state);
-	//touch_tp_state = state;
-    }
-	
-
-    return NULL;
-}
-
-#ifdef SOFIA3GR_PCBA
-static void *input_codec_thread(void *cookie)
-{
-    int drag = 0;
-	static int touch_and_hold = 0, dontwait = 0, touch_repeat = 0, x = 0, y = 0, lshift = 0, rshift = 0, key_repeat = 0;
-	static struct timeval touchStart;
-	static struct timeval keyStart, keyEnd;
-	LOGE("start input thread!\n");
-
-	memset(&keyStart, 0, sizeof(struct timeval));
-	memset(&keyEnd, 0, sizeof(struct timeval));
-	
-    for (;;) 
-	{
-
-        // wait for the next event
-        struct input_event ev;
-        int state = 0, ret = 0;
-
-		ret = ev_get(&ev, dontwait);
-		//LOGE("type:%d>>code:%d>>value:%d\n",ev.type,ev.code,ev.value);
-		if (ret < 0)
-		{
-			struct timeval curTime;
-			gettimeofday(&curTime, NULL);
-			long mtime, seconds, useconds;
-
-			seconds  = curTime.tv_sec  - touchStart.tv_sec;
-			useconds = curTime.tv_usec - touchStart.tv_usec;
-
-			mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
-			if (touch_and_hold && mtime > 500) 
-			{
-				touch_and_hold = 0;
-				touch_repeat = 1;
-				gettimeofday(&touchStart, NULL);
-#ifdef _EVENT_LOGGING
-                LOGE("TOUCH_HOLD: %d,%d\n", x, y);
-#endif
-				NotifyTouch(TOUCH_HOLD, x, y);
-			} 
-			else if (touch_repeat && mtime > 100)
-			{
-#ifdef _EVENT_LOGGING
-                LOGE("TOUCH_REPEAT: %d,%d\n", x, y);
-#endif
-				gettimeofday(&touchStart, NULL);
-				NotifyTouch(TOUCH_REPEAT, x, y);
-			} 
-			else if (key_repeat == 1 && mtime > 500) 
-			{
-#ifdef _EVENT_LOGGING
-                LOGE("KEY_HOLD: %d,%d\n", x, y);
-#endif
-				gettimeofday(&touchStart, NULL);
-				key_repeat = 2;
-			} 
-			else if (key_repeat == 2 && mtime > 100) 
-			{
-#ifdef _EVENT_LOGGING
-                LOGE("KEY_REPEAT: %d,%d\n", x, y);
-#endif
-				gettimeofday(&touchStart, NULL);
-			}
-		} 
-		else if (ev.type == EV_ABS)
-		{
-
-            x = ev.value >> 16;
-            y = ev.value & 0xFFFF;
-
-            if (ev.code == 0)
-            {
-                if (state == 0)
-                {
-#ifdef _EVENT_LOGGING
-                    LOGE("TOUCH_RELEASE: %d,%d\n", x, y);
-#endif
-			touch_tp_state = 0;
-
-			start_manual_test_item(x,y);
+			#else
+				if (ev.value != 0 && ev.code != 143)
+				{
+					gettimeofday(&keyStart, NULL);
+					printf("key down:%lu\n",keyStart.tv_sec);
 					
-                    NotifyTouch(TOUCH_RELEASE, x, y);
+					key_repeat = 0;
 					touch_and_hold = 0;
 					touch_repeat = 0;
-					if (!key_repeat)
-						dontwait = 0;
-                }
-                state = 0;
-                drag = 0;
-            }
-            else
-            {
-                if (!drag)
-                {
-#ifdef _EVENT_LOGGING
-                    LOGE("TOUCH_START: %d,%d\n", x, y);
-#endif
-                    NotifyTouch(TOUCH_START, x, y);
-                    state = 1;
-                    drag = 1;
-					touch_and_hold = 1;
-					dontwait = 1;
+					dontwait = 0;
+				} 
+				else if (ev.code != 143) 
+				{
+					// This is a key release
+					gettimeofday(&keyEnd, NULL);
+					printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
+					
+					if(g_key_test)
+						set_gKey(ev.code);
 					key_repeat = 0;
-					gettimeofday(&touchStart, NULL);
-                }
-                else
-                {
-                    if (state == 0)
-                    {
-			touch_tp_state = 1;
-#ifdef _EVENT_LOGGING
-                        LOGE("TOUCH_DRAG: %d,%d\n", x, y);
-#endif
-                        NotifyTouch(TOUCH_DRAG, x, y);
-                        state = 1;
-						key_repeat = 0;
-                    }
-                }
-            }
-        }
-        else if (ev.type == EV_KEY)
-        {
-            // Handle key-press here
-#ifdef _EVENT_LOGGING
-            LOGE("TOUCH_KEY: %d\n", ev.code);
-#endif
- LOGE("TOUCH_KEY: %d\n", ev.code);
- 		if (ev.code==330)
- 		{
-		 continue;
- 		}	
-			if (ev.value != 0 && ev.code != 143)
-			{
-				key_repeat = 0;
-				touch_and_hold = 0;
-				touch_repeat = 0;
-				dontwait = 0;
-
-			} 
-			else if (ev.code != 143 ) 
-			{
-				// This is a key release
-				if(g_key_test)
-					set_gKey(ev.code);
-				key_repeat = 0;
-				touch_and_hold = 0;
-				touch_repeat = 0;
-				dontwait = 0;
-			}
-
-			/*record key press event for PTEST SCREEN*/
-			pthread_mutex_lock(&key_queue_mutex);
-			printf("%s line=%d key press, ev_code=%d ev_value=%d \n", __FUNCTION__, __LINE__, ev.code, ev.value);
-			key_pressed[ev.code] = ev.value;
-			const int queue_max = sizeof(key_queue) / sizeof(key_queue[0]);
-	    	if (ev.value > 0 && key_queue_len < queue_max) {
-	        	key_queue[key_queue_len++] = ev.code;
-	        	pthread_cond_signal(&key_queue_cond);
-	    	}
-	    	pthread_mutex_unlock(&key_queue_mutex);
-			
-			if(ptest_get_codec_key_wait_status())
-			{
-				break;
-			}
+					touch_and_hold = 0;
+					touch_repeat = 0;
+					dontwait = 0;
+					if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
+					{
+						break;
+					}
+				}
+	        #endif
         }
 	//printf("tp touch : state : %d\r\n",state);
 	//touch_tp_state = state;
@@ -860,7 +677,6 @@ static void *input_codec_thread(void *cookie)
 
     return NULL;
 }
-#endif
 
 void ui_print_init(void)  //add by yxj
 {
@@ -904,14 +720,6 @@ void start_input_thread(void){
 
 void join_input_thread(void){
 	pthread_join(g_input_ui,NULL);
-}
-
-void start_codec_input_thread(void){ 
-    pthread_create(&g_codec_input_ui, NULL, input_codec_thread, NULL);
-}
-
-void join_codec_input_thread(void){
-	pthread_join(g_codec_input_ui,NULL);
 }
 
 #else

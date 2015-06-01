@@ -94,12 +94,16 @@ void* codec_test(void *argc)
 
 	y = tc_info->y;
 
+#ifdef SOFIA3GR_AUD_WITHOUT_EARPIEC
+	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_WITHOUT_EP_CODEC_INFO);
+#else
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_CODEC_INFO);
+#endif
 
-	start_codec_input_thread();
 	int key_code, key_count = 0, key_power = 0, key_vol_plus = 0, key_vol_cut = 0, codec_err=0;
 	while(key_code = ui_wait_key()) {
 		switch(key_code) {
+			#ifndef SOFIA3GR_AUD_WITHOUT_EARPIEC
 			case KEY_POWER:
 				LOG("codec_test::Power key is press! \n");
 				key_power++;
@@ -109,6 +113,7 @@ void* codec_test(void *argc)
 				   LOG("codec_test::create rec_power_tid thread error: %s/n",strerror(codec_err));  
 				} 
 				break;
+			#endif
 			case KEY_VOLUMEUP:
 				LOG("codec_test::Volueme up key is press! \n");
 				key_vol_plus++;
@@ -131,16 +136,24 @@ void* codec_test(void *argc)
 				key_count = 0;
 				break;
 		}
-
-		if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
-			LOG("codec_test::break ui_wait_key.\n");
-			break;
-		}
+		#ifdef SOFIA3GR_AUD_WITHOUT_EARPIEC
+			if(key_vol_plus >= 1 && key_vol_cut >= 1) {
+				LOG("codec_test::break ui_wait_key.\n");
+				break;
+			}
+		#else
+			if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
+				LOG("codec_test::break ui_wait_key.\n");
+				break;
+			}
+		#endif
 	}
 	sleep(5);
-	ptest_set_codec_key_wait_status(1);
 	ptest_set_key_wait_status(1);
-	join_codec_input_thread();
+#ifdef SOFIA3GR_AUD_WITHOUT_EARPIEC
+	ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_WITHOUT_EP_CODEC_INFO);
+#else
 	ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_CODEC_INFO);
+#endif
     return NULL;
 }

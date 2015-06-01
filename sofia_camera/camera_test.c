@@ -23,13 +23,62 @@ pthread_t camera_tid;
 
 int pollDataFromCamera(int index)
 {
+	int poll_counts = 0;
 	int ret = -1;
 	struct pollfd mEvents;
+
+POLL_WORK:
+	poll_counts++;
+	mDevFp = open("/dev/video2", O_RDWR);
+	if (mDevFp < 0) {
+		LOG("startCameraTest::Cannot open camera.\n");
+		goto POLL_ERROR;
+	}
+
+	fd = open("/dev/ion", O_RDWR);
+	if (fd < 0) {
+	    LOG("startCameraTest::opening ion device failed with fd = %d\n", fd);
+	    goto POLL_ERROR;
+	}
+	alloc_data.flags = 0;
+	alloc_data.heap_id_mask = (1<<4);//camera_id = 4,mask=1<<4
+	alloc_data.len = 4194304;//1048576;//128*4096;//854*480;//must page align
+	alloc_data.align = 0;//1024*1024;//clip2(alignment);
+	rc = ioctl(fd,ION_IOC_ALLOC,&alloc_data);
+
+	if(rc){
+        LOG("startCameraTest::ION ALLOC memory failed,rc=%d\n",rc);
+        close(fd);
+        fd = -1;
+        goto POLL_ERROR;
+	}
+
+	fd_data.handle = alloc_data.handle;
+    rc = -2;
+	rc = ioctl(fd,ION_IOC_MAP,&fd_data);
+	
+	if (rc) {
+		LOG("startCameraTest::ION MAP failed,rc=%d\n",rc);
+		fd_data.fd =-1;
+		close(fd);
+		fd = -1;
+		goto POLL_ERROR;
+	}
+	
+    LOG("startCameraTest::pBuf=0x%08x,fd_data.fd=%d\n",pBuf,fd_data.fd);
+	pBuf = mmap(NULL, 4194304, 3, 1, fd_data.fd, 0);
+	if (pBuf == MAP_FAILED) {
+        LOG("startCameraTest::mmap failed,pBuf=0x%08x\n",pBuf);
+        goto POLL_ERROR;
+	}
+	memset(pBuf,0x55,1024);
+	memset(pBuf+854*480/4,0x55,1024);
+	
 	input.index = index;
 	ret = ioctl(mDevFp, VIDIOC_S_INPUT, &input);
 	if (ret < 0) {
 		LOG("pollDataFromCamera::channel[%d] set input error,ret=%d\n",input.index,ret);
-		return ret;
+		goto POLL_ERROR;
 	}
 	LOG("pollDataFromCamera::set input ok\n");
 	
@@ -45,8 +94,8 @@ int pollDataFromCamera(int index)
 	ret = -1;
 	ret = ioctl(mDevFp, VIDIOC_S_FMT, &v4l2Fmt);
 	if(ret){
-		LOG("pollDataFromCamera::set format error.");
-		return ret;
+		LOG("pollDataFromCamera::set format error.\n");
+		goto POLL_ERROR;
 	}
    	
    	LOG("pollDataFromCamera::set format ok\n");
@@ -60,7 +109,7 @@ int pollDataFromCamera(int index)
 	ret = ioctl(mDevFp, VIDIOC_REQBUFS, &req);
 	if(ret){
 		LOG("pollDataFromCamera::request buffers error,ret=%d\n",ret);
-		return ret;
+		goto POLL_ERROR;
 	}
 	
 	LOG("pollDataFromCamera::request buffers ok\n");
@@ -76,7 +125,7 @@ int pollDataFromCamera(int index)
 	ret = ioctl(mDevFp, VIDIOC_QBUF, &v4l2Buf);
 	if(ret){
 		LOG("pollDataFromCamera::camera qbuf error,ret=%d\n",ret);
-		return ret;
+		goto POLL_ERROR;
 	}
 	
 	LOG("pollDataFromCamera::queue buffer ok\n");
@@ -86,12 +135,10 @@ int pollDataFromCamera(int index)
 	ret = ioctl(mDevFp, VIDIOC_STREAMON, &v4l2Buf.type);
 	if(ret){
 		LOG("pollDataFromCamera::camera streamon error,ret=%d\n",ret);
-		return ret;
+		goto POLL_ERROR;
 	}
 	
 	LOG("pollDataFromCamera::turn on camera ok\n");
-
-	ioctl(mDevFp, VIDIOC_STREAMOFF, &v4l2Buf.type);
 
 	
 	//出队列以取得已采集数据的帧缓冲，取得原始采集数据
@@ -102,61 +149,45 @@ int pollDataFromCamera(int index)
 	ret = poll(&mEvents, 1, 1000);
 	if (ret < 0) {
 		LOG("pollDataFromCamera::camera dqbuf poll error,ret=%d\n",ret);
-		return ret;
+		ioctl(mDevFp, VIDIOC_STREAMOFF, &v4l2Buf.type);
+		goto POLL_ERROR;
 	}
 	else if (!ret) {
 		LOG("pollDataFromCamera::camera dqbuf poll timeout,ret=%d\n",ret);
-		return ret;
+		ioctl(mDevFp, VIDIOC_STREAMOFF, &v4l2Buf.type);
+		goto POLL_ERROR;
    	}
    	LOG("pollDataFromCamera::camera poll ok,ret=%d\n",ret);
+
+	ioctl(mDevFp, VIDIOC_STREAMOFF, &v4l2Buf.type);
+	if(mDevFp >= 0) {
+		close(mDevFp);
+	}
+
+	if(fd >= 0) {
+		close(fd);
+	}
 	return 1;
+
+POLL_ERROR:
+	if(mDevFp >= 0) {
+		close(mDevFp);
+	}
+
+	if(fd >= 0) {
+		close(fd);
+	}
+	
+	if(poll_counts >= 3) {
+		return -1;
+	}
+	
+	goto POLL_WORK;
 }
 
 int startCameraTest()
 {
 	int ret = -1;
-	fd = open("/dev/ion", O_RDWR);
-	if (fd < 0) {
-		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
-	    LOG("startCameraTest::opening ion device failed with fd = %d\n", fd);
-	    return fd;
-	}
-	alloc_data.flags = 0;
-	alloc_data.heap_id_mask = (1<<4);//camera_id = 4,mask=1<<4
-	alloc_data.len = 4194304;//1048576;//128*4096;//854*480;//must page align
-	alloc_data.align = 0;//1024*1024;//clip2(alignment);
-	rc = ioctl(fd,ION_IOC_ALLOC,&alloc_data);
-
-	if(rc){
-		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
-        LOG("startCameraTest::ION ALLOC memory failed,rc=%d\n",rc);
-        close(fd);
-        fd = -1;
-        return fd;
-	}
-
-	fd_data.handle = alloc_data.handle;
-    rc = -2;
-	rc = ioctl(fd,ION_IOC_MAP,&fd_data);
-	
-	if (rc) {
-		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
-		LOG("startCameraTest::ION MAP failed,rc=%d\n",rc);
-		fd_data.fd =-1;
-		close(fd);
-		fd = -1;
-		return fd;
-	}
-	
-    printf("startCameraTest::pBuf=0x%08x,fd_data.fd=%d\n",pBuf,fd_data.fd);
-	pBuf = mmap(NULL, 4194304, /*PROT_READ | PROT_WRITE*/3, 1, fd_data.fd, 0);
-	if (pBuf == MAP_FAILED) {
-		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
-        LOG("startCameraTest::mmap failed,pBuf=0x%08x\n",pBuf);
-        return -1;
-	}
-	memset(pBuf,0x55,1024);
-	memset(pBuf+854*480/4,0x55,1024);
 	
 	mDevFp = open("/dev/video2", O_RDWR);
 	if (mDevFp < 0) {
@@ -173,15 +204,18 @@ int startCameraTest()
 		input.index = index;
 		ret = ioctl(mDevFp, VIDIOC_ENUMINPUT, &input);
 		if(ret != 0){
-			//printf("startCameraTest::channel[%d] enum input error,ret=%d\n",input.index,ret);
+			//LOG("startCameraTest::channel[%d] enum input error,ret=%d\n",input.index,ret);
 			break;//return ret;
 		}
-		//printf("startCameraTest::Name of input channel[%d] is %s\n", input.index, input.name);
+		//LOG("startCameraTest::Name of input channel[%d] is %s\n", input.index, input.name);
 		index++;
 	}
+
+	close(mDevFp);
 	
 	if(index == 0){
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_CAMERA,PCBA_FAILED);
+		LOG("%s line=%d %s:[%s] \n", __FUNCTION__, __LINE__ ,PCBA_CAMERA,PCBA_FAILED);
 		return ret;
 	}
 
@@ -194,27 +228,31 @@ int startCameraTest()
 		else
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED);
+			LOG("%s line=%d %s:[%s] \n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_FAILED);
 		}
 	}
 
 	if(index == 2)
 	{
-		int result_back = pollDataFromCamera(0);
 		int result_front = pollDataFromCamera(1);
+		int result_back = pollDataFromCamera(0);
 		LOG("startCameraTest::result_back=%d,result_front=%d\n", result_back, result_front);
 		if(result_back == 1 && result_front <= 0)
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_SECCESS,PCBA_FRONT_CAMERA,PCBA_FAILED);
+			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_SECCESS,PCBA_FRONT_CAMERA,PCBA_FAILED);
 		}
 
 		if(result_back <= 0 && result_front == 1)
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_SECCESS);
+			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_SECCESS);
 		}
 
 		if(result_back <= 0 && result_front <= 0)
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
+			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
 		}
 
 		if(result_back == 1 && result_front == 1)
@@ -223,7 +261,6 @@ int startCameraTest()
 		}
 	}
 
-	close(mDevFp);
 	return 0;
 }
 
