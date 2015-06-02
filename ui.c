@@ -627,7 +627,7 @@ static void *input_thread(void *cookie)
 				}
 
 				/*record key press event for PTEST SCREEN*/
-				if(!ptest_get_key_wait_status())
+				//if(!ptest_get_key_wait_status())
 				{
 					pthread_mutex_lock(&key_queue_mutex);
 					printf("%s line=%d key press, ev_code=%d ev_value=%d \n", __FUNCTION__, __LINE__, ev.code, ev.value);
