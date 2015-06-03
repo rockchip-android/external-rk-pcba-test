@@ -86,6 +86,7 @@ void* codec_test(void *argc)
 {
     int ret = -1;
     char dt[32] = {0};
+	static int flag = 0;
 
 	struct testcase_info *tc_info = (struct testcase_info*)argc;
 			
@@ -141,13 +142,17 @@ void* codec_test(void *argc)
 				break;
 		}
 		#ifdef SOFIA3GR_AUD_WITHOUT_EARPIEC
-			if(key_vol_plus >= 1 && key_vol_cut >= 1) {
+			if(key_vol_plus >= 1 && key_vol_cut >= 1 && !flag) {
 				ptest_set_key_wait_status(1);
+				flag = 1;
+				sleep(5);
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_WITHOUT_EP_CODEC_INFO);
 			}
 		#else
-			if(key_power >= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
-				ptest_set_key_wait_status(1);			
+			if(key_power >= 1 && key_vol_plus >= 1 && key_vol_cut >= 1 && !flag) {
+				ptest_set_key_wait_status(1);
+				flag = 1;
+				sleep(5);
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_CODEC_INFO);
 			}
 		#endif

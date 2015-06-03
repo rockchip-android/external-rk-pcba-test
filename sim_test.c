@@ -405,9 +405,7 @@ void* sim_test(void *argc)
      	//while(1){sleep(5);write (gFd, "AT+CPIN?\r\n", 10);}
 	}
 
-#ifndef SOFIA3GR_PCBA
 	sleep(5);
-#endif
 
 #ifdef SOFIA3GR_PCBA
 	int simcard1 = 0;
@@ -444,6 +442,7 @@ void* sim_test(void *argc)
 	}
 
 	if(at_send(serial_fd,"AT+CIMI\r\n","OK") < 0){
+		#if 0
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
 		{
 			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
@@ -454,10 +453,15 @@ void* sim_test(void *argc)
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 		LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
 		return argc;
+		#endif
+	}
+	else
+	{
+		simcard1 = 1;
+		sprintf(ISMI1,"%s", ISMI);
 	}
 
-	simcard1 = 1;
-	sprintf(ISMI1,"%s", ISMI);
+	
 
 	if(at_send(serial_fd,"AT+XSIMSEL=1\r\n","OK") < 0){
 		//return argc;
@@ -479,8 +483,7 @@ void* sim_test(void *argc)
 		close(serial_fd);
 		return argc;
 	}
-
-	if(simcard1)
+	else if(simcard1)
 	{
 		tc_info->result = 0;
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1);
@@ -490,6 +493,31 @@ void* sim_test(void *argc)
 		}
 		set_is_sim_test_done(1);
 		close(serial_fd);
+		return argc;
+	}
+	else if(simcard2)
+	{
+		tc_info->result = 0;
+		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI2);
+		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
+		{
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+		}
+		set_is_sim_test_done(1);
+		close(serial_fd);
+		return argc;
+	}
+	else
+	{
+		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
+		{
+			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
+		}
+		set_is_sim_test_done(1);
+		close(serial_fd);
+		tc_info->result = -1;
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
 		return argc;
 	}
 #endif

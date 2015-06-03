@@ -627,13 +627,13 @@ static void *input_thread(void *cookie)
 				}
 
 				/*record key press event for PTEST SCREEN*/
-				//if(!ptest_get_key_wait_status())
+				if(ev.value == 0)
 				{
 					pthread_mutex_lock(&key_queue_mutex);
 					printf("%s line=%d key press, ev_code=%d ev_value=%d \n", __FUNCTION__, __LINE__, ev.code, ev.value);
 					key_pressed[ev.code] = ev.value;
 					const int queue_max = sizeof(key_queue) / sizeof(key_queue[0]);
-		        	if (ev.value > 0 && key_queue_len < queue_max) {
+		        	if (/*ev.value > 0 &&*/ key_queue_len < queue_max) {
 		            	key_queue[key_queue_len++] = ev.code;
 		            	pthread_cond_signal(&key_queue_cond);
 		        	}
