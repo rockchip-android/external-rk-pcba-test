@@ -123,6 +123,7 @@ static int openInput(const char* inputName)
  	//struct gsensor_msg *g_msg =  (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
         struct lsensor_msg g_msg;
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
+	int flags = 1;
 		
 	/*remind ddr test*/
 	if(tc_info->y <= 0)
@@ -163,7 +164,7 @@ static int openInput(const char* inputName)
 		return argv;
 	
     }
-    ret = ioctl(fd_dev, LIGHTSENSOR_IOCTL_ENABLE);
+    ret = ioctl(fd_dev, LIGHTSENSOR_IOCTL_ENABLE, &flags);
     if(ret < 0)
     {
 		printf("start light sensor fail!\n");
