@@ -61,6 +61,7 @@
 #endif
 #endif
 #include "lightsensor_test.h"
+#include "gnss_test.h"
 
 
 #ifdef SOFIA3GR_PCBA
@@ -182,6 +183,8 @@ pthread_t cpu_tid;
 int cpu_err = -1;
 
 pthread_t lsensor_tid; 
+pthread_t gps_tid; 
+
 
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
@@ -429,6 +432,16 @@ int start_test_pthread(struct testcase_info *tc_info)
 		if(err != 0)
 		{  
 		   printf("create lsensor test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "gps"))
+	{
+		err = pthread_create(&gps_tid, NULL, gps_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create gps test thread error: %s/n",strerror(err)); 
 		   return -1;
 		   
 		}  

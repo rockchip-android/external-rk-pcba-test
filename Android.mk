@@ -88,7 +88,8 @@ LOCAL_SRC_FILES := \
     battery_test.c\
 	ddr_test.c \
 	cpu_test.c	\
-	lightsensor_test.c
+	lightsensor_test.c \
+	gnss_test.c
 
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)

@@ -44,4 +44,5 @@
 #define PCBA_BOOT_IN_TOUCH_FUNCTION	"在该界面画线进行触摸屏测试"
 #define PCBA_TIP_IN_PCBA_FUNCTION	"按VOL+或VOL-超5秒松开退出PTEST模式"
 #define PCBA_LSENSOR	"光传感器"
+#define PCBA_GNSS			"GPS"
 #endif
