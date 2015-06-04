@@ -39,6 +39,6 @@
 #define PCBA_BOOT_IN_CORE_FUNCTION	"Clik each key(power, vol+, vol-) 1 time to go to pcba core"
 #define PCBA_BOOT_IN_TOUCH_FUNCTION	"Please draw line in this screen to execute TP test"
 #define PCBA_TIP_IN_PCBA_FUNCTION	"Press VOL+ or VOL- longer than 5 seconds to exit PTEST mode"
-
+#define PCBA_LSENSOR	"Lsensor"
 
 #endif

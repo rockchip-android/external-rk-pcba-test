@@ -60,6 +60,7 @@
 #endif
 #endif
 #endif
+#include "lightsensor_test.h"
 
 
 #ifdef SOFIA3GR_PCBA
@@ -179,6 +180,9 @@ int ddr_err = -1;
 
 pthread_t cpu_tid;
 int cpu_err = -1;
+
+pthread_t lsensor_tid; 
+
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -405,7 +409,7 @@ int start_test_pthread(struct testcase_info *tc_info)
 		err = pthread_create(&gsensor_tid, NULL, gsensor_test_mpu,tc_info); //
 		if(err != 0)
 		{  
-		   printf("create camera test thread error: %s/n",strerror(err)); 
+		   printf("create gsensor test thread error: %s/n",strerror(err)); 
 		   return -1;
 		   
 		} 
@@ -413,11 +417,21 @@ int start_test_pthread(struct testcase_info *tc_info)
 		err = pthread_create(&gsensor_tid, NULL, gsensor_test,tc_info); //
 		if(err != 0)
 		{  
-		   printf("create camera test thread error: %s/n",strerror(err)); 
+		   printf("create gsensor test thread error: %s/n",strerror(err)); 
 		   return -1;
 		   
 		}  
 #endif
+	}
+	else if(!strcmp(tc_info->base_info->name, "lsensor"))
+	{
+		err = pthread_create(&lsensor_tid, NULL, lightsensor_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create lsensor test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		}  
 	}
 	else if(!strcmp(tc_info->base_info->name, "udisk"))
 	{
