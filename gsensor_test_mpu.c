@@ -557,7 +557,7 @@ static int build_event(void)
 		return argv;
  	}
 	
-	//for(;;)
+	for(;;)
 	{
 		//printf("%s line=%d \n", __FUNCTION__, __LINE__);
 		build_event();
@@ -566,7 +566,7 @@ static int build_event(void)
 		//ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s] { %2d,%2d,%2d }\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
 		ui_display_sync(0,g_msg.y,0,255,0,255,"%s:[%s] { %2d,%2d,%2d }\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
-		//usleep(100000);
+		usleep(100000);
 	}
 
     //close(fd);
@@ -579,7 +579,7 @@ static int build_event(void)
 	if(sysfs_names_ptr)
 		free(sysfs_names_ptr);
 
-    //ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_SECCESS);
+    ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_SECCESS);
 	return argv;
  }
  
