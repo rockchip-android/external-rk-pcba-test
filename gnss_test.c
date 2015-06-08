@@ -89,7 +89,7 @@ void* gps_test(void *argv)
 
 	printf("%s line=%d file_size=%d \n", __FUNCTION__, __LINE__, file_size);
 
-	if(file_size > 0)
+	if(file_size > 1)
 	{
 		ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_SECCESS);
 		return argv;
