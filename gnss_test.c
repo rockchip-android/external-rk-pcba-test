@@ -4,18 +4,21 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../hardware/imc/gnss_drv/gnss_driver/imc_idi_gnss_ioctl.h"  
+#include <stdio.h>
+//#include "../../hardware/imc/gnss_drv/gnss_driver/imc_idi_gnss_ioctl.h"  
 #include "gnss_test.h"
 #include "common.h"
 #include "test_case.h"
 #include "language.h"
+#include"extra-functions.h"
+
 
 
 
 
 
 #define GNSS_TTY_DEVICE "/dev/ttyGNSS0"
-
+#define GNSS_RESULT_FILE	"/data/gnss_info"
 
 
 
@@ -27,6 +30,8 @@ void* gps_test(void *argv)
    int fd;
    struct gnss_msg g_msg;
    int chip_id = 0;
+   FILE* fp = NULL;
+   long file_size= 0;
    struct testcase_info *tc_info = (struct testcase_info*)argv;
 	   
    /*remind ddr test*/
@@ -37,6 +42,7 @@ void* gps_test(void *argv)
    ui_print_xy_rgba(0,g_msg.y,255,255,0,255,"%s:[%s..] \n",PCBA_GNSS,PCBA_TESTING);
 
 
+#if 0
 	 /*
      * This function should open the tty device. set required properties
      */
@@ -63,11 +69,36 @@ void* gps_test(void *argv)
 
    close(fd);
    fd = -1;
-
    printf("%s line=%d chip_id=0x%x \n", __FUNCTION__, __LINE__, chip_id);
-   ui_display_sync(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_SECCESS);
-   return argv;
+#endif
 
+	__system("busybox chmod 777 /system/bin/gnsstester.sh");
+	__system("/system/bin/gnsstester.sh");
+
+	fp = fopen(GNSS_RESULT_FILE, "r");
+	if(fp == NULL)
+	{
+		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_FAILED);
+		return argv;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	file_size - ftell(fp);
+	fclose(fp);
+
+
+	printf("%s line=%d file_size=%d \n", __FUNCTION__, __LINE__, file_size);
+
+	if(file_size > 0)
+	{
+		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_SECCESS);
+		return argv;
+	}
+	else
+	{
+		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_FAILED);
+		return argv;
+	}
 
 }
 
