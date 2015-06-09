@@ -21,6 +21,6 @@ busybox sleep 17
 gpgsv=`cat /data/gnss/LBS_NMEA.txt | grep "GPGSV"`
 
 busybox echo $gpgsv > /data/gnss_info
-busybox rm -f /data/gnss/LBS_NMEA.txt
+#busybox rm -f /data/gnss/LBS_NMEA.txt
 exit 1
 
