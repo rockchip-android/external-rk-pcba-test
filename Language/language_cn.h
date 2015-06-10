@@ -45,4 +45,5 @@
 #define PCBA_TIP_IN_PCBA_FUNCTION	"按VOL+或VOL-超5秒松开退出PTEST模式"
 #define PCBA_LSENSOR	"光传感器"
 #define PCBA_GNSS			"GPS"
+#define PCBA_PSENSOR	"距离传感器"
 #endif

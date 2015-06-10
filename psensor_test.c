@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #include <linux/input.h>
-#include "lightsensor_test.h"
+#include "psensor_test.h"
 #include "../../hardware/rockchip/sensor/st/isl29028.h"   
 #include "common.h"
 #include "test_case.h"
@@ -19,23 +19,17 @@
 
 
 
-#define  LSENSOR_CTL_DEV_PATH    "/dev/lightsensor"
-#define LSENSOR_INPUT_NAME		"lightsensor-level"
+#define  PSENSOR_CTL_DEV_PATH    "/dev/psensor"
+#define PSENSOR_INPUT_NAME		"proximity"
 
 
-static float lux_value = 0;
+static float p_value = 0;
+
+#define PROXIMITY_THRESHOLD_CM  9.0f
 
 static float indexToValue(size_t index)
 {
-    static const float luxValues[8] = {
-            10.0, 160.0, 225.0, 320.0,
-            640.0, 1280.0, 2600.0, 10240.0
-    };
-
-    const size_t maxIndex = sizeof(luxValues)/sizeof(*luxValues) - 1;
-    if (index > maxIndex)
-        index = maxIndex;
-    return luxValues[index];
+   return index * PROXIMITY_THRESHOLD_CM;
 }
 
 
@@ -103,7 +97,7 @@ static int openInput(const char* inputName)
 	 {		 // #define EV_ABS 0x03
 	 	 if (event.value != -1) {
                     // FIXME: not sure why we're getting -1 sometimes
-                    lux_value = indexToValue(event.value);
+                    p_value = indexToValue(event.value);
                 }
 	     
 	   
@@ -115,13 +109,13 @@ static int openInput(const char* inputName)
  
 
 
- void* lightsensor_test(void *argv)
+ void* psensor_test(void *argv)
  {
  	
 	int ret;
 	int fd;
  	//struct gsensor_msg *g_msg =  (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
-        struct lsensor_msg g_msg;
+        struct psensor_msg g_msg;
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
 	int flags = 1;
 		
@@ -130,7 +124,7 @@ static int openInput(const char* inputName)
 		tc_info->y  = get_cur_print_y();	
 
 	g_msg.y = tc_info->y;
-	ui_print_xy_rgba(0,g_msg.y,255,255,0,255,"%s:[%s..] \n",PCBA_LSENSOR,PCBA_TESTING);
+	ui_print_xy_rgba(0,g_msg.y,255,255,0,255,"%s:[%s..] \n",PCBA_PSENSOR,PCBA_TESTING);
 
         /*
  	if(!g_msg)
@@ -144,31 +138,31 @@ static int openInput(const char* inputName)
 	}
         */
         
- 	fd = openInput(LSENSOR_INPUT_NAME);
+ 	fd = openInput(PSENSOR_INPUT_NAME);
 	if(fd < 0)
 	{
-		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_LSENSOR,PCBA_FAILED);
+		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_PSENSOR,PCBA_FAILED);
 		g_msg.result = -1;
 		tc_info->result = -1;
 		return argv;
 	}
 	
-	int fd_dev = open(LSENSOR_CTL_DEV_PATH, O_RDONLY);
+	int fd_dev = open(PSENSOR_CTL_DEV_PATH, O_RDONLY);
     if(fd_dev<0)
     {
      	printf("opne Lsensor demon fail\n");
-		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_LSENSOR,PCBA_FAILED);
+		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_PSENSOR,PCBA_FAILED);
 		g_msg.result = -1;
 		tc_info->result = -1;
                 close(fd);
 		return argv;
 	
     }
-    ret = ioctl(fd_dev, LIGHTSENSOR_IOCTL_ENABLE, &flags);
+    ret = ioctl(fd_dev, PSENSOR_IOCTL_ENABLE, &flags);
     if(ret < 0)
     {
-		printf("start light sensor fail!\n");
-		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_LSENSOR,PCBA_FAILED);
+		printf("start p sensor fail!\n");
+		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_PSENSOR,PCBA_FAILED);
 		g_msg.result = -1;
 		tc_info->result = -1;
                 close(fd_dev);
@@ -179,7 +173,7 @@ static int openInput(const char* inputName)
 	{
 		readEvents(fd);
 		//ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s] { %2d,%2d,%2d }\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
-		ui_display_sync(0,g_msg.y,0,255,0,255,"%s:[%s] { %5d }\n",PCBA_LSENSOR,PCBA_SECCESS,(int)lux_value);
+		ui_display_sync(0,g_msg.y,0,255,0,255,"%s:[%s] { %5d }\n",PCBA_PSENSOR,PCBA_SECCESS,(int)p_value);
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 		usleep(100000);
 	}
@@ -187,7 +181,7 @@ static int openInput(const char* inputName)
     close(fd);
     close(fd_dev);
 
-    ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_LSENSOR,PCBA_SECCESS);
+    ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_PSENSOR,PCBA_SECCESS);
 	return argv;
  }
  
