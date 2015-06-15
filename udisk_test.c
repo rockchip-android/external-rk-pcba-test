@@ -65,10 +65,14 @@ void * udisk_test(void * argv)
 	
 	cap = strtod(results,NULL);
     printf("capacity : %s\n", results);
-	if(cap > 0)
+	if(cap > 0) {
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { %2fG }\n",PCBA_UCARD,PCBA_SECCESS,cap*1.0/1024/1024);
-    else
+		tc_info->result = 0;
+	}
+    else {
         ui_print_xy_rgba(0,y,0,0,255,255,"%s:[%s]\n",PCBA_UCARD,PCBA_FAILED);
+		tc_info->result = -1;
+    }
 
         fclose(fp);
 	

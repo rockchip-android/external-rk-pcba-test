@@ -296,6 +296,7 @@ void* sim_test(void *argc)
 	pthread_attr_t attr;
 	int modem_fd;
 	int serial_fd;
+	gFd = -1;
 	int err;
 	int biID =-1;
 #ifdef SOFIA3GR_PCBA
@@ -363,7 +364,7 @@ void* sim_test(void *argc)
 			set_is_sim_test_done(1);
 		#endif
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		printf("open at port fail!\n");
+		LOG("open at port fail!\n");
 		tc_info->result = -1;
 		return argc;
 	}
@@ -396,9 +397,10 @@ void* sim_test(void *argc)
     {
      	ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
      	LOG("%s line=%d pthread_create err\n", __FUNCTION__, __LINE__);
+		tc_info->result = -1;
 		#ifdef SOFIA3GR_PCBA
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		#endif
     }
@@ -425,7 +427,7 @@ void* sim_test(void *argc)
 			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
-		close(serial_fd);
+		//close(serial_fd);
 		tc_info->result = -1;
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 		LOG("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
@@ -438,7 +440,7 @@ void* sim_test(void *argc)
 			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 		}
 		set_is_sim_test_done(1);
-		close(serial_fd);
+		//close(serial_fd);
 		tc_info->result = -1;
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 		LOG("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
@@ -477,7 +479,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		}
 		else if(simcard1) {
@@ -488,7 +490,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		}
 		else if(simcard2) {
@@ -499,7 +501,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		}
 		else {
@@ -510,7 +512,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		}
 	}
@@ -521,7 +523,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			tc_info->result = -1;
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
 			LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
@@ -536,7 +538,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		}
 		else if(simcard2)
@@ -548,7 +550,7 @@ void* sim_test(void *argc)
 				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
 			}
 			set_is_sim_test_done(1);
-			close(serial_fd);
+			//close(serial_fd);
 			return argc;
 		}
 	}

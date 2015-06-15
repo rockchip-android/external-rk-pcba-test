@@ -32,6 +32,7 @@
 #include "data.h"
 #ifdef SOFIA3GR_PCBA
 #include "cutils/android_reboot.h"
+#include "sim_test.h"
 #endif
 
 
@@ -446,7 +447,6 @@ static void *input_thread_for_key_check(void *cookie)
 
 #include "touch_test.c"
 #include "key_test.h"
-
 static void *input_thread(void *cookie)
 {
     int drag = 0;
@@ -622,6 +622,7 @@ static void *input_thread(void *cookie)
 					if((keyEnd.tv_sec-keyStart.tv_sec) >= 5)
 					{
 						printf("%s line=%d press key longer than 5 seconds ,now exit ptest mode keyStart=%lu keyEnd=%lu\n", __FUNCTION__, __LINE__, keyStart.tv_sec, keyEnd.tv_sec);
+						write_test_result_to_nvm();
 						android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
 					}
 				}

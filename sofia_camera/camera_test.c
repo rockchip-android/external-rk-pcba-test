@@ -20,6 +20,7 @@ struct v4l2_requestbuffers req;
 struct v4l2_buffer v4l2Buf;
 struct v4l2_input input;
 pthread_t camera_tid;
+struct testcase_info *tc_info;
 
 int pollDataFromCamera(int index)
 {
@@ -192,6 +193,7 @@ int startCameraTest()
 	mDevFp = open("/dev/video2", O_RDWR);
 	if (mDevFp < 0) {
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
+		tc_info->result = -1;
 		LOG("startCameraTest::Cannot open camera.\n");
 		return mDevFp;
 	}
@@ -215,6 +217,7 @@ int startCameraTest()
 	
 	if(index == 0){
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_CAMERA,PCBA_FAILED);
+		tc_info->result = -1;
 		LOG("%s line=%d %s:[%s] \n", __FUNCTION__, __LINE__ ,PCBA_CAMERA,PCBA_FAILED);
 		return ret;
 	}
@@ -224,10 +227,12 @@ int startCameraTest()
 		if(pollDataFromCamera(0) > 1)
 		{
 			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]\n",PCBA_BACK_CAMERA,PCBA_SECCESS);
+			tc_info->result = 0;
 		}
 		else
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED);
+			tc_info->result = -1;
 			LOG("%s line=%d %s:[%s] \n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_FAILED);
 		}
 	}
@@ -240,24 +245,29 @@ int startCameraTest()
 		if(result_back == 1 && result_front <= 0)
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_SECCESS,PCBA_FRONT_CAMERA,PCBA_FAILED);
+			tc_info->result = -1;
 			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_SECCESS,PCBA_FRONT_CAMERA,PCBA_FAILED);
 		}
 
 		if(result_back <= 0 && result_front == 1)
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_SECCESS);
+			tc_info->result = -1;
 			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_SECCESS);
 		}
 
 		if(result_back <= 0 && result_front <= 0)
 		{
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
+			tc_info->result = -1;
 			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
 		}
 
 		if(result_back == 1 && result_front == 1)
 		{
 			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_SECCESS,PCBA_FRONT_CAMERA,PCBA_SECCESS);
+			tc_info->result = 0;
+			LOG("%s line=%d %s:[%s] %s:[%s]\n", __FUNCTION__, __LINE__ ,PCBA_BACK_CAMERA,PCBA_SECCESS,PCBA_FRONT_CAMERA,PCBA_SECCESS);
 		}
 	}
 
@@ -267,7 +277,7 @@ int startCameraTest()
 void * camera_test(void *argc)
 {
 	int ret,num;
-	struct testcase_info *tc_info = (struct testcase_info*)argc;
+	tc_info = (struct testcase_info*)argc;
 	int arg = 1; 
 
 	if(tc_info->y <= 0)

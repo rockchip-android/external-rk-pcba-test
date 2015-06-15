@@ -94,6 +94,7 @@ void* codec_test(void *argc)
 		tc_info->y  = get_cur_print_y();	
 
 	y = tc_info->y;
+	tc_info->result = -1;
 
 #ifdef SOFIA3GR_AUD_WITHOUT_EARPIEC
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_WITHOUT_EP_CODEC_INFO);
@@ -147,6 +148,7 @@ void* codec_test(void *argc)
 				flag = 1;
 				sleep(5);
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_WITHOUT_EP_CODEC_INFO);
+				tc_info->result = 0;
 			}
 		#else
 			if(key_power >= 1 && key_vol_plus >= 1 && key_vol_cut >= 1 && !flag) {
@@ -154,6 +156,7 @@ void* codec_test(void *argc)
 				flag = 1;
 				sleep(5);
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_CODEC_INFO);
+				tc_info->result = 0;
 			}
 		#endif
 	}

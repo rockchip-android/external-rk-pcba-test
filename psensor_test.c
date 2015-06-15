@@ -125,7 +125,8 @@ static int openInput(const char* inputName)
 
 	g_msg.y = tc_info->y;
 	ui_print_xy_rgba(0,g_msg.y,255,255,0,255,"%s:[%s..] \n",PCBA_PSENSOR,PCBA_TESTING);
-
+	tc_info->result = 0;
+	
         /*
  	if(!g_msg)
 	{
@@ -182,6 +183,7 @@ static int openInput(const char* inputName)
     close(fd_dev);
 
     ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_PSENSOR,PCBA_SECCESS);
+	tc_info->result = 0;
 	return argv;
  }
  

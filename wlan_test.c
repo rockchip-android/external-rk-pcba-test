@@ -247,6 +247,7 @@ void* wlan_test(void* argv)
 		process_ssid(ssid, results, results2);
 	#endif
 	ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_SECCESS,ssid);
+	tc_info->result = 0;
 	
 	LOG("wlan_test success.\n");
 	if(fp != NULL) {

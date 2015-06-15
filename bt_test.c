@@ -838,11 +838,14 @@ void *bt_test(void *argv)
         break;
     }
 
-    if (ret==0)
+    if (ret==0) {
         ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);
-    else
+		tc_info->result = 0;
+    }
+    else {
         ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_FAILED);
-
+		tc_info->result = -1;
+    }
 	return 0;
 }
 

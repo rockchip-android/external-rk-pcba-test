@@ -79,6 +79,7 @@ void* gps_test(void *argv)
 	if(fp == NULL)
 	{
 		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_FAILED);
+		tc_info->result = -1;
 		return argv;
 	}
 
@@ -92,11 +93,13 @@ void* gps_test(void *argv)
 	if(file_size > 1)
 	{
 		ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_SECCESS);
+		tc_info->result = 0;
 		return argv;
 	}
 	else
 	{
 		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GNSS,PCBA_FAILED);
+		tc_info->result = -1;
 		return argv;
 	}
 

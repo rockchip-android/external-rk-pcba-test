@@ -539,7 +539,7 @@ static int build_event(void)
 
 	g_msg.y = tc_info->y;
 	ui_print_xy_rgba(0,g_msg.y,255,255,0,255,"%s:[%s..] \n",PCBA_GSENSOR,PCBA_TESTING);
-
+	tc_info->result = 0;
 
     if (mpu_int() < 0)
 	{
@@ -580,6 +580,7 @@ static int build_event(void)
 		free(sysfs_names_ptr);
 
     ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_SECCESS);
+	tc_info->result = 0;
 	return argv;
  }
  

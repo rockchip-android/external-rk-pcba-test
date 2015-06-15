@@ -55,6 +55,7 @@
 #else
 #ifdef SOFIA3GR_PCBA
 #include "sofia_camera/camera_test.h"
+#include "at_util.h"
 #else
 #include "camera_test.h"
 #endif
@@ -309,6 +310,47 @@ static int parse_testcase()
     return total_testcases;
 }
 
+void write_test_result_to_nvm() {	
+	int writeCounts = 1;
+	struct list_head *pos;
+	
+	list_for_each(pos, &auto_test_list_head) {
+		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
+		if(tc_info->result == -1) {
+			writeCounts = 1;
+			while(send_at_cmd("at@nvm:cal_prodparm.cust_parms.param_3=0\r\n","OK") < 0 && writeCounts <= 3) {
+				writeCounts++;
+			}
+
+			writeCounts = 1;
+			while(send_at_cmd("at@nvm:store_nvm(cal_prodparm)\r\n","Committed to NVM flash...") < 0 && writeCounts <= 3) {
+				writeCounts++;
+			}
+
+			writeCounts = 1;
+			while(send_at_cmd("at@nvm:wait_nvm_idle()\r\n","OK") < 0 && writeCounts <= 3) {
+				writeCounts++;
+			}
+			return;
+		}
+	}
+
+	writeCounts = 1;
+	while(send_at_cmd("at@nvm:cal_prodparm.cust_parms.param_3=1\r\n","OK") < 0 && writeCounts <= 3) {
+		writeCounts++;
+	}
+
+	writeCounts = 1;
+	while(send_at_cmd("at@nvm:store_nvm(cal_prodparm)\r\n","Committed to NVM flash...") < 0 && writeCounts <= 3) {
+		writeCounts++;
+	}
+
+	writeCounts = 1;
+	while(send_at_cmd("at@nvm:wait_nvm_idle()\r\n","OK") < 0 && writeCounts <= 3) {
+		writeCounts++;
+	}
+
+}
 
 int start_test_pthread(struct testcase_info *tc_info)
 {

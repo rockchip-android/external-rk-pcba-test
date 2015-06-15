@@ -94,8 +94,10 @@ void * sdcard_test(void * argv)
 			//LOG("%s.\n", results);
 			
 			cap = strtod(results,NULL);
-			if(cap)
+			if(cap) {
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { %2fG } \n",PCBA_SDCARD,PCBA_SECCESS,cap*1.0);
+				tc_info->result = 0;
+			}
 		    fclose(fp);
 
 			return argv;
@@ -131,6 +133,7 @@ void * sdcard_test(void * argv)
 	if(cap)
 	{
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { %2fG } \n",PCBA_SDCARD,PCBA_SECCESS,cap*1.0/1024/1024);
+		tc_info->result = 0;
 	}
     fclose(fp);
 

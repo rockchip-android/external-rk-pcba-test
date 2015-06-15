@@ -213,6 +213,7 @@ int BatteryPathInit()
 		tc_info->y  = get_cur_print_y();	
  #ifdef SOFIA3GR_PCBA
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_TESTING);
+ 	tc_info->result = 0;
  #else
     ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s \n",PCBA_BATTERY);
  #endif
@@ -262,6 +263,7 @@ int BatteryPathInit()
 	}
 
     ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
+	tc_info->result = -1;
 	return argv;
  }
  
