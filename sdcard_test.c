@@ -56,6 +56,7 @@ void * sdcard_test(void * argv)
 			while(1)
 			{
 				fp = NULL;
+				LOG("%s::wait for insert sd card...\n", __FUNCTION__);
 				if(__system("/system/bin/mmctester.sh") > 0)
 				{
 					fp = fopen(SCAN_RESULT_FILE, "r");
@@ -65,18 +66,8 @@ void * sdcard_test(void * argv)
 				{
 					break;
 				}
-				else
-				{
-					if(fopen(SD_INSERT_RESULT_FILE, "r") != NULL)
-					{
-						LOG("has not insert sd card.\n");
-						ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_SDCARD_NOINSERT);
-						tc_info->result = -1;
-						return argv;
-					}
-				}
 				
-				if(testCounts++ > 5)
+				if(testCounts++ > 3)
 				{
 					LOG("can not open %s.\n", SCAN_RESULT_FILE);
 					ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_FAILED);
@@ -85,7 +76,6 @@ void * sdcard_test(void * argv)
 				}
 				sleep(1);
 			}
-
 			memset(results, 0, SCAN_RESULT_LENGTH);
 			//fread(results, 1, SCAN_RESULT_LENGTH, fp);
 			fgets(results,50,fp);

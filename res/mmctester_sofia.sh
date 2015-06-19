@@ -1,38 +1,78 @@
 #!/system/bin/sh
 
-result_file=/data/sd_capacity
-insert_sd_info=/data/sd_insert_info
+result_file2=/data/sd_capacity
 
-if [ -e $result_file ] ; then
-busybox rm -f $result_file
+if [ -e $result_file2 ] ; then
+busybox rm -f $result_file2
 fi
 
-if [ -e insert_sd_info ] ; then
-busybox rm -f insert_sd_info
-fi
+while true; do
+	nr=0
+	mmcblk="/dev/block/mmcblk$nr"
+	#echo $mmcblk
+	mmcp=$mmcblk
+	
+    while true; do
+        while true; do
+        	#echo $mmcblk
+            if [ -b "$mmcblk" ]; then
+                #busybox  sleep 1
+                if [ -b "$mmcblk" ]; then
+                    echo "card$nr insert"
+                    break
+                fi
+            else
+            	if [ $nr -eq 100 ]; then
+			       echo "PCBA TEST SDcard:mmcblk1-->100 can't find card..."
+			       busybox sleep 2
+			       break 2
+			    fi
+			    nr=`busybox expr $nr + 1`
+				mmcblk="/dev/block/mmcblk$nr"
+				#echo $mmcblk
+				continue 2
+            fi
+        done
+        
+        if [ ! -d "/mnt/external_sd" ]; then
+            busybox mkdir -p /mnt/external_sd
+        fi
 
-if [ ! -b "/dev/block/mmcblk1p1" ]; then
-	busybox echo "not card insert" > /data/sd_insert_info
-	exit 0
-fi        
+		umount /mnt/external_sd
+        mmcp=$mmcblk"p1"
+        #mmcp=$mmcblk
+        echo $mmcp
+        mount -t vfat $mmcp /mnt/external_sd
+        if [ $? -ne 0 ]; then
+        	echo "mount error."
+			if [ $nr -eq 100 ]; then
+			       echo "PCBA TEST SDcard:mmcblk1-->100 can't mount card..."
+			       busybox sleep 2
+			       break
+		    fi
+		    nr=`busybox expr $nr + 1`
+			mmcblk="/dev/block/mmcblk$nr"
+			#echo $mmcblk
+			continue 1
 
-#if [ ! -d "/tmp/extsd" ]; then
-#    busybox mkdir -p /tmp/extsd
-#fi
+            mmcp=$mmcblk"p1"
+            echo $mmcp
+            mount -t vfat $mmcp /mnt/external_sd
+            if [ $? -ne 0 ]; then
+            	echo "mount error."
+            fi
+        fi
 
-umount /mnt/external_sd
+        break 2
+    done
+done
+	echo "PCBA TEST SDcard:$mmcp: mount success."
+    capacity=`df | grep "/mnt/external_sd" | busybox awk '{printf $2}'`
+    echo "$mmcp: $capacity"
+    
+    umount /mnt/external_sd
+    
+    echo $capacity > /data/sd_capacity
 
-mmcp=$mmcblk
-su root
-
-mount -t vfat /dev/block/mmcblk1p1 /mnt/external_sd
-
-capacity=`df | grep "/mnt/external_sd" | busybox awk '{printf $2}'`
-busybox echo "$mmcp: $capacity"
-
-busybox sleep 1
-
-umount /mnt/external_sd
-busybox echo $capacity > /data/sd_capacity
-exit 1
+	exit 1
 

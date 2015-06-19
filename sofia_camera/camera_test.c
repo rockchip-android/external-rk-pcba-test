@@ -86,11 +86,11 @@ POLL_WORK:
 	//…Ë÷√format
 	memset(&v4l2Fmt, 0, sizeof(v4l2Fmt));
 	v4l2Fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	v4l2Fmt.fmt.pix.width = 854;
-	v4l2Fmt.fmt.pix.height = 480;
+	v4l2Fmt.fmt.pix.width = 320;
+	v4l2Fmt.fmt.pix.height = 240;
 	v4l2Fmt.fmt.pix.bytesperline = 0;//854*4;//0
 	v4l2Fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV422P;//V4L2_PIX_FMT_RGB32;//V4L2_PIX_FMT_YUV422P;//v4l2PixFmt;
-	v4l2Fmt.fmt.pix.sizeimage = (854 * 480 * 16) / 8;
+	v4l2Fmt.fmt.pix.sizeimage = (320 * 240 * 16) / 8;
 	
 	ret = -1;
 	ret = ioctl(mDevFp, VIDIOC_S_FMT, &v4l2Fmt);
