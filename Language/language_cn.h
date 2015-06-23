@@ -13,6 +13,7 @@
 #define PCBA_SIM "SIM卡"
 #define PCBA_SIM2 "SIM卡2"
 #define PCBA_SDCARD  "SD卡"
+#define PCBA_FM  "收音机"
 #define PCBA_UCARD  "U盘"
 #define PCBA_WIFI   "网络"
 #define PCBA_WIFI_SIGNAL "信号"

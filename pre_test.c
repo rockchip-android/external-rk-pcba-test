@@ -64,6 +64,7 @@
 #include "lightsensor_test.h"
 #include "gnss_test.h"
 #include "psensor_test.h"
+#include "fm_test.h"
 
 
 #ifdef SOFIA3GR_PCBA
@@ -128,6 +129,9 @@ pthread_t key_tid;
 char *key_res;
 struct key_msg *key_msg;
 
+pthread_t fm_tid;
+char *fm_res;
+struct fm_msg *fm_msg;
 
 pthread_t camera_tid;  
 char *camera_res;
@@ -401,6 +405,16 @@ int start_test_pthread(struct testcase_info *tc_info)
 		if(err != 0)
 		{  
 		   printf("create key test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "fm"))
+	{
+		err = pthread_create(&fm_tid, NULL, fm_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create fm test thread error: %s/n",strerror(err));
 		   return -1;
 		   
 		}  
