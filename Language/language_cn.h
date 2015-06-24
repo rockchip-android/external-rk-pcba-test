@@ -47,4 +47,5 @@
 #define PCBA_LSENSOR	"光传感器"
 #define PCBA_GNSS			"GPS"
 #define PCBA_PSENSOR	"距离传感器"
+#define PCBA_COMPASS	"电子罗盘"
 #endif

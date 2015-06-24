@@ -80,6 +80,14 @@ struct sysfs_attrbs {
 
        char *display_orientation_on;
        char *event_display_orientation;
+
+	   char *compass_enable;
+       char *compass_x_fifo_enable;
+       char *compass_y_fifo_enable;
+       char *compass_z_fifo_enable;
+       char *compass_rate;
+       char *compass_scale;
+       char *compass_orient;
 } ;
 
 #define EVENT_TYPE_ACCEL_X          ABS_X
@@ -97,6 +105,11 @@ static long g_x = 0;
 static long g_y = 0;
 static long g_z = 0;
 
+static long c_x = 0;
+static long c_y = 0;
+static long c_z = 0;
+
+
 
 #define MAX_CHIP_ID_LEN			(20)
 #define MAX_SYSFS_NAME_LEN		(100)
@@ -113,6 +126,8 @@ struct sysfs_attrbs mpu;
 int iio_fd = -1;
 
 char mIIOBuffer[(16 + 8 * 3 + 8) * IIO_BUFFER_LENGTH];
+
+static int int_flag = 0;
 
 
 static int inv_init_sysfs_attributes(void)
@@ -212,6 +227,14 @@ static int inv_init_sysfs_attributes(void)
             "/display_orientation_on");
     sprintf(mpu.event_display_orientation, "%s%s", sysfs_path, 
             "/event_display_orientation");
+
+	sprintf(mpu.compass_enable, "%s%s", sysfs_path, "/compass_enable");
+    sprintf(mpu.compass_x_fifo_enable, "%s%s", sysfs_path, "/scan_elements/in_magn_x_en");
+    sprintf(mpu.compass_y_fifo_enable, "%s%s", sysfs_path, "/scan_elements/in_magn_y_en");
+    sprintf(mpu.compass_z_fifo_enable, "%s%s", sysfs_path, "/scan_elements/in_magn_z_en");
+    sprintf(mpu.compass_rate, "%s%s", sysfs_path, "/sampling_frequency");
+    sprintf(mpu.compass_scale, "%s%s", sysfs_path, "/in_magn_scale");
+    sprintf(mpu.compass_orient, "%s%s", sysfs_path, "/compass_matrix");
 
     return 0;
 }
@@ -449,6 +472,59 @@ static int disableGyro(/*int en*/)
 
 
 
+static int enableCompass(int en) 
+{
+    int tempFd;
+    int res = 0;
+
+
+    tempFd = open(mpu.compass_enable, O_RDWR);
+    if(tempFd < 0) {
+        printf("%s line=%d open of %s failed with '%s' (%d) \n", __FUNCTION__, __LINE__,
+             mpu.compass_enable, strerror(res), res);
+        return res;
+    }
+    res = enable_sysfs_sensor(tempFd, en);
+	if(res < 0)
+	{
+		printf("%s line=%d enable compass failed \n", __FUNCTION__, __LINE__);
+	}
+    close(tempFd);
+
+    if (en) {
+        tempFd = open(mpu.compass_x_fifo_enable, O_RDWR);
+        if (tempFd > 0) {
+            res = enable_sysfs_sensor(tempFd, en);
+            close(tempFd);
+        } else {
+            printf("%s line=%d:open of %s failed with '%s' (%d) \n", __FUNCTION__, __LINE__,
+                 mpu.compass_x_fifo_enable, strerror(res), res);
+        }
+
+
+        tempFd = open(mpu.compass_y_fifo_enable, O_RDWR);
+        if (tempFd > 0) {
+            res = enable_sysfs_sensor(tempFd, en);
+            close(tempFd);
+        } else {
+            printf("%s line=%d:open of %s failed with '%s' (%d) \n",  __FUNCTION__, __LINE__, 
+                 mpu.compass_y_fifo_enable, strerror(res), res);
+        }
+
+
+        tempFd = open(mpu.compass_z_fifo_enable, O_RDWR);
+        res = errno;
+        if (tempFd > 0) {
+            res = enable_sysfs_sensor(tempFd, en);
+            close(tempFd);
+        } else {
+            printf("%s line=%d :open of %s failed with '%s' (%d) \n", __FUNCTION__, __LINE__, 
+                 mpu.compass_z_fifo_enable, strerror(res), res);
+        }
+    }
+
+    return res;
+}
 
 
 
@@ -457,6 +533,13 @@ static int mpu_int(void)
 	int result= 0;
 	
 	printf("%s line=%d \n", __FUNCTION__, __LINE__);
+
+	
+	if(int_flag)
+	{
+		printf("%s line=%d int_flag=%d already call.\n", __FUNCTION__, __LINE__, int_flag);
+		return 0;
+	}
 
 	memset(mIIOBuffer, 0, sizeof(mIIOBuffer));
 
@@ -475,23 +558,26 @@ static int mpu_int(void)
     masterEnable(0);
 	disableGyro(0);
 	enableAccel(0);
+	enableCompass(0);
 	onPower(0);
 
 
 	onPower(1);
 	masterEnable(0);
 	result = enableAccel(1);
+	enableCompass(1);
 
 	masterEnable(1);//shall open
 	printf("%s line=%d result=%d \n", __FUNCTION__, __LINE__, result);
 
 	if(result < 0)
 		return -1;
-	
+
+	int_flag = 1;
 	return 0;
 }
  
-
+#if 0
 static int build_event(void)
 {
 	int nbyte;
@@ -523,6 +609,44 @@ static int build_event(void)
 
 	return 0;
 }
+#else
+static int build_event(void)
+{
+	int nbyte;
+	int i, nb;
+	int sensors;
+	ssize_t rsize;
+
+	char *rdata = mIIOBuffer;
+
+	sensors = 2;
+	
+	nbyte= (8 * sensors + 8) * 1;
+
+	memset(mIIOBuffer, 0, sizeof(mIIOBuffer));
+
+	//printf("%s line=%d iio_fd=%d nbyte=%d \n", __FUNCTION__, __LINE__, iio_fd, nbyte);
+	rsize = read(iio_fd, rdata, nbyte);
+	//printf("%s line=%d iio_fd=%d, rsize=%d \n", __FUNCTION__, __LINE__, iio_fd, rsize);
+
+	g_x = *((short *) (rdata + 0 ));
+	g_y = *((short *) (rdata + 2 ));
+	g_z = *((short *) (rdata + 4 ));
+
+	c_x = *((short *) (rdata + 0 + 6));
+	c_y = *((short *) (rdata + 2 + 6));
+	c_z = *((short *) (rdata + 4 + 6));
+
+	//g_x = lg_x*ACCELERATION_RATIO_ANDROID_TO_HW;
+	//g_y = lg_y*ACCELERATION_RATIO_ANDROID_TO_HW;
+	//g_z = lg_z*ACCELERATION_RATIO_ANDROID_TO_HW;
+
+	//printf("%s line=%d x=%d y=%d z=%d \n", __FUNCTION__, __LINE__, g_x, g_y, g_z);
+
+	return 0;
+}
+
+#endif
 
  void* gsensor_test_mpu(void *argv)
  {
@@ -546,6 +670,14 @@ static int build_event(void)
  		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_FAILED);
 		g_msg.result = -1;
 		tc_info->result = -1;
+		int_flag = 0;
+		if(iio_fd > 0)
+	    {
+	    	close(iio_fd);
+	    }
+
+		if(sysfs_names_ptr)
+			free(sysfs_names_ptr);
 		return argv;
  	}
         
@@ -554,6 +686,14 @@ static int build_event(void)
  		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_FAILED);
 		g_msg.result = -1;
 		tc_info->result = -1;
+		int_flag = 0;
+		if(iio_fd > 0)
+	    {
+	    	close(iio_fd);
+	    }
+
+		if(sysfs_names_ptr)
+			free(sysfs_names_ptr);
 		return argv;
  	}
 	
@@ -581,6 +721,88 @@ static int build_event(void)
 
     ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_GSENSOR,PCBA_SECCESS);
 	tc_info->result = 0;
+	int_flag = 0;
 	return argv;
  }
+
+
+ void* compass_test_mpu(void *argv)
+ {
+
+	int ret;
+	int fd;
+ 	//struct gsensor_msg *g_msg =  (struct gsensor_msg *)malloc(sizeof(struct gsensor_msg));
+        struct gsensor_msg g_msg;
+	struct testcase_info *tc_info = (struct testcase_info*)argv;
+		
+	/*remind ddr test*/
+	if(tc_info->y <= 0)
+		tc_info->y  = get_cur_print_y();	
+
+	g_msg.y = tc_info->y;
+	ui_print_xy_rgba(0,g_msg.y,255,255,0,255,"%s:[%s..] \n",PCBA_COMPASS,PCBA_TESTING);
+	tc_info->result = 0;
+
+	printf("%s line=%d MPU compass \n", __FUNCTION__, __LINE__);
+
+    if (mpu_int() < 0)
+	{
+ 		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_COMPASS,PCBA_FAILED);
+		g_msg.result = -1;
+		tc_info->result = -1;
+		int_flag = 0;
+		if(iio_fd > 0)
+	    {
+	    	close(iio_fd);
+	    }
+
+		if(sysfs_names_ptr)
+			free(sysfs_names_ptr);
+		return argv;
+ 	}
+        
+ 	if(iio_fd < 0)
+ 	{
+ 		ui_print_xy_rgba(0,g_msg.y,255,0,0,255,"%s:[%s]\n",PCBA_COMPASS,PCBA_FAILED);
+		g_msg.result = -1;
+		tc_info->result = -1;
+		int_flag = 0;
+		if(iio_fd > 0)
+	    {
+	    	close(iio_fd);
+	    }
+
+		if(sysfs_names_ptr)
+			free(sysfs_names_ptr);
+		return argv;
+ 	}
+	
+	for(;;)
+	{
+		//printf("%s line=%d \n", __FUNCTION__, __LINE__);
+		build_event();
+		//printf("%s line=%d \n", __FUNCTION__, __LINE__);
+		//readEvents(fd);
+		//ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s] { %2d,%2d,%2d }\n",PCBA_GSENSOR,PCBA_SECCESS,(int)g_x,(int)g_y,(int)g_z);
+		ui_display_sync(0,g_msg.y,0,255,0,255,"%s:[%s] { %2d,%2d,%2d }\n",PCBA_COMPASS,PCBA_SECCESS,(int)c_x,(int)c_y,(int)c_z);
+		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
+		usleep(100000);
+	}
+
+    //close(fd);
+    //close(fd_dev);
+    if(iio_fd > 0)
+    {
+    	close(iio_fd);
+    }
+
+	if(sysfs_names_ptr)
+		free(sysfs_names_ptr);
+
+    ui_print_xy_rgba(0,g_msg.y,0,255,0,255,"%s:[%s]\n",PCBA_COMPASS,PCBA_SECCESS);
+	tc_info->result = 0;
+	int_flag = 0;
+	return argv;
+ }
+
  

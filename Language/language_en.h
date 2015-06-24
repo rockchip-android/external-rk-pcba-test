@@ -43,5 +43,6 @@
 #define PCBA_LSENSOR	"LSensor"
 #define PCBA_GNSS			"GPS"
 #define PCBA_PSENSOR	"PSensor"
+#define PCBA_COMPASS	"ECompass"
 
 #endif

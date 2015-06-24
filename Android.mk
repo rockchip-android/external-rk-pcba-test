@@ -91,7 +91,8 @@ LOCAL_SRC_FILES := \
 	lightsensor_test.c \
 	gnss_test.c \
 	psensor_test.c \
-	fm_test.c
+	fm_test.c \
+	compass_test.c
 
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)

@@ -65,6 +65,7 @@
 #include "gnss_test.h"
 #include "psensor_test.h"
 #include "fm_test.h"
+#include "compass_test.h"
 
 
 #ifdef SOFIA3GR_PCBA
@@ -191,6 +192,8 @@ int cpu_err = -1;
 pthread_t lsensor_tid; 
 pthread_t gps_tid; 
 pthread_t psensor_tid; 
+pthread_t compass_tid;
+
 
 
 
@@ -513,6 +516,26 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "compass"))
+	{
+#ifdef SOFIA3GR_SENSOR_MPU
+		err = pthread_create(&compass_tid, NULL, compass_test_mpu,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create mpu compass test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		} 
+#else
+		err = pthread_create(&compass_tid, NULL, compass_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create ST compass test thread error: %s/n",strerror(err)); 
+		   return -1;
+		   
+		}  
+#endif
 	}
 	else if(!strcmp(tc_info->base_info->name, "udisk"))
 	{
