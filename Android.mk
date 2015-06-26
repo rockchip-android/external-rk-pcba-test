@@ -92,8 +92,8 @@ LOCAL_SRC_FILES := \
 	gnss_test.c \
 	psensor_test.c \
 	fm_test.c \
-	compass_test.c
-
+	compass_test.c \
+	vibrator.c
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 	LOCAL_CFLAGS += -DRK3288_PCBA

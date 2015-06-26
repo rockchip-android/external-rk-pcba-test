@@ -13,6 +13,7 @@
 #define PCBA_SIM "Sim"
 #define PCBA_SIM2 "Sim2"
 #define PCBA_SDCARD  "SDCard"
+#define PCBA_VIBRATOR  "VIBRATOR"
 #define PCBA_FM  "FM"
 #define PCBA_UCARD  "UDisk"
 #define PCBA_WIFI   "Wifi"

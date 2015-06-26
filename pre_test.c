@@ -45,6 +45,7 @@
 #include "ddr_test.h"
 #include "cpu_test.h"
 #include "codec_test.h"
+#include "vibrator.h"
 #include <signal.h>
 #include "language.h"
 #ifdef RK3288_PCBA
@@ -133,6 +134,10 @@ struct key_msg *key_msg;
 pthread_t fm_tid;
 char *fm_res;
 struct fm_msg *fm_msg;
+
+pthread_t vibrator_tid;
+char *vibrator_res;
+struct fm_msg *vibrator_msg;
 
 pthread_t camera_tid;  
 char *camera_res;
@@ -576,7 +581,17 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   return -1;
 		   
 		}  
-	}	
+	}
+	else if(!strcmp(tc_info->base_info->name, "vibrator"))
+	{
+		err = pthread_create(&vibrator_tid, NULL, vibrator_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create sim test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}
 	else if(!strcmp(tc_info->base_info->name, "ddr"))
 	{
 		ddr_err = pthread_create(&ddr_tid, NULL, ddr_test,tc_info); //
