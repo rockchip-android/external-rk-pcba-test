@@ -32,6 +32,7 @@
 #define PCBA_CODEC_VOL_DOWN "EXT_MIC/HS testing"
 #define PCBA_CODEC_VOL_POWER "EP testing"
 #define PCBA_DDR "DDR"
+#define PCBA_FLASHLIGHT "FLASHLIGHT"
 #define PCBA_CAMERA "Camera"
 #define PCBA_FRONT_CAMERA "Front Camera"
 #define PCBA_BACK_CAMERA "Back Camera"

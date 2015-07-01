@@ -46,6 +46,7 @@
 #include "cpu_test.h"
 #include "codec_test.h"
 #include "vibrator.h"
+#include "flashlight_test.h"
 #include <signal.h>
 #include "language.h"
 #ifdef RK3288_PCBA
@@ -138,6 +139,11 @@ struct fm_msg *fm_msg;
 pthread_t vibrator_tid;
 char *vibrator_res;
 struct fm_msg *vibrator_msg;
+
+pthread_t falshlight_tid;
+char *falshlight_res;
+struct fm_msg *falshlight_msg;
+
 
 pthread_t camera_tid;  
 char *camera_res;
@@ -587,7 +593,17 @@ int start_test_pthread(struct testcase_info *tc_info)
 		err = pthread_create(&vibrator_tid, NULL, vibrator_test,tc_info); //
 		if(err != 0)
 		{  
-		   printf("create sim test thread error: %s/n",strerror(err));
+		   printf("create vibrator test thread error: %s/n",strerror(err));
+		   return -1;
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "falshlight"))
+	{
+		err = pthread_create(&falshlight_tid, NULL, flashlight_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create flashlight test thread error: %s/n",strerror(err));
 		   return -1;
 		   
 		}  

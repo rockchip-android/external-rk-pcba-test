@@ -5,6 +5,7 @@
 #include "script.h"
 #include "test_case.h"
 #include "language.h"
+#include <linux/videodev2.h>
 
 #define LOG(x...)   printf("[Camera_TEST] "x)
 
