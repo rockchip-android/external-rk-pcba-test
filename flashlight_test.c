@@ -100,7 +100,7 @@ void * flashlight_test(void * argv)
 	y = tc_info->y;
 
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_FLASHLIGHT,PCBA_TESTING);
-	sleep(15);
+	sleep(5);
 	while(1) {
 		if(test_count++ > 3) {
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_FLASHLIGHT,PCBA_FAILED);
