@@ -238,7 +238,7 @@ static int parse_testcase()
     int i, j, mainkey_cnt;
     struct testcase_base_info *info;
     char mainkey_name[32], display_name[64], binary[16];
-    int activated, category, run_type;
+    int activated, category, run_type, sim_counts;
     int len;
 
     mainkey_cnt = script_mainkey_cnt();
@@ -278,6 +278,10 @@ static int parse_testcase()
 
             if (script_fetch(mainkey_name, "run_type", &run_type, 1) == 0) {
                 info[j].run_type = run_type;
+            }
+			
+			if (script_fetch(mainkey_name, "sim_counts", &sim_counts, 1) == 0) {
+                tc_info->w = sim_counts;
             }
 			tc_info = (struct testcase_info*) malloc(sizeof(struct testcase_info));
 			if(tc_info == NULL)

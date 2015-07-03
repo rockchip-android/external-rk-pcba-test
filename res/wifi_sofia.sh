@@ -24,7 +24,7 @@ rmmod iwlwifi
 insmod /system/lib/modules/iwlwifi.ko nvm_file=nvmDataDefault
 insmod /system/lib/modules/iwlmvm.ko
 
-echo "sleep 1s"
+echo "wlan test sleep 1s"
 busybox sleep 1
 
 busybox ifconfig wlan0 up

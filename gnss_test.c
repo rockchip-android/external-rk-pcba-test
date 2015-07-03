@@ -11,17 +11,10 @@
 #include "test_case.h"
 #include "language.h"
 #include"extra-functions.h"
-
-
-
-
-
-
 #define GNSS_TTY_DEVICE "/dev/ttyGNSS0"
 #define GNSS_RESULT_FILE	"/data/gnss_info"
 
-
-
+#define LOG(x...)   				printf("[GPS_TEST] "x)
 
 void* gps_test(void *argv)
 {
@@ -72,7 +65,7 @@ void* gps_test(void *argv)
    printf("%s line=%d chip_id=0x%x \n", __FUNCTION__, __LINE__, chip_id);
 #endif
 
-	__system("busybox chmod 777 /system/bin/gnsstester.sh");
+	//__system("busybox chmod 777 /system/bin/gnsstester.sh");
 	__system("/system/bin/gnsstester.sh");
 
 	fp = fopen(GNSS_RESULT_FILE, "r");
@@ -88,7 +81,7 @@ void* gps_test(void *argv)
 	fclose(fp);
 
 
-	printf("%s line=%d file_size=%d \n", __FUNCTION__, __LINE__, file_size);
+	LOG("%s line=%d file_size=%d \n", __FUNCTION__, __LINE__, file_size);
 
 	if(file_size > 1)
 	{

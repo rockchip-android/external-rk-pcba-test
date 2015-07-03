@@ -23,7 +23,7 @@ while true; do
                 fi
             else
             	if [ $nr -eq 100 ]; then
-			       echo "PCBA TEST SDcard:mmcblk1-->100 can't find card..."
+			       #echo "PCBA TEST SDcard:mmcblk1-->100 can't find card..."
 			       busybox sleep 2
 			       break 2
 			    fi

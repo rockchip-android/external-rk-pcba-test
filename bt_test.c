@@ -824,19 +824,23 @@ void *bt_test(void *argv)
 		tc_info->y  = get_cur_print_y();
 
 	ui_print_xy_rgba(0,tc_info->y,255,255,0,255,"%s:[%s..] \n",PCBA_BLUETOOTH,PCBA_TESTING);
-    switch (get_chip_type()) {
+#ifdef SOFIA3GR_PCBA
+	ret = Sofia3gr_bluedroid_test();
+#else
+	switch (get_chip_type()) {
     case RK903:
     case RTK8723BS:
     case BK3515:
         ret = bt_test_bluedroid();
         break;
-	case SOFIA_3GR:
+	/*case SOFIA_3GR:
 		ret = Sofia3gr_bluedroid_test();
-        break;
+        break;*/
     default:
         ret = bt_test_bluedroid();//bt_test_bluez();
         break;
     }
+#endif
 
     if (ret==0) {
         ui_print_xy_rgba(0,tc_info->y,0,255,0,255,"%s:[%s]\n",PCBA_BLUETOOTH,PCBA_SECCESS);

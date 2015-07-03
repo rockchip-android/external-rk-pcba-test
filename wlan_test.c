@@ -185,8 +185,8 @@ void* wlan_test(void* argv)
 			}
 
 			if(counts > 4) {
-				ret=-1;
-				break;
+				LOG("execute sh system/bin/wifi.sh fail.\n");
+				goto error_exit;
 			}
 
 			fp = fopen(SCAN_RESULT_FILE, "r");
@@ -243,6 +243,10 @@ void* wlan_test(void* argv)
 	
 	#ifdef SOFIA3GR_PCBA
 		parse_ssid_level(ssid, results, results2);
+		if(atoi(&rssis[0][1])*(-1) == 0) {
+			LOG("get wifi rssid is 0.\n");
+			goto error_exit;
+		}
 	#else
 		process_ssid(ssid, results, results2);
 	#endif

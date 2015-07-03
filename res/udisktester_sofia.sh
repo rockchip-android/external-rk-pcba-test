@@ -6,8 +6,6 @@
 
 result_file_udisk=/data/udisk_capacity.txt
 
-su root
-
 if [ -e $result_file2 ] ; then
 busybox rm -f $result_file_udisk
 fi
@@ -25,7 +23,10 @@ fi
                     busybox sleep 1
                     if [ -b "$udisk" ]; then
                         echo "udisk insert"
-                        break;
+                        #add by wjh
+                        echo "ok" > /data/udisk_capacity.txt
+                        exit 1
+                        #break;
                     fi
                 else
                     busybox sleep 1
@@ -37,9 +38,9 @@ fi
             fi
             
             echo "mounting disk ..."
-            mount -t vfat $udisk /mnt/usb_storage
+            mount -t vfat $udiskp /mnt/usb_storage
             if [ $? -ne 0 ]; then
-                mount -t vfat $udiskp /mnt/usb_storage
+                mount -t vfat $udisk /mnt/usb_storage
                 if [ $? -ne 0 ]; then
                     echo "udisk mount failed"
                     exit 1

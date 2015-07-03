@@ -6,9 +6,6 @@ if [ -e $result_file ] ; then
 busybox rm -f $result_file
 fi
 
-
-su root
-
 at_cli_client "at@gnss:get_gnss_host_sw_version()"
 
 at_cli_client "at@gnss:clear_assist_data(65535)"

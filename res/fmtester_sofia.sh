@@ -6,9 +6,6 @@
 #busybox rm -f $result_file
 #fi
 
-
-su root
-
 #busybox touch /data/fm_info
 
 #busybox chmod 777 /data/fm_info

@@ -180,7 +180,7 @@ POLL_ERROR:
 		close(fd);
 	}
 	
-	if(poll_counts >= 3) {
+	if(poll_counts >= 1) {
 		return -1;
 	}
 	

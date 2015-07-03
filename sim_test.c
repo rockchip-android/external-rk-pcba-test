@@ -417,9 +417,9 @@ void* sim_test(void *argc)
 	char ISMI2[50];
 	memset(ISMI1, 0, 50);
 	memset(ISMI2, 0, 50);
-	if (script_fetch("sim", "sim_counts", &simCounts, 2) == 0) {
-    	LOG("script_fetch sim_counts = %d\n", simCounts);
-    }
+
+	simCounts = tc_info->w;
+	LOG("script_fetch sim_counts = %d\n", simCounts);
 
 	if(at_send(serial_fd,"AT+CFUN=1\r\n","OK") < 0){
 		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)

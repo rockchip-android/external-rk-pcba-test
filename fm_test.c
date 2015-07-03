@@ -18,7 +18,7 @@ void * fm_test(void * argv)
 {
 	
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
-	int ret,y,channelCounts=0,testCounts =0;;
+	int ret,y,channelCounts=0,testCounts =-1;;
 	int cap;
 	FILE *fp;
 	char result[SCAN_RESULT_LENGTH];
@@ -32,14 +32,25 @@ void * fm_test(void * argv)
 	
 	while(1)
 	{
+		testCounts++;
+		if(testCounts > 3)
+		{
+			LOG("can not open %s.\n", SCAN_CHANNEL_COUNTS_FILE);
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_FM,PCBA_FAILED);
+			tc_info->result = -1;
+			return argv;
+		}
+		sleep(1);
+		
 		fp = NULL;
 		LOG("%s::start test fm...\n", __FUNCTION__);
-		__system("busybox chmod 777 /system/bin/fmtester.sh");
+		//__system("busybox chmod 777 /system/bin/fmtester.sh");
 		__system("/system/bin/fmtester.sh");
 		fp = fopen(SCAN_CHANNEL_RESULT_FILE, "r");
 		
 		if(fp != NULL)
 		{
+			LOG("open /data/fm_info sucess.");
 			char *temp;			
 			char *channel_counts = NULL;
 			char *channel_fq = NULL;
@@ -79,15 +90,6 @@ void * fm_test(void * argv)
 				break;
 			}
 		}
-		
-		if(testCounts++ > 3)
-		{
-			LOG("can not open %s.\n", SCAN_CHANNEL_COUNTS_FILE);
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_FM,PCBA_FAILED);
-			tc_info->result = -1;
-			return argv;
-		}
-		sleep(1);
 	}
 
 	if(cap) {

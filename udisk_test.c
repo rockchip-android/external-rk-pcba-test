@@ -72,18 +72,24 @@ void * udisk_test(void * argv)
 				}
 				sleep(1);
 			}
+
+			//disable by wjh
+			/*
 			memset(results, 0, SCAN_RESULT_LENGTH);
 			//fread(results, 1, SCAN_RESULT_LENGTH, fp);
 			fgets(results,50,fp);
 			//fgets(wlan_msg->ssid,50,fp); //we assume tha a AP's name is less of 50 charactes
 			
 			//LOG("%s.\n", results);
-			
+
 			cap = strtod(results,NULL);
 			if(cap) {
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { %2fG } \n",PCBA_UCARD,PCBA_SECCESS,cap*1.0);
 				tc_info->result = 0;
-			}
+			}*/
+
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]\n",PCBA_UCARD,PCBA_SECCESS);
+				tc_info->result = 0;
 		    fclose(fp);
 
 			return argv;
