@@ -21,11 +21,7 @@ LOCAL_SRC_FILES := \
     codec_test.c   \
     codec_main.c
 
-ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_MODULE_TAGS := optional
-else
-LOCAL_MODULE_TAGS := eng
-endif
 LOCAL_STATIC_LIBRARIES := libc libcutils liblog
 LOCAL_SHARED_LIBRARIES := 
 
@@ -106,7 +102,7 @@ ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 else
 	ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk312x)
 	LOCAL_CFLAGS += -DRK312X_PCBA
- 	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c #rk312x-camera/camera_test.c  				
+	LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c rk312x-camera/camera_test.c
  	else
  		ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
  			LOCAL_SRC_FILES += 	sofia_codec/alsa_mixer.c \
@@ -223,11 +219,7 @@ endif
 # It gets copied there in config/Makefile.  LOCAL_MODULE_TAGS suppresses
 # a (redundant) copy of the binary in /system/bin for user builds.
 # TODO: Build the ramdisk image in a more principled way.
-ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_MODULE_TAGS := optional
-else
-LOCAL_MODULE_TAGS := eng
-endif
 LOCAL_STATIC_LIBRARIES :=
 LOCAL_SHARED_LIBRARIES := 
 
