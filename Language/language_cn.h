@@ -33,7 +33,7 @@
 #define PCBA_CODEC_VOL_DOWN "耳机录音和播放测试中..."
 #define PCBA_CODEC_VOL_POWER "听筒测试中..."
 #define PCBA_DDR	"内存"
-#define PCBA_FLASHLIGHT "散光灯"
+#define PCBA_FLASHLIGHT "闪光灯"
 #define PCBA_CAMERA "相机"
 #define PCBA_FRONT_CAMERA "前置摄像头"
 #define PCBA_BACK_CAMERA "后置摄像头"
