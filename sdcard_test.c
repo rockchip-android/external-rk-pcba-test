@@ -76,6 +76,7 @@ void * sdcard_test(void * argv)
 				}
 				sleep(1);
 			}
+			/*
 			memset(results, 0, SCAN_RESULT_LENGTH);
 			//fread(results, 1, SCAN_RESULT_LENGTH, fp);
 			fgets(results,50,fp);
@@ -87,7 +88,9 @@ void * sdcard_test(void * argv)
 			if(cap) {
 				ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { %2fG } \n",PCBA_SDCARD,PCBA_SECCESS,cap*1.0);
 				tc_info->result = 0;
-			}
+			}*/
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]\n",PCBA_SDCARD,PCBA_SECCESS);
+				tc_info->result = 0;
 		    fclose(fp);
 
 			return argv;

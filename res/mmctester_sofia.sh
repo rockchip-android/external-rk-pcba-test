@@ -19,7 +19,9 @@ while true; do
                 #busybox  sleep 1
                 if [ -b "$mmcblk" ]; then
                     echo "card$nr insert"
-                    break
+                    #break
+                    echo "ok" > /data/sd_capacity
+                    exit 1
                 fi
             else
             	if [ $nr -eq 100 ]; then
