@@ -17,7 +17,9 @@
 
 static int m_flash_on;
 static int m_cam_fd_overlay;
-
+extern pthread_mutex_t mutex;
+extern pthread_cond_t cond;
+extern int lock;
 
 static int fimc_v4l2_s_ctrl(int fp, unsigned int id, unsigned int value)
 {
@@ -92,6 +94,7 @@ void * flashlight_test(void * argv)
 {
 	int test_count = 1;
 	int y;
+	int flashlightTurnoffcounts = 0;
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
 	
 	if(tc_info->y <= 0)
@@ -100,7 +103,12 @@ void * flashlight_test(void * argv)
 	y = tc_info->y;
 
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_FLASHLIGHT,PCBA_TESTING);
-	sleep(5);
+	pthread_mutex_lock(&mutex);  
+	while(lock)  
+	   pthread_cond_wait(&cond,&mutex);  
+	pthread_mutex_unlock(&mutex);
+
+	LOG("flashlight start testing...");
 	while(1) {
 		if(test_count++ > 3) {
 			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s]\n",PCBA_FLASHLIGHT,PCBA_FAILED);
@@ -118,7 +126,16 @@ void * flashlight_test(void * argv)
 		}
 	}
 
-	triggerFlash(0);
+	while(triggerFlash(0) < 0) {
+		flashlightTurnoffcounts++;
+		
+		if(flashlightTurnoffcounts >= 3) {
+			LOG("Turn off flashlight faile.\n");
+			break;
+		}
+		
+	}
+	
 	if (m_cam_fd_overlay > -1) {
          close(m_cam_fd_overlay);
          m_cam_fd_overlay = -1;

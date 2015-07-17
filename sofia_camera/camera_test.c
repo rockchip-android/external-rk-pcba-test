@@ -23,6 +23,11 @@ struct v4l2_input input;
 pthread_t camera_tid;
 struct testcase_info *tc_info;
 
+extern pthread_mutex_t mutex;
+extern pthread_cond_t cond;
+extern int lock;
+
+
 int pollDataFromCamera(int index)
 {
 	int poll_counts = 0;
@@ -161,7 +166,12 @@ POLL_WORK:
    	}
    	LOG("pollDataFromCamera::camera poll ok,ret=%d\n",ret);
 
-	ioctl(mDevFp, VIDIOC_STREAMOFF, &v4l2Buf.type);
+	ret = ioctl(mDevFp, VIDIOC_STREAMOFF, &v4l2Buf.type);
+	if (ret < 0) {
+        LOG("ERR(%s):VIDIOC_STREAMOFF failed\n", __func__);
+        goto POLL_ERROR;
+    }
+	
 	if(mDevFp >= 0) {
 		close(mDevFp);
 	}
@@ -190,7 +200,9 @@ POLL_ERROR:
 int startCameraTest()
 {
 	int ret = -1;
-	
+
+	pthread_mutex_lock(&mutex);  
+	  
 	mDevFp = open("/dev/video2", O_RDWR);
 	if (mDevFp < 0) {
 		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] %s:[%s]\n",PCBA_BACK_CAMERA,PCBA_FAILED,PCBA_FRONT_CAMERA,PCBA_FAILED);
@@ -272,11 +284,15 @@ int startCameraTest()
 		}
 	}
 
+	lock = 0;
+	pthread_cond_signal(&cond);  
+    pthread_mutex_unlock(&mutex); 
+
 	return 0;
 }
 
 void * camera_test(void *argc)
-{
+{ 
 	int ret,num;
 	tc_info = (struct testcase_info*)argc;
 	int arg = 1; 

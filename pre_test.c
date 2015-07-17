@@ -205,8 +205,9 @@ pthread_t gps_tid;
 pthread_t psensor_tid; 
 pthread_t compass_tid;
 
-
-
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+int lock = 1;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -963,6 +964,8 @@ int main(int argc, char **argv)
 		ptest_set_key_wait_status(1);
 	}
 	join_input_thread();
+	pthread_mutex_destroy(&mutex);  
+    pthread_cond_destroy(&cond); 
 #else
 	gui_start();
 	start_input_thread();
