@@ -819,8 +819,8 @@ int main(int argc, char **argv)
 	int success = 0;
 	
 #ifdef SOFIA3GR_PCBA
-	freopen("/dev/ttyS1", "a", stdout); setbuf(stdout, NULL);
-	freopen("/dev/ttyS1", "a", stderr); setbuf(stderr, NULL);
+	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
+	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
 
 	ui_init();
 	
