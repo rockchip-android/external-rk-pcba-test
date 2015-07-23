@@ -1,13 +1,18 @@
 #!/system/bin/sh
 
 result_file2=/data/sd_capacity
+nand_file=/proc/nand
 
 if [ -e $result_file2 ] ; then
 busybox rm -f $result_file2
 fi
 
 while true; do
-	nr=0
+
+	nr=1
+	if [ -e $nand_file ] ; then
+		nr=0
+	fi
 	mmcblk="/dev/block/mmcblk$nr"
 	#echo $mmcblk
 	mmcp=$mmcblk

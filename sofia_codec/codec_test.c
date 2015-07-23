@@ -31,12 +31,17 @@ void IntMic_LS_test()
 	}
 	isTesting = 1;
 	//ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s] \n",PCBA_CODEC, PCBA_CODEC_VOL_UP);
-	int ret = system("/system/bin/audio_pcb 1 /data/test.wav -D 0 -d 0 -c 2 -r 48000 -b 16 -p 240 -n 8 -t 0 -u 6");
+	int ret = system("/system/bin/audio_pcb 1 /data/test.wav -D 0 -d 0 -c 2 -r 48000 -b 16 -p 240 -n 8 -t 0 -u 3");
 	if(ret < 0) {
 		LOG("IntMic_LS_test:: cmd: ./audio_pcb error: %s", strerror(errno));
 	}
 
-	ret = system("/system/bin/audio_pcb 2 /data/test.wav -D 0 -d 0 -p 240 -n 16 -t 1 -u 6");
+	ret = system("/system/bin/alc /data/test.wav");
+	if(ret < 0) {
+		LOG("IntMic_LS_test:: cmd: ./alc /data/test.wav error: %s", strerror(errno));
+	}
+	
+	ret = system("/system/bin/audio_pcb 2 /data/test.wav -D 0 -d 0 -p 240 -n 16 -t 1 -u 3");
 	if(ret < 0) {
 		LOG("IntMic_LS_test:: play ./audio_pcb error: %s", strerror(errno));
 	}
@@ -57,6 +62,11 @@ void ExtMic_HS_test()
 		LOG("ExtMic_HS_test:: record error: %s", strerror(errno));
 	}
 
+	ret = system("/system/bin/alc /data/test.wav");
+	if(ret < 0) {
+		LOG("IntMic_LS_test:: cmd: ./alc /data/test.wav error: %s", strerror(errno));
+	}
+	
 	ret = system("/system/bin/audio_pcb 2 /data/test.wav -D 0 -d 0 -p 240 -n 16 -t 2 -u 6");
 	if(ret < 0) {
 		LOG("ExtMic_HS_test:: playing error: %s", strerror(errno));
