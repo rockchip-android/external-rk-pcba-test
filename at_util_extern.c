@@ -37,6 +37,7 @@ extern char ISMI2[30];
 extern int simcard1;
 extern int simcard2;
 extern int simCounts;
+int getImei_testresult_end = 0;
 
 #define LOG(x...) printf("[At_UTIL_EXTERN] "x)
 
@@ -321,7 +322,7 @@ void* getImei_testresult(void *argc) {
 	int loop=15;
 	set_is_sim_test_done_extern(0);
 
-	sleep(15);
+	sleep(10);
 	
     do{
 		serial_fd = open("/dev/mvpipe-atc",O_RDWR );
@@ -418,7 +419,7 @@ void* getImei_testresult(void *argc) {
 																imei_result);
 	}
 
-	//sleep(5);
+	sleep(12);
 
 	strncpy(gAtAck_command_extern, "AT+CFUN=1", 9);
 	gAtAck_command_extern[9] = '\0';
@@ -469,6 +470,7 @@ void* getImei_testresult(void *argc) {
 	}
 
 	//set_is_sim_test_done_extern(1);
+	getImei_testresult_end = 1;
 	return 0;
 
 ERROR:
@@ -478,6 +480,7 @@ ERROR:
 		at_send_extern(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n");
 	}
 	//set_is_sim_test_done_extern(1);
+	getImei_testresult_end = 1;
 	return -1;
 }
 

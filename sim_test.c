@@ -52,6 +52,7 @@ char *atChannelTab[]={"","/dev/ttyS1","/dev/ttyS1","/dev/ttyUSB0","/dev/ttyS1","
 
 static pthread_mutex_t s_commandmutex = PTHREAD_MUTEX_INITIALIZER;
 int gFd;
+extern getImei_testresult_end;
 static pthread_t s_tid_reader;
 #define MAX_AT_RESPONSE 1024
 static char s_ATBuffer[MAX_AT_RESPONSE+1];
@@ -316,6 +317,9 @@ void* sim_test(void *argc)
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_SIM,PCBA_TESTING);
 
 #ifdef SOFIA3GR_PCBA
+	while(!getImei_testresult_end) {
+		sleep(1);
+	}
 	LOG("sim_counts=%d  simcard1=%d  simcard2=%d\n", simCounts);
 
 	if(simCounts == 2) {
