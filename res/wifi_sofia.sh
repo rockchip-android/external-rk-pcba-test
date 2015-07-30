@@ -8,6 +8,7 @@ result_file4=/data/scan_result4.txt
 result_file5=/data/scan_result5.txt
 result_file6=/data/scan_result6.txt
 result_file7=/data/scan_result7.txt
+nr=1
 
 if [ -e $result_file ] ; then
 busybox rm -f $result_file
@@ -37,13 +38,27 @@ start wpa_supplicant
 echo "sleep 1s"
 busybox sleep 1
 
-wpa_cli ifname=wlan0 scan
+while true; do
+	echo "" > $result_file4
+	
+	wpa_cli ifname=wlan0 scan
 
-echo "sleep 1s"
-busybox sleep 1
+	#echo "sleep 1s"
+	busybox sleep 1
 
-wpa_cli ifname=wlan0 scan_results > $result_file4
-if [ $(busybox sed -n '$=' $result_file4) -gt $bb ] ; then
+	wpa_cli ifname=wlan0 scan_results > $result_file4
+	echo "wjh000000000000000000000000"
+	#busybox sed -n '$=' $result_file4
+	[ "`busybox wc -l < $result_file4`" -gt 2 ] && break
+
+	if [ $nr -eq 5 ]; then
+		exit 1    
+    fi
+    nr=`busybox expr $nr + 1`
+    busybox sleep 1
+done
+
+if [ $(busybox sed -n '$=' $result_file4) -gt $bb ]; then
 	busybox tail -1 $result_file4 > $result_file3
 	busybox tail -1 $result_file4 > $result_file7
 	cat $result_file3 | busybox awk '{print $5}' > $result_file5
@@ -59,7 +74,7 @@ fi
 
 busybox rm -f $result_file4
 
-if [ -e $wpa_supplicant_file ] ; then
+if [ -e $wpa_supplicant_file ]; then
 	busybox rm -f $wpa_supplicant_file
 fi
 

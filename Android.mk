@@ -110,7 +110,7 @@ else
                         sofia_codec/alsa_route.c \
 						sofia_codec/codec_test.c \
 						sofia_camera/camera_test.c \
-						at_util.c
+						at_util_extern.c
  		else
  			LOCAL_SRC_FILES += alsa_mixer.c alsa_pcm.c codec_test.c camera_test.c
  		endif

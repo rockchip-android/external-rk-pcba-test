@@ -165,7 +165,11 @@ int isResponseSuc = 0;
 int isAtSended = 0;
 char gAtAck_command[100]={"ERROR"};
 char ISMI[30]={"\0"};
-
+char ISMI1[30]={"\0"};
+char ISMI2[30]={"\0"};
+int simcard1 = 0;
+int simcard2 = 0;
+int simCounts = 2;
 
 static void *readerLoop(void *arg){
 	 const char  *line;
@@ -296,14 +300,10 @@ void* sim_test(void *argc)
 	pthread_attr_t attr;
 	int modem_fd;
 	int serial_fd;
-	gFd = -1;
+	//gFd = -1;
 	int err;
 	int biID =-1;
-#ifdef SOFIA3GR_PCBA
-	int loop = 3;
-#else
 	int loop = 10;
-#endif
 	struct testcase_info *tc_info = (struct testcase_info*)argc;
 	int arg = 1; 
 	int y;
@@ -312,50 +312,82 @@ void* sim_test(void *argc)
 		tc_info->y  = get_cur_print_y();	
 
 	y = tc_info->y;
-
-#ifdef SOFIA3GR_PCBA
-	set_is_sim_test_done(0);
-#endif
 	
 	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_SIM,PCBA_TESTING);
 
-	#ifndef SOFIA3GR_PCBA
-		modem_fd = open("/dev/voice_modem", O_RDWR); 
-	 	if(modem_fd > 0){
-	 		//sleep(5);
-			//ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
-			//sleep(2);
-	   	 	ioctl(modem_fd,BP_IOCTL_POWON,&arg);
-			sleep(2);     
-	  	}else{
-	  		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			LOG("modem open fail !\n");
-			tc_info->result = -1; 
-			return argc;
-	  	} 
-		err = ioctl(modem_fd,BP_IOCTL_GET_BPID,&biID);
-		if(err < 0){
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			LOG("biID fail !\n");
-			tc_info->result = -1;
+#ifdef SOFIA3GR_PCBA
+	LOG("sim_counts=%d  simcard1=%d  simcard2=%d\n", simCounts);
+
+	if(simCounts == 2) {
+		if(simcard1 && simcard2){
+			tc_info->result = 0;
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
 			return argc;
 		}
-	#endif
+		else if(simcard1) {
+			tc_info->result = -1;
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_FAILED, ISMI1, PCBA_FAILED);
+			return argc;
+		}
+		else if(simcard2) {
+			tc_info->result = -1;
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_FAILED, PCBA_FAILED, ISMI2);
+			return argc;
+		}
+		else {
+			tc_info->result = -1;
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_FAILED, PCBA_FAILED, PCBA_FAILED);
+			return argc;
+		}
+	}
+	else {
+		if(!simcard1 && !simcard2) {
+			tc_info->result = -1;
+			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+			return argc;
+		}
+		else if(simcard1)
+		{
+			tc_info->result = 0;
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1);
+			return argc;
+		}
+		else if(simcard2)
+		{
+			tc_info->result = 0;
+			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI2);
+			return argc;
+		}
+	}
+#else
+	modem_fd = open("/dev/voice_modem", O_RDWR); 
+ 	if(modem_fd > 0){
+ 		//sleep(5);
+		//ioctl(modem_fd,BP_IOCTL_POWOFF,&arg);
+		//sleep(2);
+   	 	ioctl(modem_fd,BP_IOCTL_POWON,&arg);
+		sleep(2);     
+  	}else{
+  		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		LOG("modem open fail !\n");
+		tc_info->result = -1; 
+		return argc;
+  	} 
+	err = ioctl(modem_fd,BP_IOCTL_GET_BPID,&biID);
+	if(err < 0){
+		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+		LOG("biID fail !\n");
+		tc_info->result = -1;
+		return argc;
+	}
 	
-    do{
-	   	#ifdef SOFIA3GR_PCBA
-			serial_fd = open("/dev/mvpipe-atc",O_RDWR );
-			if(serial_fd < 0)
-			{
-				sleep(1);
-			}
-		#else
-			serial_fd = open(atChannelTab[biID],O_RDWR );
-			sleep(1);
-		#endif
+	do{
+		serial_fd = open(atChannelTab[biID],O_RDWR );
+		sleep(1);
 		loop --;
 		if(loop<0)break;
 	}while(serial_fd < 0);
+#endif
 
 
 	if(serial_fd <0)
@@ -388,173 +420,26 @@ void* sim_test(void *argc)
 		cfmakeraw(&ios);		 		
 		tcsetattr( serial_fd, TCSANOW, &ios );
 		
-       gFd = serial_fd;     
+        gFd = serial_fd;     
     
         pthread_attr_init (&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-    if(pthread_create(&s_tid_reader, &attr, readerLoop, &attr)<0)
-    {
-     	ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-     	LOG("%s line=%d pthread_create err\n", __FUNCTION__, __LINE__);
-		tc_info->result = -1;
-		#ifdef SOFIA3GR_PCBA
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		#endif
-    }
+	    if(pthread_create(&s_tid_reader, &attr, readerLoop, &attr)<0)
+	    {
+	     	ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
+	     	LOG("%s line=%d pthread_create err\n", __FUNCTION__, __LINE__);
+			tc_info->result = -1;
+			#ifdef SOFIA3GR_PCBA
+				set_is_sim_test_done(1);
+				//close(serial_fd);
+				return argc;
+			#endif
+	    }
      	//while(1){sleep(5);write (gFd, "AT+CPIN?\r\n", 10);}
 	}
 
 	sleep(5);
-
-#ifdef SOFIA3GR_PCBA
-	int simcard1 = 0;
-	int simcard2 = 0;
-	int simCounts = 2;
-	char ISMI1[50];
-	char ISMI2[50];
-	memset(ISMI1, 0, 50);
-	memset(ISMI2, 0, 50);
-
-	simCounts = tc_info->w;
-	LOG("script_fetch sim_counts = %d\n", simCounts);
-
-	if(at_send(serial_fd,"AT+CFUN=1\r\n","OK") < 0){
-		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-		{
-			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-		}
-		set_is_sim_test_done(1);
-		//close(serial_fd);
-		tc_info->result = -1;
-		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		LOG("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
-		return argc;
-	}
-
-	if(at_send(serial_fd,"AT+XSIMSEL=0\r\n","OK") < 0){
-		if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-		{
-			LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-		}
-		set_is_sim_test_done(1);
-		//close(serial_fd);
-		tc_info->result = -1;
-		ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-		LOG("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
-		return argc;
-	}
-
-	if(at_send(serial_fd,"AT+CIMI\r\n","OK") >= 0) {
-		simcard1 = 1;
-		sprintf(ISMI1,"%s", ISMI);
-	}
-	else {
-		LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
-	}
-	
-	if(at_send(serial_fd,"AT+XSIMSEL=1\r\n","OK") < 0) {
-		LOG("%s line=%d execute AT+XSIMSEL=1 fail\n", __FUNCTION__, __LINE__);
-	}
-
-	if(at_send(serial_fd,"AT+CIMI\r\n","OK") >= 0) {
-		simcard2 = 1;
-		sprintf(ISMI2,"%s", ISMI);
-	}
-	else
-	{
-		if(simCounts == 2) {
-			LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
-		}
-	}
-
-	if(simCounts == 2) {
-		if(simcard1 && simcard2){
-			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1, ISMI2);
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		}
-		else if(simcard1) {
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_FAILED, ISMI1, PCBA_FAILED);
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		}
-		else if(simcard2) {
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_FAILED, PCBA_FAILED, ISMI2);
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		}
-		else {
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] { IMSI[sim]=%s, IMSI[sim2]=%s }\n",PCBA_SIM,PCBA_FAILED, PCBA_FAILED, PCBA_FAILED);
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		}
-	}
-	else {
-		if(!simcard1 && !simcard2) {
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			tc_info->result = -1;
-			ui_print_xy_rgba(0,y,255,0,0,255,"%s:[%s] \n",PCBA_SIM,PCBA_FAILED);
-			LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
-			return argc;
-		}
-		else if(simcard1)
-		{
-			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI1);
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		}
-		else if(simcard2)
-		{
-			tc_info->result = 0;
-			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { IMSI[sim]=%s }\n",PCBA_SIM,PCBA_SECCESS, ISMI2);
-			if(at_send(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n","OK") < 0)
-			{
-				LOG("%s line=%d set ptest failed !\n", __FUNCTION__, __LINE__);
-			}
-			set_is_sim_test_done(1);
-			//close(serial_fd);
-			return argc;
-		}
-	}
-#endif
 
 #ifndef SOFIA3GR_PCBA
 	if(at_send(serial_fd,"AT+CPIN?\r\n","READY") >= 0){

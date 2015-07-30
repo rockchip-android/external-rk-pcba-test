@@ -57,7 +57,7 @@
 #else
 #ifdef SOFIA3GR_PCBA
 #include "sofia_camera/camera_test.h"
-#include "at_util.h"
+#include "at_util_extern.h"
 #else
 #include "camera_test.h"
 #endif
@@ -193,6 +193,7 @@ struct sd_msg *hdmi_msg;
 int hdmi_err = -1;
 
 pthread_t sim_tid;
+pthread_t at_util_extern_tid;
 
 pthread_t ddr_tid;  
 int ddr_err = -1;
@@ -208,6 +209,11 @@ pthread_t compass_tid;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 int lock = 1;
+int rf_cal_result;
+int wifi_cal_result;
+char imei_result[50];
+int UI_LEVEL = 1;
+extern int simCounts;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -282,7 +288,7 @@ static int parse_testcase()
             }
 			
 			if (script_fetch(mainkey_name, "sim_counts", &sim_counts, 1) == 0) {
-                tc_info->w = sim_counts;
+                simCounts = sim_counts;
             }
 			tc_info = (struct testcase_info*) malloc(sizeof(struct testcase_info));
 			if(tc_info == NULL)
@@ -341,17 +347,7 @@ void write_test_result_to_nvm() {
 		struct testcase_info *tc_info = list_entry(pos, struct testcase_info, list);
 		if(tc_info->result == -1) {
 			writeCounts = 1;
-			while(send_at_cmd("at@nvm:cal_prodparm.cust_parms.param_3=0\r\n","OK") < 0 && writeCounts <= 3) {
-				writeCounts++;
-			}
-
-			writeCounts = 1;
-			while(send_at_cmd("at@nvm:store_nvm(cal_prodparm)\r\n","Committed to NVM flash...") < 0 && writeCounts <= 3) {
-				writeCounts++;
-			}
-
-			writeCounts = 1;
-			while(send_at_cmd("at@nvm:wait_nvm_idle()\r\n","OK") < 0 && writeCounts <= 3) {
+			while(commit_pcba_test_value(0) < 0 && writeCounts <= 3) {
 				writeCounts++;
 			}
 			return;
@@ -359,22 +355,11 @@ void write_test_result_to_nvm() {
 	}
 
 	writeCounts = 1;
-	while(send_at_cmd("at@nvm:cal_prodparm.cust_parms.param_3=1\r\n","OK") < 0 && writeCounts <= 3) {
-		writeCounts++;
-	}
-
-	writeCounts = 1;
-	while(send_at_cmd("at@nvm:store_nvm(cal_prodparm)\r\n","Committed to NVM flash...") < 0 && writeCounts <= 3) {
-		writeCounts++;
-	}
-
-	writeCounts = 1;
-	while(send_at_cmd("at@nvm:wait_nvm_idle()\r\n","OK") < 0 && writeCounts <= 3) {
+	while(commit_pcba_test_value(1) < 0 && writeCounts <= 3) {
 		writeCounts++;
 	}
 
 }
-
 int start_test_pthread(struct testcase_info *tc_info)
 {
 	int err;
@@ -652,9 +637,6 @@ int init_manual_test_item(struct testcase_info *tc_info)
 	return 0;
 }
 
-
-
-
 int start_manual_test_item(int x,int y)
 {
 	return 1;Camera_Click_Event(x,y); 
@@ -817,14 +799,21 @@ int main(int argc, char **argv)
 	char *script_buf;
 	struct list_head *pos;
 	int success = 0;
+	char rfCalResult[10];
 	
 #ifdef SOFIA3GR_PCBA
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
-
-	ui_init();
 	
+	ui_init();
 	ui_print_init();
+
+	int at_err = pthread_create(&at_util_extern_tid, NULL, getImei_testresult, NULL); //
+	if(at_err != 0)
+	{  
+	   printf("create get cal result thread error: %s\n",strerror(at_err));
+	   return -1;
+	} 
 
 	w =  gr_fb_width() >> 1;
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",PCBA_INTEL_PTEST_MODE);
@@ -840,10 +829,10 @@ int main(int argc, char **argv)
 	printf("ptest wait key...\n");
 	int key_code, key_count = 0, key_power = 0, key_vol_plus = 0, key_vol_cut = 0;
 	while(key_code = ui_wait_key()) {
-		printf("get key_code = %d\n, I want to check %d \n", key_code, KEY_POWER);
+		printf("get key_code = %d\n\n", key_code);
 		switch(key_code) {
 			case KEY_POWER:
-				printf("Power key is press! \n");
+				ui_print_xy_rgba(0,4,255,0,0,255,"%s\n",PCBA_POWER_KEY);
 				key_count++;
 				key_power++;
 				if(key_count >= 5) {
@@ -857,10 +846,12 @@ int main(int argc, char **argv)
 				break;
 			case KEY_VOLUMEUP:
 				printf("Volueme up key is press! \n");
+				ui_print_xy_rgba(0,4,255,0,0,255,"%s\n",PCBA_VOLUME_UP_KEY);
 				key_vol_plus++;				
 				break;
 			case KEY_VOLUMEDOWN:
 				printf("Voluem down key is press! \n");
+				ui_print_xy_rgba(0,4,255,0,0,255,"%s\n",PCBA_VOLUME_DOWN_KEY);
 				key_vol_cut++;
 				break;
 			default:
@@ -869,6 +860,7 @@ int main(int argc, char **argv)
 		}
 
 		if(key_power>= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
+			UI_LEVEL = 2;
 			break;
 		}
 	}
@@ -876,8 +868,10 @@ int main(int argc, char **argv)
 	printf("exit wait key...\n");
 
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-2),(gr_fb_height()/CHAR_HEIGHT)/2 - 1,0,255,0,255,"%s\n",""); //clear ptest mode
-	ui_print_xy_rgba(0,1,0,255,0,255,"%s\n","");
+	ui_print_xy_rgba(0,4,0,255,0,255,"%s\n","");
+	ui_print_xy_rgba(0,3,0,255,0,255,"%s\n","");
 	ui_print_xy_rgba(0,2,0,255,0,255,"%s\n","");
+	ui_print_xy_rgba(0,1,255,0,0,255,"%s\n","");
 	breakFirstUi = 1;
 
 	printf("set key wait status to exit \n");
@@ -894,13 +888,14 @@ int main(int argc, char **argv)
 	gui_loadResources();
 #endif
 
-
-
 #if 1
 	w =  gr_fb_width() >> 1;
 
 #ifdef SOFIA3GR_PCBA
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_TIP_IN_PCBA_FUNCTION);
+	ui_print_xy_rgba(0,1,0,255,0,255,"[%s]%s [%s]%s %s\n",PCBA_RF_CAL, rf_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
+																PCBA_WIFI_CAL, wifi_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
+																imei_result);
 #else
 	ui_print_xy_rgba(((w>>1)/CHAR_WIDTH-9),0,0,255,0,255,"%s\n",PCBA_VERSION_NAME);
 #endif

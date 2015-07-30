@@ -39,6 +39,7 @@
 
 #define PROGRESSBAR_INDETERMINATE_STATES 6
 #define PROGRESSBAR_INDETERMINATE_FPS 15
+#define _EVENT_LOGGING 1
 
 typedef struct{ 
 	int t_col;
@@ -455,18 +456,18 @@ static void *input_thread(void *cookie)
 	static struct timeval keyStart, keyEnd;
 	LOGE("start input thread!\n");
 
+	memset(&touchStart, 0, sizeof(struct timeval));
 	memset(&keyStart, 0, sizeof(struct timeval));
 	memset(&keyEnd, 0, sizeof(struct timeval));
 	
     for (;;) 
 	{
-
         // wait for the next event
         struct input_event ev;
         int state = 0, ret = 0;
 
 		ret = ev_get(&ev, dontwait);
-		//LOGE("type:%d>>code:%d>>value:%d\n",ev.type,ev.code,ev.value);
+		//LOGE("input_thread::type:%d>>code:%d>>value:%d>>EV_ABS:%d>>EV_KEY:%d\n",ev.type,ev.code,ev.value,EV_ABS,EV_KEY);
 		if (ret < 0)
 		{
 			struct timeval curTime;
@@ -513,8 +514,12 @@ static void *input_thread(void *cookie)
 		} 
 		else if (ev.type == EV_ABS)
 		{
-
-            x = ev.value >> 16;
+			if (ev.value==-1)
+	 		{
+			 	continue;
+	 		}
+			
+			x = ev.value >> 16;
             y = ev.value & 0xFFFF;
 
             if (ev.code == 0)
@@ -524,9 +529,9 @@ static void *input_thread(void *cookie)
 #ifdef _EVENT_LOGGING
                     LOGE("TOUCH_RELEASE: %d,%d\n", x, y);
 #endif
-			touch_tp_state = 0;
+					touch_tp_state = 0;
 
-			start_manual_test_item(x,y);
+					start_manual_test_item(x,y);
 					
                     NotifyTouch(TOUCH_RELEASE, x, y);
 					touch_and_hold = 0;
@@ -556,7 +561,7 @@ static void *input_thread(void *cookie)
                 {
                     if (state == 0)
                     {
-			touch_tp_state = 1;
+						touch_tp_state = 1;
 #ifdef _EVENT_LOGGING
                         LOGE("TOUCH_DRAG: %d,%d\n", x, y);
 #endif
