@@ -214,6 +214,7 @@ int wifi_cal_result;
 char imei_result[50];
 int UI_LEVEL = 1;
 extern int simCounts;
+int reboot_normal = 0;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
@@ -360,6 +361,19 @@ void write_test_result_to_nvm() {
 	}
 
 }
+
+void change_bootmode_to_nvm(int mode) {	
+	int writeCounts = 1;
+	while(change_bootmode(mode)) {
+		if(writeCounts >= 3) {
+			printf("sofia-3gr:change_bootmode_to_nvm faile.mode=%d", mode);
+			return;
+		}
+		writeCounts++;
+	}
+	android_reboot(ANDROID_RB_RESTART, 0, 0);
+}
+
 int start_test_pthread(struct testcase_info *tc_info)
 {
 	int err;
@@ -835,13 +849,11 @@ int main(int argc, char **argv)
 				ui_print_xy_rgba(0,4,255,0,0,255,"%s\n",PCBA_POWER_KEY);
 				key_count++;
 				key_power++;
-				if(key_count >= 5) {
+				if(key_count == 5) {
 					//reboot and set nvm state
 					printf("Pre_test: power key 5 times setBootMode\n");
-					android_reboot(ANDROID_RB_RESTART2, 0, (char *)"ptest_clear");
-    				if(ret < 0) {
-        				printf("Pre_test::main: pcba test over reboot error: %s", strerror(errno));
-    				}
+					reboot_normal = 1;
+					change_bootmode_to_nvm(1);
 				}
 				break;
 			case KEY_VOLUMEUP:

@@ -37,7 +37,9 @@ extern char ISMI2[30];
 extern int simcard1;
 extern int simcard2;
 extern int simCounts;
+extern int reboot_normal;
 int getImei_testresult_end = 0;
+static int start_change_bootmode = 0;
 
 #define LOG(x...) printf("[At_UTIL_EXTERN] "x)
 
@@ -165,7 +167,7 @@ static void *readerLoopExtern(void *arg){
 	int cur=0;
 
 	while(1){
-		//LOG("%s line=%d  reader loop  \n", __FUNCTION__, __LINE__);
+		LOG("%s line=%d  reader loop  \n", __FUNCTION__, __LINE__);
 		if(get_is_sim_test_done_extern())
 		{
 			LOG("%s line=%d sim_text_is_done! exit readerLoopExtern \n", __FUNCTION__, __LINE__);
@@ -255,6 +257,37 @@ int at_send_extern(int fd,char *send_command)
 	  }
 	}
 	return -1;
+}
+
+//values=0 change to ptest mode
+//values=1 change to normal mode
+int change_bootmode(int values)
+{
+	LOG("%s line=%d values=%d.\n", __FUNCTION__, __LINE__, values);
+	while(!start_change_bootmode) {
+		usleep(500000);
+	}
+
+	LOG("%s line=%d start change boot mode.\n", __FUNCTION__, __LINE__);
+	
+	if(values == 0) {
+		strncpy(gAtAck_command_extern, "UTA_MODE_CALIBRATIO", 19);
+		gAtAck_command_extern[19] = '\0';
+		if(at_send_extern(gFd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n") < 0)
+		{
+			return -1;
+		}
+	} else {
+		strncpy(gAtAck_command_extern, "(UTA_MODE_NORMAL)", 17);
+		gAtAck_command_extern[17] = '\0';
+		if(at_send_extern(gFd,"at@bmm:UtaModePresetReq(UTA_MODE_NORMAL)\r\n") < 0)
+		{
+			return -1;
+		}
+	}
+
+	return 0;
+
 }
 
 int commit_pcba_test_value(int values)
@@ -374,6 +407,12 @@ void* getImei_testresult(void *argc) {
 			return -1;
 		}
 	}
+
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
 	
 	//rf cal result
 	strncpy(gAtAck_command_extern, "cust_parms.param_1?", 19);
@@ -386,6 +425,11 @@ void* getImei_testresult(void *argc) {
 	rf_cal_result = atoi(returnResult);
 	LOG("rf cal result is %s rf_cal_result=%d\n", returnResult, rf_cal_result);
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
 
 	//wifi cal result
 	strncpy(gAtAck_command_extern, "cust_parms.param_2?", 19);
@@ -397,6 +441,11 @@ void* getImei_testresult(void *argc) {
 	wifi_cal_result = atoi(returnResult);
 	LOG("rf cal result is %s wifi_cal_result=%d\n", returnResult, wifi_cal_result);
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
 
 	//imei result
 	strncpy(gAtAck_command_extern, "sec:imei_read(0)", 16);
@@ -408,6 +457,12 @@ void* getImei_testresult(void *argc) {
 	
 	LOG("rf cal result is %s\n", returnResult);
 	sprintf(imei_result,"%s",returnResult);
+
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
 
 	if(UI_LEVEL == 1) {
 		ui_print_xy_rgba(0,3,0,255,0,255,"[%s]%s  [%s]%s  %s\n",PCBA_RF_CAL, rf_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
@@ -421,6 +476,12 @@ void* getImei_testresult(void *argc) {
 
 	sleep(12);
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
+	
 	strncpy(gAtAck_command_extern, "AT+CFUN=1", 9);
 	gAtAck_command_extern[9] = '\0';
 	if(at_send_extern(serial_fd,"AT+CFUN=1\r\n") < 0){
@@ -428,11 +489,23 @@ void* getImei_testresult(void *argc) {
 		goto ERROR;
 	}
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
+	
 	strncpy(gAtAck_command_extern, "AT+XSIMSEL=0", 12);
 	gAtAck_command_extern[12] = '\0';
 	if(at_send_extern(serial_fd,"AT+XSIMSEL=0\r\n") < 0){
 		LOG("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
 		goto ERROR;
+	}
+
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
 	}
 
 	strncpy(gAtAck_command_extern, "AT+CIMI", 7);
@@ -447,6 +520,12 @@ void* getImei_testresult(void *argc) {
 		goto ERROR;
 	}
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
+
 	strncpy(gAtAck_command_extern, "AT+XSIMSEL=1", 12);
 	gAtAck_command_extern[12] = '\0';
 	if(at_send_extern(serial_fd,"AT+XSIMSEL=1\r\n") < 0) {
@@ -454,6 +533,12 @@ void* getImei_testresult(void *argc) {
 		goto ERROR;
 	}
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
+	
 	strncpy(gAtAck_command_extern, "AT+CIMI", 7);
 	gAtAck_command_extern[7] = '\0';
 	if(at_send_extern(serial_fd,"AT+CIMI\r\n") >= 0) {
@@ -469,7 +554,14 @@ void* getImei_testresult(void *argc) {
 		}
 	}
 
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
+	
 	//set_is_sim_test_done_extern(1);
+	start_change_bootmode = 1;
 	getImei_testresult_end = 1;
 	return 0;
 
@@ -480,6 +572,7 @@ ERROR:
 		at_send_extern(serial_fd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n");
 	}
 	//set_is_sim_test_done_extern(1);
+	start_change_bootmode = 1;
 	getImei_testresult_end = 1;
 	return -1;
 }
