@@ -26,6 +26,7 @@ void *sdcard_test(void *argv)
 		tc_info->y = get_cur_print_y();
 	y = tc_info->y;
 
+	LOG("start sdcard test.\n");
 #ifdef SOFIA3GR_PCBA
 	ui_print_xy_rgba(0, y, 255, 255, 0, 255, "%s:[%s..]\n", PCBA_SDCARD,
 			 PCBA_TESTING);
@@ -33,13 +34,12 @@ void *sdcard_test(void *argv)
 	ui_print_xy_rgba(0, y, 255, 255, 0, 255, "%s\n", PCBA_SDCARD);
 #endif
 
-#ifdef RK3288_PCBA
+#if defined(RK3288_PCBA) || defined(RK3368_PCBA)
 	ret = __system("busybox chmod 777 /res/emmctester.sh");
-#else
-#ifdef SOFIA3GR_PCBA
+#elif defined(SOFIA3GR_PCBA)
+	/* sofia3gr process empty */
 #else
 	ret = __system("busybox chmod 777 /res/mmctester.sh");
-#endif
 #endif
 
 #ifndef SOFIA3GR_PCBA
@@ -47,10 +47,9 @@ void *sdcard_test(void *argv)
 		LOG("chmod mmctester.sh failed :%d\n", ret);
 #endif
 
-#ifdef RK3288_PCBA
+#if defined(RK3288_PCBA) || defined(RK3368_PCBA)
 	ret = __system("/res/emmctester.sh");
-#else
-#ifdef SOFIA3GR_PCBA
+#elif defined(SOFIA3GR_PCBA)
 	int test_counts = 0;
 
 	while (1) {
@@ -79,7 +78,6 @@ void *sdcard_test(void *argv)
 	return argv;
 #else
 	ret = __system("/res/mmctester.sh");
-#endif
 #endif
 
 	if (ret < 0) {
