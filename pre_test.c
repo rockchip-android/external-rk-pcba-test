@@ -1,4 +1,3 @@
-
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -21,9 +20,7 @@
 #include "rtc_test.h"
 #include "screen_test.h"
 #include "key_test.h"
-#ifdef SOFIA3GR_PCBA
 #include "cutils/android_reboot.h"
-#endif
 
 #include "wlan_test.h"
 #include "bt_test.h"
