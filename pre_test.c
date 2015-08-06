@@ -888,6 +888,11 @@ int main(int argc, char **argv)
 #else
 	freopen("/dev/ttyFIQ0", "a", stdout); setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr); setbuf(stderr, NULL);
+
+#ifdef RK3368_PCBA
+	freopen("/dev/ttyS2", "a", stdout); setbuf(stdout, NULL);
+	freopen("/dev/ttyS2", "a", stderr); setbuf(stderr, NULL);
+#endif
 	if (gui_init())
 	{
 		ui_init();
