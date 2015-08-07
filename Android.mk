@@ -74,11 +74,9 @@ LOCAL_SRC_FILES := \
     script_parser.c		\
     screen_test.c		\
     rtc_test.c			\
-	et_cc_linux_arm.c	\
     key_test.c			\
     wlan_test.c			\
     bt_test.c			\
-	any_test.c          \
     sdcard_test.c		\
     udisk_test.c        \
     gsensor_test.c 		\
