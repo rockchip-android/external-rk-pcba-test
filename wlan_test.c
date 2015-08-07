@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "wltest"
-
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/stat.h>
-#include <sys/time.h>  // for utimes
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <utime.h>
 #include <fcntl.h>
-
 #include <cutils/log.h>
 #include "common.h"
 #include "extra-functions.h"
@@ -34,124 +31,123 @@
 #include "test_case.h"
 #include "language.h"
 
-#define LOG(x...) printf("[Wifi_TEST] "x)
+#define TAG	"[PCBA,WIFI]: "
+#define LOG(x...)	printf(TAG x)
 
-#define MAX_SCAN_COUNTS (64)
-#define SCAN_RESULT_LENGTH (128*MAX_SCAN_COUNTS)
-#define SCAN_RESULT_FILE "/data/scan_result.txt"
-#define SCAN_RESULT_FILE2 "/data/scan_result2.txt"
+#define MAX_SCAN_COUNTS	(64)
+#define SCAN_RESULT_LENGTH	(128 * MAX_SCAN_COUNTS)
+#define SCAN_RESULT_FILE	"/data/scan_result.txt"
+#define SCAN_RESULT_FILE2	"/data/scan_result2.txt"
 
-char ssids[MAX_SCAN_COUNTS][128];
-char rssis[MAX_SCAN_COUNTS][128];
+static char ssids[MAX_SCAN_COUNTS][128];
+static char rssis[MAX_SCAN_COUNTS][128];
 
-/* RSSI Levels as used by notification icon
-   Level 4  -55 <= RSSI
-   Level 3  -66 <= RSSI < -55
-   Level 2  -77 <= RSSI < -67
-   Level 1  -88 <= RSSI < -78
-   Level 0         RSSI < -88 */
-int calcSingleLevel(int rssi)
+/*
+ * RSSI Levels as used by notification icon
+ *
+ * Level 4  -55 <= RSSI
+ * Level 3  -66 <= RSSI < -55
+ * Level 2  -77 <= RSSI < -67
+ * Level 1  -88 <= RSSI < -78
+ * Level 0         RSSI < -88
+ */
+static int calc_rssi_lvl(int rssi)
 {
 	rssi *= -1;
-	if(rssi >= -55) {
+
+	if (rssi >= -55)
 		return 4;
-	} else if(rssi >= -66) {
+	else if (rssi >= -66)
 		return 3;
-	} else if(rssi >= -77) {
+	else if (rssi >= -77)
 		return 2;
-	} else if(rssi >= -88) {
+	else if (rssi >= -88)
 		return 1;
-	} else {
+	else
 		return 0;
-	}
 }
 
-void process_ssid(char *dst, char *src, char *src2)
+static void process_ssid(char *dst, char *src, char *src2)
 {
 	char *p, *p2, *tmp, *tmp2;
 	int i, j, dbm, dbm2 = 99, index = 0, rssi;
-	
-	for(i = 0; i < MAX_SCAN_COUNTS; i++) {
-		
-		// ESSID:"PocketAP_Home"
+
+	for (i = 0; i < MAX_SCAN_COUNTS; i++) {
+		/* ESSID:"PocketAP_Home" */
 		tmp = &ssids[i][0];
 		p = strstr(src, "ESSID:");
-		if(p == NULL) {
+		if (p == NULL)
 			break;
-		}
-		// skip "ESSID:"
+		/* skip "ESSID:" */
 		p += strlen("ESSID:");
-		while((*p != '\0') && (*p != '\n')) {
+		while ((*p != '\0') && (*p != '\n'))
 			*tmp++ = *p++;
-		}
 		*tmp++ = '\0';
 		src = p;
-		//LOG("src = %s\n", src);
-		
-		// Quality:4/5  Signal level:-59 dBm  Noise level:-96 dBm
+		/* LOG("src = %s\n", src); */
+
+		/* Quality:4/5  Signal level:-59 dBm  Noise level:-96 dBm */
 		tmp2 = &rssis[i][0];
 		p2 = strstr(src2, "Signal level");
-		if(p2 == NULL) {
+		if (p2 == NULL)
 			break;
-		}
-		// skip "level="
+		/* skip "level=" */
 		p2 += strlen("Signal level") + 1;
-		// like "-90 dBm", total 3 chars
-		*tmp2++ = *p2++; //'-'
-		*tmp2++ = *p2++; //'9'
-		*tmp2++ = *p2++; //'0'
-		*tmp2++ = *p2++; //' '
-		*tmp2++ = *p2++; //'d'
-		*tmp2++ = *p2++; //'B'
-		*tmp2++ = *p2++; //'m'
+		/* like "-90 dBm", total 3 chars */
+		*tmp2++ = *p2++;	/* '-' */
+		*tmp2++ = *p2++;	/* '9' */
+		*tmp2++ = *p2++;	/* '0' */
+		*tmp2++ = *p2++;	/* ' ' */
+		*tmp2++ = *p2++;	/* 'd' */
+		*tmp2++ = *p2++;	/* 'B' */
+		*tmp2++ = *p2++;	/* 'm' */
 		*tmp2++ = '\0';
 		src2 = p2;
-		//LOG("src2 = %s\n", src2);
-		
+		/* LOG("src2 = %s\n", src2); */
 		LOG("i = %d, %s, %s\n", i, &ssids[i][0], &rssis[i][0]);
 	}
-	
+
 	LOG("total = %d\n", i);
-	if(i == 0) {
+	if (i == 0)
 		return;
-	}
-	
-	for(j = 0; j < i; j++) {
-		dbm = atoi(&rssis[j][1]); // skip '-'
-                if(dbm == 0) continue;
-		if(dbm < dbm2) { // get max rssi
+
+	for (j = 0; j < i; j++) {
+		dbm = atoi(&rssis[j][1]);	/* skip '-' */
+		if (dbm == 0)
+			continue;
+		if (dbm < dbm2) {		/* get max rssi */
 			dbm2 = dbm;
 			index = j;
 		}
 	}
-	
+
 	LOG("index = %d, dbm = %d\n", index, dbm2);
 	LOG("select ap: %s, %s\n", &ssids[index][0], &rssis[index][0]);
-	
-	rssi = calcSingleLevel(atoi(&rssis[index][1]));
-	
-	//sprintf(dst, "{ %s %s %d %s }", &ssids[index][0], PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1);
+
+	rssi = calc_rssi_lvl(atoi(&rssis[index][1]));
+
 	sprintf(dst, "{ %s \"%d\" }", &ssids[index][0], rssi);
 }
 
-//-------------------------add wjh------------------------------------------//
-void parse_ssid_level(char *dst, char *src, char *src2)
+#ifdef SOFIA3GR_PCBA
+static void parse_ssid_level(char *dst, char *src, char *src2)
 {
 	int rssi = 0;
 	char *temp = &rssis[0][0];
-	*temp++ = *src2++; //'-'
-	*temp++ = *src2++; //'9'
-	*temp++ = *src2++; //'0'
+
+	*temp++ = *src2++;	/* '-' */
+	*temp++ = *src2++;	/* '9' */
+	*temp++ = *src2++;	/* '0' */
 	*temp++ = '\0';
-	rssi = calcSingleLevel(atoi(&rssis[0][1])*(-1));
-	sprintf(dst, "{ %s %s: %d%s Level=%ddB }", src, PCBA_WIFI_SIGNAL, rssi, PCBA_WIFI_SIGNAL1, atoi(&rssis[0][1])*(-1));
+	rssi = calc_rssi_lvl(atoi(&rssis[0][1]) * (-1));
+	sprintf(dst, "{ %s %s: %d%s Level=%ddB }", src, PCBA_WIFI_SIGNAL, rssi,
+		PCBA_WIFI_SIGNAL1, atoi(&rssis[0][1]) * (-1));
 }
+#endif
 
-// ---------------------------------------------------------------------------
-
-void* wlan_test(void* argv)
+void *wlan_test(void *argv)
 {
-	int ret,y;
+	int ret = 0, y;
 	FILE *fp = NULL;
 	FILE *fp2 = NULL;
 	char *results = NULL;
@@ -160,138 +156,102 @@ void* wlan_test(void* argv)
 	struct testcase_info *tc_info = (struct testcase_info *)argv;
 	char wifi_pcba_node = 1;
 
-	/*remind ddr test*/
-	if(tc_info->y <= 0)
-		tc_info->y  = get_cur_print_y();	
+	/* remind ddr test */
+	if (tc_info->y <= 0)
+		tc_info->y = get_cur_print_y();
 
 	y = tc_info->y;
-	ui_print_xy_rgba(0,y,255,255,0,255,"%s:[%s..] \n",PCBA_WIFI,PCBA_TESTING);
-	
-	#ifdef SOFIA3GR_PCBA
-		//ret =  __system("busybox chmod 777 /system/bin/wifi.sh");
-	#else
-		ret =  __system("busybox chmod 777 /res/wifi.sh");
-	#endif
-	
-	if(ret)
-		LOG("chmod wifi.sh failed :%d\n",ret);
+	ui_print_xy_rgba(0, y, 255, 255, 0, 255, "%s:[%s..]\n", PCBA_WIFI,
+			 PCBA_TESTING);
 
-	#ifdef SOFIA3GR_PCBA
-		int counts = 0;
-		while(fp == NULL || fp2 == NULL) {
-			ret = system("sh system/bin/wifi.sh");
-			if(ret < 0) {
-				LOG("wlan_test::wlan_test: cmd: /system/bin/wifi.sh\t error: %s", strerror(errno));
-			}
+#ifdef SOFIA3GR_PCBA
+	/* sofia3gr process empty */
+#else
+	ret = __system("busybox chmod 777 /res/wifi.sh");
+#endif
+	if (ret)
+		LOG("chmod wifi.sh failed :%d\n", ret);
 
-			if(counts > 4) {
-				LOG("execute sh system/bin/wifi.sh fail.\n");
-				goto error_exit;
-			}
+#ifdef SOFIA3GR_PCBA
+	int counts = 0;
 
-			fp = fopen(SCAN_RESULT_FILE, "r");
-			fp2 = fopen(SCAN_RESULT_FILE2, "r");
-			counts++;
-		}
-	#else
-		ret = __system("/res/wifi.sh");
-	#endif
-	if(ret <= 0) {
-		LOG("wifi test failed.\n");
-		goto error_exit;
-	}
-	
-	results = malloc(SCAN_RESULT_LENGTH);
-	if(results == NULL) {
-		LOG("can malloc results buffer.\n");
-		goto error_exit;
-	}
-	
-	results2 = malloc(SCAN_RESULT_LENGTH);
-	if(results2 == NULL) {
-		LOG("can malloc results2 buffer.\n");
-		goto error_exit;
-	}
-	
-	#ifndef SOFIA3GR_PCBA
-	fp = fopen(SCAN_RESULT_FILE, "r");
-	if(fp == NULL) {
-		LOG("can not open %s.\n", SCAN_RESULT_FILE);
-		goto error_exit;
-	}
-	#endif
-	
-	memset(results, 0, SCAN_RESULT_LENGTH);
-	fread(results,SCAN_RESULT_LENGTH,1,fp);
-	results[SCAN_RESULT_LENGTH-1] = '\0';
-	//LOG("%s.\n", results);
-	
-	#ifndef SOFIA3GR_PCBA
-	fp2 = fopen(SCAN_RESULT_FILE2, "r");
-	if(fp2 == NULL) {
-		LOG("can not open %s.\n", SCAN_RESULT_FILE2);
-		goto error_exit;
-	}
-	#endif
-	
-	memset(results2, 0, SCAN_RESULT_LENGTH);
-	fread(results2,SCAN_RESULT_LENGTH,1,fp2);
-	results2[SCAN_RESULT_LENGTH-1] = '\0';
-  //LOG("%s.\n", results2);
-	
-	memset(ssid, 0, 100);
-	
-	#ifdef SOFIA3GR_PCBA
-		parse_ssid_level(ssid, results, results2);
-		if(atoi(&rssis[0][1])*(-1) == 0) {
-			LOG("get wifi rssid is 0.\n");
+	while (fp == NULL || fp2 == NULL) {
+		ret = system("sh system/bin/wifi.sh");
+		if (ret < 0)
+			LOG("exec /system/bin/wifi.sh failed with error: %s\n",
+			    strerror(errno));
+
+		if (counts > 4) {
+			LOG("execute sh system/bin/wifi.sh fail.\n");
 			goto error_exit;
 		}
-	#else
-		process_ssid(ssid, results, results2);
-	#endif
-	ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_SECCESS,ssid);
+
+		fp = fopen(SCAN_RESULT_FILE, "r");
+		fp2 = fopen(SCAN_RESULT_FILE2, "r");
+		counts++;
+	}
+#else
+	ret = __system("/res/wifi.sh");
+#endif
+	if (ret <= 0)
+		goto error_exit;
+
+	results = malloc(SCAN_RESULT_LENGTH);
+	results2 = malloc(SCAN_RESULT_LENGTH);
+	if (results == NULL || results2 == NULL)
+		goto error_exit;
+
+#ifndef SOFIA3GR_PCBA
+	fp = fopen(SCAN_RESULT_FILE, "r");
+	fp2 = fopen(SCAN_RESULT_FILE2, "r");
+	if (fp == NULL || fp2 == NULL)
+		goto error_exit;
+#endif
+
+	memset(results, 0, SCAN_RESULT_LENGTH);
+	fread(results, SCAN_RESULT_LENGTH, 1, fp);
+	results[SCAN_RESULT_LENGTH - 1] = '\0';
+
+	memset(results2, 0, SCAN_RESULT_LENGTH);
+	fread(results2, SCAN_RESULT_LENGTH, 1, fp2);
+	results2[SCAN_RESULT_LENGTH - 1] = '\0';
+
+	memset(ssid, 0, 100);
+
+#ifdef SOFIA3GR_PCBA
+	parse_ssid_level(ssid, results, results2);
+	if (atoi(&rssis[0][1]) * (-1) == 0) {
+		LOG("get wifi rssid is 0.\n");
+		goto error_exit;
+	}
+#else
+	process_ssid(ssid, results, results2);
+#endif
+
+	ui_print_xy_rgba(0, y, 0, 255, 0, 255, "%s:[%s] %s\n", PCBA_WIFI,
+			 PCBA_SECCESS, ssid);
 	tc_info->result = 0;
-	
+
+	fclose(fp);
+	fclose(fp2);
+	free(results);
+	free(results2);
+
 	LOG("wlan_test success.\n");
-	if(fp != NULL) {
-		fclose(fp);
-	}
-	
-	if(fp2 != NULL) {
-		fclose(fp2);
-	}
-	
-	if(results != NULL) {
-		free(results);
-	}
-	
-	if(results2 != NULL) {
-		free(results2);
-	}
+
 	return 0;
 
 error_exit:
-	
-	LOG("wlan_test failed.\n");
-	
-	if(fp != NULL) {
-		fclose(fp);
-	}
-	
-	if(fp2 != NULL) {
-		fclose(fp2);
-	}
-	
-	if(results != NULL) {
-		free(results);
-	}
-	
-	if(results2 != NULL) {
-		free(results2);
-	}
-	
-	ui_print_xy_rgba(0,y,225,0,0,255,"%s:[%s] %s\n",PCBA_WIFI,PCBA_FAILED,ssid);
+	fclose(fp);
+	fclose(fp2);
+	free(results);
+	free(results2);
+
+	ui_print_xy_rgba(0, y, 225, 0, 0, 255, "%s:[%s] %s\n", PCBA_WIFI,
+			 PCBA_FAILED, ssid);
 	tc_info->result = -1;
-  return argv;
+
+	LOG("wlan_test failed.\n");
+
+	return argv;
 }
