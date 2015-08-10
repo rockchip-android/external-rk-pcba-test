@@ -133,7 +133,7 @@ void * fm_test(void * argv)
 
 		LOG("channelLevel is %s\n", channelLevel);
 		int level = strtod(channelLevel, NULL);
-		if(level > 5)
+		if(level > 3)
 		{
 			ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s] { channel = %d level = %ddBuV} \n", PCBA_FM, PCBA_SECCESS, cap, level);
 			tc_info->result = 0;

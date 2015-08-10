@@ -38,7 +38,6 @@ extern int simcard1;
 extern int simcard2;
 extern int simCounts;
 extern int reboot_normal;
-int getImei_testresult_end = 0;
 static int start_change_bootmode = 0;
 
 #define LOG(x...) printf("[At_UTIL_EXTERN] "x)
@@ -259,6 +258,73 @@ int at_send_extern(int fd,char *send_command)
 	return -1;
 }
 
+int test_simcard()
+{
+	LOG("%s line=%d\n", __FUNCTION__, __LINE__);
+	
+	strncpy(gAtAck_command_extern, "AT+CFUN=1", 9);
+	gAtAck_command_extern[9] = '\0';
+	if(at_send_extern(gFd,"AT+CFUN=1\r\n") < 0){
+		LOG("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
+		goto ERROR;
+	}
+	
+	strncpy(gAtAck_command_extern, "AT+XSIMSEL=0", 12);
+	gAtAck_command_extern[12] = '\0';
+	if(at_send_extern(gFd,"AT+XSIMSEL=0\r\n") < 0){
+		LOG("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
+		goto ERROR;
+	}
+
+	strncpy(gAtAck_command_extern, "AT+CIMI", 7);
+	gAtAck_command_extern[7] = '\0';
+	if(at_send_extern(gFd,"AT+CIMI\r\n") >= 0) {
+		simcard1 = 1;
+		LOG("ISMI1 result is %s\n", returnResult);
+		sprintf(ISMI1,"%s", returnResult);
+	}
+	else {
+		LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
+		goto ERROR;
+	}
+
+	strncpy(gAtAck_command_extern, "AT+XSIMSEL=1", 12);
+	gAtAck_command_extern[12] = '\0';
+	if(at_send_extern(gFd,"AT+XSIMSEL=1\r\n") < 0) {
+		LOG("%s line=%d execute AT+XSIMSEL=1 fail\n", __FUNCTION__, __LINE__);
+		goto ERROR;
+	}
+	
+	strncpy(gAtAck_command_extern, "AT+CIMI", 7);
+	gAtAck_command_extern[7] = '\0';
+	if(at_send_extern(gFd,"AT+CIMI\r\n") >= 0) {
+		simcard2 = 1;
+		LOG("ISMI2 result is %s\n", returnResult);
+		sprintf(ISMI2,"%s", returnResult);
+	}
+	else
+	{
+		if(simCounts == 2) {
+			LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
+			goto ERROR;
+		}
+	}
+
+	return 0;
+
+ERROR:
+	strncpy(gAtAck_command_extern, "UTA_MODE_CALIBRATION", 19);
+	gAtAck_command_extern[19] = '\0';
+	if(at_send_extern(gFd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n") < 0) {
+		at_send_extern(gFd,"at@bmm:UtaModePresetReq(UTA_MODE_CALIBRATION)\r\n");
+	}
+	//set_is_sim_test_done_extern(1);
+	start_change_bootmode = 1;
+	return -1;
+
+}
+
+
 //values=0 change to ptest mode
 //values=1 change to normal mode
 int change_bootmode(int values)
@@ -473,96 +539,9 @@ void* getImei_testresult(void *argc) {
 																PCBA_WIFI_CAL, wifi_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
 																imei_result);
 	}
-
-	sleep(12);
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
-	
-	strncpy(gAtAck_command_extern, "AT+CFUN=1", 9);
-	gAtAck_command_extern[9] = '\0';
-	if(at_send_extern(serial_fd,"AT+CFUN=1\r\n") < 0){
-		LOG("%s line=%d execute AT+CFUN=1 fail\n", __FUNCTION__, __LINE__);
-		goto ERROR;
-	}
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
-	
-	strncpy(gAtAck_command_extern, "AT+XSIMSEL=0", 12);
-	gAtAck_command_extern[12] = '\0';
-	if(at_send_extern(serial_fd,"AT+XSIMSEL=0\r\n") < 0){
-		LOG("%s line=%d execute AT+XSIMSEL=0 fail\n", __FUNCTION__, __LINE__);
-		goto ERROR;
-	}
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
-
-	strncpy(gAtAck_command_extern, "AT+CIMI", 7);
-	gAtAck_command_extern[7] = '\0';
-	if(at_send_extern(serial_fd,"AT+CIMI\r\n") >= 0) {
-		simcard1 = 1;
-		LOG("ISMI1 result is %s\n", returnResult);
-		sprintf(ISMI1,"%s", returnResult);
-	}
-	else {
-		LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
-		goto ERROR;
-	}
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
-
-	strncpy(gAtAck_command_extern, "AT+XSIMSEL=1", 12);
-	gAtAck_command_extern[12] = '\0';
-	if(at_send_extern(serial_fd,"AT+XSIMSEL=1\r\n") < 0) {
-		LOG("%s line=%d execute AT+XSIMSEL=1 fail\n", __FUNCTION__, __LINE__);
-		goto ERROR;
-	}
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
-	
-	strncpy(gAtAck_command_extern, "AT+CIMI", 7);
-	gAtAck_command_extern[7] = '\0';
-	if(at_send_extern(serial_fd,"AT+CIMI\r\n") >= 0) {
-		simcard2 = 1;
-		LOG("ISMI2 result is %s\n", returnResult);
-		sprintf(ISMI2,"%s", returnResult);
-	}
-	else
-	{
-		if(simCounts == 2) {
-			LOG("%s line=%d execute AT+CIMI fail\n", __FUNCTION__, __LINE__);
-			goto ERROR;
-		}
-	}
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
 	
 	//set_is_sim_test_done_extern(1);
 	start_change_bootmode = 1;
-	getImei_testresult_end = 1;
 	return 0;
 
 ERROR:
@@ -573,7 +552,6 @@ ERROR:
 	}
 	//set_is_sim_test_done_extern(1);
 	start_change_bootmode = 1;
-	getImei_testresult_end = 1;
 	return -1;
 }
 
