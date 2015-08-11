@@ -48,7 +48,10 @@ endif
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
+endif
 
+ifeq ($(strip $(DISABLE_MODEM)), true)
+LOCAL_CFLAGS += -DWIFI_ONLY_PCBA
 endif
 
 ifeq ($(strip $(BOARD_SENSOR_MPU)), true)

@@ -479,23 +479,6 @@ void* getImei_testresult(void *argc) {
 		LOG("reboot: change boot mode and break getImei_testresult.\n");
 		return 0;
 	}
-	
-	//rf cal result
-	strncpy(gAtAck_command_extern, "cust_parms.param_1?", 19);
-	gAtAck_command_extern[19] = '\0';
-	if(at_send_extern(serial_fd,"at@nvm:cal_prodparm.cust_parms.param_1?\r\n") < 0) {
-		LOG("%s line=%d execute at@nvm:cal_prodparm.cust_parms.param_1? fail\n", __FUNCTION__, __LINE__);
-		goto ERROR;
-	}
-
-	rf_cal_result = atoi(returnResult);
-	LOG("rf cal result is %s rf_cal_result=%d\n", returnResult, rf_cal_result);
-
-	if(reboot_normal) {
-		start_change_bootmode = 1;
-		LOG("reboot: change boot mode and break getImei_testresult.\n");
-		return 0;
-	}
 
 	//wifi cal result
 	strncpy(gAtAck_command_extern, "cust_parms.param_2?", 19);
@@ -506,6 +489,24 @@ void* getImei_testresult(void *argc) {
 	}
 	wifi_cal_result = atoi(returnResult);
 	LOG("rf cal result is %s wifi_cal_result=%d\n", returnResult, wifi_cal_result);
+
+	if(reboot_normal) {
+		start_change_bootmode = 1;
+		LOG("reboot: change boot mode and break getImei_testresult.\n");
+		return 0;
+	}
+
+#ifndef WIFI_ONLY_PCBA
+	//rf cal result
+	strncpy(gAtAck_command_extern, "cust_parms.param_1?", 19);
+	gAtAck_command_extern[19] = '\0';
+	if(at_send_extern(serial_fd,"at@nvm:cal_prodparm.cust_parms.param_1?\r\n") < 0) {
+		LOG("%s line=%d execute at@nvm:cal_prodparm.cust_parms.param_1? fail\n", __FUNCTION__, __LINE__);
+		goto ERROR;
+	}
+
+	rf_cal_result = atoi(returnResult);
+	LOG("rf cal result is %s rf_cal_result=%d\n", returnResult, rf_cal_result);
 
 	if(reboot_normal) {
 		start_change_bootmode = 1;
@@ -539,6 +540,13 @@ void* getImei_testresult(void *argc) {
 																PCBA_WIFI_CAL, wifi_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
 																imei_result);
 	}
+#else
+	if(UI_LEVEL == 1) {
+		ui_print_xy_rgba(0,3,0,255,0,255,"[%s]%s\n",PCBA_WIFI_CAL, wifi_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES);
+	}else if(UI_LEVEL == 2) {
+		ui_print_xy_rgba(0,1,0,255,0,255,"[%s]%s [%s]%s %s\n",PCBA_WIFI_CAL, wifi_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES);
+	}
+#endif
 	
 	//set_is_sim_test_done_extern(1);
 	start_change_bootmode = 1;
