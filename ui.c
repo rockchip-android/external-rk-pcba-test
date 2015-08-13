@@ -615,7 +615,7 @@ static void *input_thread(void *cookie)
 						printf("%s line=%d key hold time:%lu, g_key_test=%d keyEnd=%lu  keystart=%lu \n",__FUNCTION__, __LINE__, keyEnd.tv_sec-keyStart.tv_sec, g_key_test, keyEnd.tv_sec, keyStart.tv_sec);
 					}
 					if(g_key_test)
-					set_gKey(ev.code);
+					set_gkey(ev.code);
 					key_repeat = 0;
 					touch_and_hold = 0;
 					touch_repeat = 0;
@@ -664,7 +664,7 @@ static void *input_thread(void *cookie)
 					printf("key hold time:%lu, g_key_test=%d\n",keyEnd.tv_sec-keyStart.tv_sec, g_key_test);
 					
 					if(g_key_test)
-						set_gKey(ev.code);
+						set_gkey(ev.code);
 					key_repeat = 0;
 					touch_and_hold = 0;
 					touch_repeat = 0;

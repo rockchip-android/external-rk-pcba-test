@@ -49,7 +49,7 @@ int HardwareKeyboard::KeyUp(int key_code) {
 	LOGE("HardwareKeyboard::KeyUp %i\n", key_code);
 #endif
 	if(g_key_test)
-		set_gKey(key_code);
+		set_gkey(key_code);
 	return 0;
 }
 
