@@ -48,10 +48,7 @@ endif
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
-endif
 
-ifeq ($(strip $(DISABLE_MODEM)), true)
-LOCAL_CFLAGS += -DWIFI_ONLY_PCBA
 endif
 
 ifeq ($(strip $(BOARD_SENSOR_MPU)), true)
@@ -95,7 +92,8 @@ LOCAL_SRC_FILES := \
 	fm_test.c \
 	compass_test.c \
 	vibrator.c \
-	flashlight_test.c
+	flashlight_test.c \
+	lan_test.c
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 	LOCAL_CFLAGS += -DRK3288_PCBA

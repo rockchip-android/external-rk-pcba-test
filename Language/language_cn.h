@@ -58,4 +58,5 @@
 #define PCBA_IMEI_NO   "IMEI号:"
 #define PCBA_CAL_YES   "已校准"
 #define PCBA_CAL_NO   "未校准"
+#define PCBA_LAN	"以太网"
 #endif

@@ -42,6 +42,7 @@
 #include "cpu_test.h"
 #include "codec_test.h"
 #include "vibrator.h"
+#include "lan_test.h"
 #include "flashlight_test.h"
 #include <signal.h>
 #include "language.h"
@@ -189,6 +190,9 @@ int ddr_err = -1;
 
 pthread_t cpu_tid;
 int cpu_err = -1;
+
+pthread_t lan_tid;
+int lan_err = -1;
 
 pthread_t lsensor_tid; 
 pthread_t gps_tid; 
@@ -605,6 +609,14 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   printf("create cpu test thread error: %s/n",strerror(cpu_err));
 		   return -1;
 		}
+	}
+	else if(!strcmp(tc_info->base_info->name, "lan")){
+		lan_err = pthread_create(&lan_tid, NULL, lan_test, tc_info); //
+		if(lan_err != 0)
+		{  
+		   printf("create lan test thread error: %s/n",strerror(lan_err));
+		   return -1;
+		}  
 	}
 	else
 	{
