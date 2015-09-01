@@ -1,4 +1,4 @@
-﻿#ifndef __LANGUAGE_CN_H_
+#ifndef __LANGUAGE_CN_H_
 #define __LANGUAGE_CN_H_
 
 #define PCBA_VERSION_NAME "ROCKCHIP PCBA TEST V2.3"
@@ -10,6 +10,7 @@
 #define PCBA_GSENSOR "重力传感器"
 #define PCBA_KEY "按键"
 #define PCBA_RTC "时钟"
+#define PCBA_NAND "NandFlash"
 #define PCBA_SIM "SIM卡"
 #define PCBA_SIM2 "SIM卡2"
 #define PCBA_SDCARD  "SD卡"

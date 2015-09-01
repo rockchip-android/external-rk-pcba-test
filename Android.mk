@@ -93,7 +93,8 @@ LOCAL_SRC_FILES := \
 	compass_test.c \
 	vibrator.c \
 	flashlight_test.c \
-	lan_test.c
+	lan_test.c \
+	nand_test.c
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 	LOCAL_CFLAGS += -DRK3288_PCBA

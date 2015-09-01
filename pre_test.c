@@ -44,6 +44,7 @@
 #include "vibrator.h"
 #include "lan_test.h"
 #include "flashlight_test.h"
+#include "nand_test.h"
 #include <signal.h>
 #include "language.h"
 #ifdef RK3288_PCBA
@@ -130,6 +131,7 @@ char *key_res;
 struct key_msg *key_msg;
 
 pthread_t fm_tid;
+pthread_t nand_tid;
 char *fm_res;
 struct fm_msg *fm_msg;
 
@@ -449,6 +451,15 @@ int start_test_pthread(struct testcase_info *tc_info)
 		if(err != 0)
 		{  
 		   printf("create wifi test thread error: %s/n",strerror(err));	
+		   
+		}  
+	}
+	else if(!strcmp(tc_info->base_info->name, "nand"))
+	{
+		err = pthread_create(&nand_tid, NULL, nand_test,tc_info); //
+		if(err != 0)
+		{  
+		   printf("create nandflash test thread error: %s/n",strerror(err));	
 		   
 		}  
 	}
