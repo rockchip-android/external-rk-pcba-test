@@ -1,6 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
+LOCAL_CFLAGS += -w
+
 LOCAL_SRC_FILES := events.c resources.c graphics.c
 LOCAL_C_INCLUDES +=\
     external/libpng\

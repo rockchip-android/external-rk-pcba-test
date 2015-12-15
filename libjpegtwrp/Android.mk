@@ -1,6 +1,8 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+LOCAL_CFLAGS += -w
+
 LOCAL_ARM_MODE := arm
 
 # Set ANDROID_JPEG_USE_VENUM to true to enable VeNum optimizations

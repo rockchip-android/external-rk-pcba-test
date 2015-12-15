@@ -14,6 +14,6 @@ LOCAL_C_INCLUDES += \
 	
 LOCAL_MODULE := libminziptwrp
 
-LOCAL_CFLAGS += -Wall
+LOCAL_CFLAGS += -w
 
 include $(BUILD_STATIC_LIBRARY)

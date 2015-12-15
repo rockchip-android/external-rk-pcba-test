@@ -8,8 +8,7 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/Language \
     external/libpng/
 
-LOCAL_CFLAGS += \
-    -Wno-unused-parameter
+LOCAL_CFLAGS += -w
 
 LOCAL_SRC_FILES := \
     alsa_pcm.c \
@@ -38,8 +37,7 @@ LOCAL_C_INCLUDES += \
     external/stlport/stlport \
     $(LOCAL_PATH)/Language
 
-LOCAL_CFLAGS += \
-    -Wno-unused-parameter
+LOCAL_CFLAGS += -w
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3368)
 LOCAL_CFLAGS += -DRK3368_PCBA
