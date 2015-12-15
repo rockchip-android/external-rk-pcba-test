@@ -62,11 +62,7 @@
 #include "fm_test.h"
 #include "compass_test.h"
 
-#ifdef SOFIA3GR_PCBA
-#define SCRIPT_NAME                     "/system/etc/test_config.cfg"
-#else
 #define SCRIPT_NAME                     "/res/test_config.cfg"
-#endif
 
 #define ITEM_H				2	/* height of test item */
 #define ITEM_X				0	/* x positon of test item */
