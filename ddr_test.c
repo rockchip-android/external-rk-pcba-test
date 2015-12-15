@@ -135,7 +135,7 @@ int ddr_check_test(void)
 		memset(ddr_data1[num], num, block_size * 1024);
 		memset(ddr_data2[num], num, block_size * 1024);
 
-		if (strcmp(ddr_data1[num], ddr_data2[num]) != 0) {
+		if (memcmp(ddr_data1[num], ddr_data2[num], block_size * 1024)) {
 			result = -1;
 			break;
 		}
