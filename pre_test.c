@@ -432,6 +432,7 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   
 		}  
 	}
+#ifndef RK3288_PCBA
 	else if(!strcmp(tc_info->base_info->name, "camera"))
 	{	
 		tc_info->dev_id = 0;
@@ -443,6 +444,7 @@ int start_test_pthread(struct testcase_info *tc_info)
 		   
 		}  
 	}
+#endif
 	else if(!strcmp(tc_info->base_info->name, "wifi"))
 	{
 		//ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,255,"iiiiiiiiii wifi 1\n");
