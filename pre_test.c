@@ -47,20 +47,15 @@
 #include "nand_test.h"
 #include <signal.h>
 #include "language.h"
+
 #ifdef RK3288_PCBA
 #include "rk3288-camera/camera_test.h"
-#else
-#ifdef RK312X_PCBA
+#elif defined RK312X_PCBA
 #include "rk312x-camera/camera_test.h"
-#else
-#ifdef SOFIA3GR_PCBA
-#include "sofia_camera/camera_test.h"
-#include "at_util_extern.h"
 #else
 #include "camera_test.h"
 #endif
-#endif
-#endif
+
 #include "lightsensor_test.h"
 #include "gnss_test.h"
 #include "psensor_test.h"
