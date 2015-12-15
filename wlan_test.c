@@ -129,22 +129,6 @@ static void process_ssid(char *dst, char *src, char *src2)
 	sprintf(dst, "{ %s \"%d\" }", &ssids[index][0], rssi);
 }
 
-#ifdef SOFIA3GR_PCBA
-static void parse_ssid_level(char *dst, char *src, char *src2)
-{
-	int rssi = 0;
-	char *temp = &rssis[0][0];
-
-	*temp++ = *src2++;	/* '-' */
-	*temp++ = *src2++;	/* '9' */
-	*temp++ = *src2++;	/* '0' */
-	*temp++ = '\0';
-	rssi = calc_rssi_lvl(atoi(&rssis[0][1]) * (-1));
-	sprintf(dst, "{ %s %s: %d%s Level=%ddB }", src, PCBA_WIFI_SIGNAL, rssi,
-		PCBA_WIFI_SIGNAL1, atoi(&rssis[0][1]) * (-1));
-}
-#endif
-
 void *wlan_test(void *argv)
 {
 	int ret = 0, y;
@@ -164,35 +148,11 @@ void *wlan_test(void *argv)
 	ui_print_xy_rgba(0, y, 255, 255, 0, 255, "%s:[%s..]\n", PCBA_WIFI,
 			 PCBA_TESTING);
 
-#ifdef SOFIA3GR_PCBA
-	/* sofia3gr process empty */
-#else
 	ret = __system("busybox chmod 777 /res/wifi.sh");
-#endif
 	if (ret)
 		LOG("chmod wifi.sh failed :%d\n", ret);
 
-#ifdef SOFIA3GR_PCBA
-	int counts = 0;
-
-	while (fp == NULL || fp2 == NULL) {
-		ret = system("sh system/bin/wifi.sh");
-		if (ret < 0)
-			LOG("exec /system/bin/wifi.sh failed with error: %s\n",
-			    strerror(errno));
-
-		if (counts > 4) {
-			LOG("execute sh system/bin/wifi.sh fail.\n");
-			goto error_exit;
-		}
-
-		fp = fopen(SCAN_RESULT_FILE, "r");
-		fp2 = fopen(SCAN_RESULT_FILE2, "r");
-		counts++;
-	}
-#else
 	ret = __system("/res/wifi.sh");
-#endif
 	if (ret <= 0)
 		goto error_exit;
 
@@ -201,12 +161,10 @@ void *wlan_test(void *argv)
 	if (results == NULL || results2 == NULL)
 		goto error_exit;
 
-#ifndef SOFIA3GR_PCBA
 	fp = fopen(SCAN_RESULT_FILE, "r");
 	fp2 = fopen(SCAN_RESULT_FILE2, "r");
 	if (fp == NULL || fp2 == NULL)
 		goto error_exit;
-#endif
 
 	memset(results, 0, SCAN_RESULT_LENGTH);
 	fread(results, SCAN_RESULT_LENGTH, 1, fp);
@@ -218,15 +176,7 @@ void *wlan_test(void *argv)
 
 	memset(ssid, 0, 100);
 
-#ifdef SOFIA3GR_PCBA
-	parse_ssid_level(ssid, results, results2);
-	if (atoi(&rssis[0][1]) * (-1) == 0) {
-		LOG("get wifi rssid is 0.\n");
-		goto error_exit;
-	}
-#else
 	process_ssid(ssid, results, results2);
-#endif
 
 	ui_print_xy_rgba(0, y, 0, 255, 0, 255, "%s:[%s] %s\n", PCBA_WIFI,
 			 PCBA_SECCESS, ssid);
