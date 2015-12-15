@@ -242,10 +242,14 @@ void *wlan_test(void *argv)
 	return 0;
 
 error_exit:
-	fclose(fp);
-	fclose(fp2);
-	free(results);
-	free(results2);
+	if (fp)
+		fclose(fp);
+	if (fp2)
+		fclose(fp2);
+	if (results)
+		free(results);
+	if (results2)
+		free(results2);
 
 	ui_print_xy_rgba(0, y, 225, 0, 0, 255, "%s:[%s] %s\n", PCBA_WIFI,
 			 PCBA_FAILED, ssid);
