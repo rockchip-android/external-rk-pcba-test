@@ -199,10 +199,6 @@ int reboot_normal = 0;
 
 static pthread_mutex_t gCur_p_y = PTHREAD_MUTEX_INITIALIZER;
 
-#ifdef SOFIA3GR_PCBA
-extern void ptest_set_key_wait_status(int key_wait);
-#endif
-
 int get_cur_print_y(void)
 {
 	int tmp;
@@ -426,23 +422,12 @@ int start_test_pthread(struct testcase_info *tc_info)
 			       strerror(err));
 		}
 	} else if (!strcmp(tc_info->base_info->name, "gsensor")) {
-#ifdef SOFIA3GR_SENSOR_MPU
-		err =
-		    pthread_create(&gsensor_tid, NULL, gsensor_test_mpu,
-				   tc_info);
-		if (err != 0) {
-			printf("create gsensor test thread error: %s/n",
-			       strerror(err));
-			return -1;
-		}
-#else
 		err = pthread_create(&gsensor_tid, NULL, gsensor_test, tc_info);
 		if (err != 0) {
 			printf("create gsensor test thread error: %s/n",
 			       strerror(err));
 			return -1;
 		}
-#endif
 	} else if (!strcmp(tc_info->base_info->name, "lsensor")) {
 		err =
 		    pthread_create(&lsensor_tid, NULL, lightsensor_test,
@@ -467,23 +452,12 @@ int start_test_pthread(struct testcase_info *tc_info)
 			return -1;
 		}
 	} else if (!strcmp(tc_info->base_info->name, "compass")) {
-#ifdef SOFIA3GR_SENSOR_MPU
-		err =
-		    pthread_create(&compass_tid, NULL, compass_test_mpu,
-				   tc_info);
-		if (err != 0) {
-			printf("create mpu compass test thread error: %s/n",
-			       strerror(err));
-			return -1;
-		}
-#else
 		err = pthread_create(&compass_tid, NULL, compass_test, tc_info);
 		if (err != 0) {
 			printf("create ST compass test thread error: %s/n",
 			       strerror(err));
 			return -1;
 		}
-#endif
 	} else if (!strcmp(tc_info->base_info->name, "udisk")) {
 		err = pthread_create(&udisk_tid, NULL, udisk_test, tc_info);
 		if (err != 0) {
@@ -717,17 +691,6 @@ void prompt_and_wait(void)
 	}
 }
 
-#ifdef SOFIA3GR_PCBA
-int sync_screen_for_prompt(void)
-{
-	if (breakFirstUi)
-		return 0;
-
-	ui_print_xy_rgba(0, 4, 0, 255, 0, 255, "\n");
-	return 0;
-}
-#endif
-
 int main(int argc, char **argv)
 {
 	int ret, w;
@@ -736,93 +699,6 @@ int main(int argc, char **argv)
 	int success = 0;
 	char rfCalResult[10];
 
-#ifdef SOFIA3GR_PCBA
-	freopen("/dev/ttyFIQ0", "a", stdout);
-	setbuf(stdout, NULL);
-	freopen("/dev/ttyFIQ0", "a", stderr);
-	setbuf(stderr, NULL);
-
-	ui_init();
-	ui_print_init();
-
-	int at_err = pthread_create(&at_util_extern_tid,
-				    NULL, getImei_testresult, NULL);
-	if (at_err != 0) {
-		printf("create get cal result thread error: %s\n",
-		       strerror(at_err));
-		return -1;
-	}
-
-	w = gr_fb_width() >> 1;
-	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 2),
-			 (gr_fb_height() / CHAR_HEIGHT) / 2 - 1, 0, 255, 0, 255,
-			 "%s\n", PCBA_INTEL_PTEST_MODE);
-	ui_print_xy_rgba(0, 0, 0, 255, 0, 255, "%s\n",
-			 PCBA_BOOT_IN_ANDROID_FUCTION);
-	ui_print_xy_rgba(0, 1, 0, 255, 0, 255, "%s\n",
-			 PCBA_BOOT_IN_CORE_FUNCTION);
-	ui_print_xy_rgba(0, 2, 0, 255, 0, 255, "%s\n",
-			 PCBA_BOOT_IN_TOUCH_FUNCTION);
-
-	gui_start();
-	start_input_thread();
-
-	printf("ptest wait key...\n");
-	int key_code, key_count = 0, key_power = 0, key_vol_plus =
-	    0, key_vol_cut = 0;
-	while (key_code = ui_wait_key()) {
-		printf("get key_code = %d\n\n", key_code);
-		switch (key_code) {
-		case KEY_POWER:
-			ui_print_xy_rgba(0, 4, 255, 0, 0, 255, "%s\n",
-					 PCBA_POWER_KEY);
-			key_count++;
-			key_power++;
-			if (key_count == 5) {
-				/* reboot and set nvm state */
-				printf("power key 5 times setBootMode\n");
-				reboot_normal = 1;
-				change_bootmode_to_nvm(1);
-			}
-			break;
-		case KEY_VOLUMEUP:
-			printf("Volueme up key is press!\n");
-			ui_print_xy_rgba(0, 4, 255, 0, 0, 255, "%s\n",
-					 PCBA_VOLUME_UP_KEY);
-			key_vol_plus++;
-			break;
-		case KEY_VOLUMEDOWN:
-			printf("Voluem down key is press!\n");
-			ui_print_xy_rgba(0, 4, 255, 0, 0, 255, "%s\n",
-					 PCBA_VOLUME_DOWN_KEY);
-			key_vol_cut++;
-			break;
-		default:
-			key_count = 0;
-			break;
-		}
-
-		if (key_power >= 1 && key_vol_plus >= 1 && key_vol_cut >= 1) {
-			UI_LEVEL = 2;
-			break;
-		}
-	}
-
-	printf("exit wait key...\n");
-
-	/* clear ptest mode */
-	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 2),
-			 (gr_fb_height() / CHAR_HEIGHT) / 2 - 1,
-			 0, 255, 0, 255, "%s\n", "");
-	ui_print_xy_rgba(0, 4, 0, 255, 0, 255, "%s\n", "");
-	ui_print_xy_rgba(0, 3, 0, 255, 0, 255, "%s\n", "");
-	ui_print_xy_rgba(0, 2, 0, 255, 0, 255, "%s\n", "");
-	ui_print_xy_rgba(0, 1, 255, 0, 0, 255, "%s\n", "");
-	breakFirstUi = 1;
-
-	printf("set key wait status to exit\n");
-
-#else
 	freopen("/dev/ttyFIQ0", "a", stdout);
 	setbuf(stdout, NULL);
 	freopen("/dev/ttyFIQ0", "a", stderr);
@@ -840,30 +716,16 @@ int main(int argc, char **argv)
 	}
 	ui_print_init();
 	gui_loadResources();
-#endif
 
-#if 1
 	w = gr_fb_width() >> 1;
 
-#ifdef SOFIA3GR_PCBA
-	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 9), 0, 0, 255, 0, 255, "%s\n",
-			 PCBA_TIP_IN_PCBA_FUNCTION);
-	ui_print_xy_rgba(0, 1, 0, 255, 0, 255, "[%s]%s [%s]%s %s\n",
-			 PCBA_RF_CAL,
-			 rf_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
-			 PCBA_WIFI_CAL,
-			 wifi_cal_result == 0 ? PCBA_CAL_NO : PCBA_CAL_YES,
-			 imei_result);
-#else
 	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 9), 0, 0, 255, 0, 255, "%s\n",
 			 PCBA_VERSION_NAME);
-#endif
-#ifndef SOFIA3GR_PCBA
 	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 3), 1, 255, 255, 0, 255,
 			 "%s\n", PCBA_MANUAL_TEST);
 	drawline_4(255, 255, 0, 255, 0, (1 * CHAR_HEIGHT - CHAR_HEIGHT / 4), w,
 		   CHAR_HEIGHT, 3);
-#endif
+
 	cur_p_y = (gr_fb_height() / CHAR_HEIGHT) - 1;
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
@@ -896,13 +758,11 @@ int main(int argc, char **argv)
 		init_manual_test_item(tc_info);
 	}
 
-#ifndef SOFIA3GR_PCBA
 	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 3), manual_p_y + 1, 255, 255,
 			 0, 255, "%s\n", PCBA_AUTO_TEST);
 	drawline_4(255, 255, 0, 255, 0,
 		   (CHAR_HEIGHT * (manual_p_y + 1) - CHAR_HEIGHT / 4), w,
 		   CHAR_HEIGHT, 3);
-#endif
 
 	printf("\n\nauto testcase:\n");
 	list_for_each(pos, &auto_test_list_head) {
@@ -911,18 +771,8 @@ int main(int argc, char **argv)
 		start_auto_test_item(tc_info);
 	}
 
-#endif
-
-#ifdef SOFIA3GR_PCBA
-	if (!hasCodec)
-		ptest_set_key_wait_status(1);
-	join_input_thread();
-	pthread_mutex_destroy(&mutex);
-	pthread_cond_destroy(&cond);
-#else
 	gui_start();
 	start_input_thread();
-#endif
 
 	printf("pcba test over!\n");
 	return success;
