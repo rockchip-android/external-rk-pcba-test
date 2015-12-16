@@ -131,47 +131,6 @@ int set_system_time(struct timeval *tv)
 	}
 	#else
 
-	#ifdef SOFIA3GR_PCBA
-	struct rtc_time rtc;   
-	struct tm tm, *gmtime_res;    
-	//int fd;    
-	int res;    
-	res = settimeofday(tv, NULL);
-	if (res < 0) {        
-		printf("settimeofday() failed: %s\n", strerror(errno));        
-		return -1;    
-	}    
-	fd = open("/dev/rtc0", O_RDWR);    
-	if (fd < 0) {        
-		printf("Unable to open RTC driver: %s\n", strerror(errno));        
-		return res;    
-	}    
-	gmtime_res = gmtime_r(&tv->tv_sec, &tm);    
-	if (!gmtime_res) 
-	{        
-		printf("gmtime_r() failed: %s\n", strerror(errno));        
-		res = -1;        
-		goto done;   
-	}    
-	memset(&rtc, 0, sizeof(rtc));   
-	rtc.tm_sec = tm.tm_sec;    
-	rtc.tm_min = tm.tm_min;   
-	rtc.tm_hour = tm.tm_hour;    
-	rtc.tm_mday = tm.tm_mday;    
-	rtc.tm_mon = tm.tm_mon;    
-	rtc.tm_year = tm.tm_year;    
-	rtc.tm_wday = tm.tm_wday;    
-	rtc.tm_yday = tm.tm_yday;    
-	rtc.tm_isdst = tm.tm_isdst;    
-	res = ioctl(fd, RTC_SET_TIME, &rtc);    
-	if (res < 0)       
-		printf("RTC_SET_TIME ioctl failed: %s\n", strerror(errno));
-
-	done:    
-		close(fd);    
-		return res;
-	
-	#else
 	fd = open("/dev/alarm", O_RDWR);
 	if(fd < 0)
 	{
@@ -184,7 +143,6 @@ int set_system_time(struct timeval *tv)
 		printf("set rtc failed:%s\n" ,strerror(errno));
 		return -1;
 	}
-	#endif
 	
 	#endif
 	return 0;
@@ -250,7 +208,6 @@ void* rtc_test(void *argc)
 	}
 	else
 	{
-#ifndef SOFIA3GR_PCBA
 	    sleep(1);
 //	    y=get_cur_print_y();
 		while(1)
@@ -267,42 +224,13 @@ void* rtc_test(void *argc)
 			ui_display_sync(0,y,0,255,0,255,"%s:[%s] { %04d/%02d/%02d %02d:%02d:%02d }\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
 			sleep(1);
 		}
-#else
-		t = get_system_time(dt);
-		if(t < 0)
-		{
-			//rtc_msg->result = -1;
-			printf("test rtc failed:get_system_time failed \n");
-			ret = -1;
-		}
-		else
-		{
-			if((t - tv.tv_sec > 10))
-			{
-				printf("test rtc failed:settime:%lu>>read time:%lu\n",
-					tv.tv_sec,t);
-				//rtc_msg->result = -1;
-				ret = -1;
-			}
-			else
-			{
-				//rtc_msg->result = 0;
-				ret = 0;
-			}
-		}
-#endif
 	}
 	
 	if(ret == 0)
 	{
 		tc_info->result = 0;
-	#ifdef SOFIA3GR_PCBA
-		p = localtime(&t);
-		ui_display_sync(0,y,0,255,0,255,"%s:[%s] { %04d/%02d/%02d %02d:%02d:%02d }\n",PCBA_RTC,PCBA_SECCESS,(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
-	#else
 	//	ui_print_xy_rgba(0,get_cur_print_y(),0,0,255,100,"rtc: ok!   { %s }\n",dt);
 		ui_print_xy_rgba(0,y,0,255,0,255,"%s:[%s]\n",PCBA_RTC,PCBA_SECCESS);
-	#endif
 	}
 	else
 	{
