@@ -107,7 +107,6 @@ int get_system_time(char *dt)
 	printf("%s>>>>>tv.tv_sec:%ld>>tv.tv_usec:%d\n",__func__,tv.tv_sec,tv.tv_usec);
 	#endif
 
-	return timep;
 	
 	
 	
