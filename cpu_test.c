@@ -397,11 +397,11 @@ int get_cpu_info(void)
 
 	memset(command, 0, sizeof(command));
 	sprintf(command,
-		"busybox top -n1  | busybox grep idle > data/cpu_idle.txt");
+		"busybox top -n1  | busybox grep idle > /data/cpu_idle.txt");
 
 	__system(command);
 
-	fp = fopen("data/cpu_idle.txt", "r");
+	fp = fopen("/data/cpu_idle.txt", "r");
 	if (fp == NULL) {
 		printf("%s open err\r\n", __func__);
 		return 0;
