@@ -214,7 +214,7 @@ endif
 LOCAL_STATIC_LIBRARIES += libm
 LOCAL_STATIC_LIBRARIES += libminziptwrp libmincrypt
 LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp libbluetooth
-LOCAL_STATIC_LIBRARIES += libz libc libcutils libstdc++
+LOCAL_STATIC_LIBRARIES += libz libc libcutils libutils libstdc++
 LOCAL_STATIC_LIBRARIES += libmtdutils liblog
 
 include $(BUILD_EXECUTABLE)
