@@ -53,6 +53,9 @@ fi
 cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/system/bin/
 cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/sbin/
 
+if [ -e "$PRODUCT_OUT/system/bin/sh" ] ; then
+cp $PRODUCT_OUT/system/bin/sh $PRODUCT_OUT/recovery/root/system/bin/
+fi
 if [ -e "$PRODUCT_OUT/system/bin/toolbox" ] ; then
 cp $PRODUCT_OUT/system/bin/toolbox $PRODUCT_OUT/recovery/root/system/bin/
 fi
