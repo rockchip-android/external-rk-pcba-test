@@ -23,6 +23,7 @@ mkdir -p $PRODUCT_OUT/recovery/root/system/lib/hw/
 mkdir -p $PRODUCT_OUT/recovery/root/system/etc/
 mkdir -p $PRODUCT_OUT/recovery/root/system/etc/firmware/
 mkdir -p $PRODUCT_OUT/recovery/root/etc/firmware/
+mkdir -p $PRODUCT_OUT/recovery/root/etc/bluetooth/
 mkdir -p $PRODUCT_OUT/recovery/root/vendor/firmware
 mkdir -p $PRODUCT_OUT/recovery/root/lib/firmware
 mkdir -p $PRODUCT_OUT/recovery/root/system/etc/bluetooth
@@ -31,6 +32,9 @@ cp $PRODUCT_OUT/system/etc/firmware/ $PRODUCT_OUT/recovery/root/system/etc/ -a
 fi
 if [ -e "$PRODUCT_OUT/system/vendor/firmware/" ] ; then
 cp $PRODUCT_OUT/system/vendor/firmware/ $PRODUCT_OUT/recovery/root/vendor/ -a
+fi
+if [ -e "$PRODUCT_OUT/system/etc/bluetooth/" ] ; then
+cp $PRODUCT_OUT/system/etc/bluetooth/ $PRODUCT_OUT/recovery/root/etc/ -a
 fi
 
 if [ -e "$PRODUCT_OUT/system/etc/firmware/rtl8723b_fw" ] ; then
@@ -109,6 +113,12 @@ if [ $BT_BLUEDROID = "true" ] ; then
     if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
     fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor_uart.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-vendor_uart.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor_usb.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libbt-vendor_usb.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
     if [ -e "$PRODUCT_OUT/obj/lib/libcorkscrew.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libcorkscrew.so $PRODUCT_OUT/recovery/root/system/lib/
     fi
@@ -153,6 +163,9 @@ if [ $BT_BLUEDROID = "true" ] ; then
     fi
     if [ -e "$PRODUCT_OUT/obj/lib/libunwind-ptrace.so" ] ; then
     cp $PRODUCT_OUT/obj/lib/libunwind-ptrace.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libc++.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libc++.so $PRODUCT_OUT/recovery/root/system/lib/
     fi
     if [ -e "$PRODUCT_OUT/system/bin/bdt" ] ; then
     cp $PRODUCT_OUT/system/bin/bdt $PRODUCT_OUT/recovery/root/system/bin/
