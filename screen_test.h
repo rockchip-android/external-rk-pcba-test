@@ -1,10 +1,15 @@
 #ifndef _SCREEN_TEST_H_
 #define _SCREEN_TEST_H_
 
-extern  void* screen_test(void *argc);
-struct  screen_msg{
-	int result;  //test result
-	int x;	     //x,y,w,h
+void *screen_test(void *argc);
+void screenTest_key_detect(unsigned int code);
+
+extern uint8_t key_press;
+extern int tiles_count;
+
+struct  screen_msg {
+	int result;
+	int x;
 	int y;
 	int w;
 	int h;

@@ -44,6 +44,18 @@ ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3368)
 LOCAL_CFLAGS += -DRK3368_PCBA
 endif
 
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3399)
+LOCAL_CFLAGS += -DRK3399_PCBA
+endif
+
+#=========  rotate screen  0, 90, 180, 270  degree===========
+# warning:  If changed please force rebuid the target -B
+ROTATE_SCREEN := 0
+#ROTATE_SCREEN := 90
+#ROTATE_SCREEN := 180
+#ROTATE_SCREEN := 270
+
+
 LOCAL_SRC_FILES := \
     pre_test.c \
     ui.c \
@@ -77,7 +89,9 @@ LOCAL_SRC_FILES := \
     vibrator.c \
     flashlight_test.c \
     lan_test.c \
-    nand_test.c
+    nand_test.c \
+    sensor_test.c \
+    ddr_emmc_test.c
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 LOCAL_CFLAGS += -DRK3288_PCBA

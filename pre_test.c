@@ -39,6 +39,7 @@
 #include "sim_test.h"
 #include "battery_test.h"
 #include "ddr_test.h"
+#include "ddr_emmc_test.h"
 #include "cpu_test.h"
 #include "codec_test.h"
 #include "vibrator.h"
@@ -47,6 +48,7 @@
 #include "nand_test.h"
 #include <signal.h>
 #include "language.h"
+#include "sensor_test.h"
 
 #ifdef RK3288_PCBA
 #include "rk3288-camera/camera_test.h"
@@ -106,6 +108,8 @@ struct rtc_msg *rtc_msg;
 int err_rtc;
 int rtc_p_y;			/* rtc position in y direction */
 pthread_t battery_tid;
+
+pthread_t ddr_emmc_tid;     /*ddr and emmc size test*/
 
 pthread_t screen_tid;
 char *screen_res;
@@ -186,6 +190,7 @@ pthread_t lsensor_tid;
 pthread_t gps_tid;
 pthread_t psensor_tid;
 pthread_t compass_tid;
+pthread_t sensor_tid = 0;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -204,9 +209,11 @@ int get_cur_print_y(void)
 	int tmp;
 
 	pthread_mutex_lock(&gCur_p_y);
-	if (gr_fb_height() > 600)
+	/*if (gr_fb_height() > 1080)
 		cur_p_y--;
-	tmp = cur_p_y--;
+	tmp = cur_p_y--;*/
+	tmp = cur_p_y++;
+
 	pthread_mutex_unlock(&gCur_p_y);
 	printf("cur_print_y:%d\n", tmp);
 	return tmp;
@@ -367,6 +374,14 @@ int start_test_pthread(struct testcase_info *tc_info)
 			       strerror(err));
 			return -1;
 		}
+	} else if (!strcmp(tc_info->base_info->name, "ddr_emmc")) {
+		err = pthread_create(&ddr_emmc_tid, NULL,
+			ddr_emmc_test, tc_info);
+		if (err != 0) {
+			printf("create ddr_emmc test  thread error: %s/n",
+				   strerror(err));
+			return -1;
+		}
 	} else if (!strcmp(tc_info->base_info->name, "Codec")) {
 		hasCodec = 1;
 		err = pthread_create(&codec_tid, NULL, codec_test, tc_info);
@@ -425,6 +440,14 @@ int start_test_pthread(struct testcase_info *tc_info)
 		err = pthread_create(&gsensor_tid, NULL, gsensor_test, tc_info);
 		if (err != 0) {
 			printf("create gsensor test thread error: %s/n",
+			       strerror(err));
+			return -1;
+		}
+	} else if (!strcmp(tc_info->base_info->name, "allsensor")) {
+		err = pthread_create(&sensor_tid, NULL,
+			all_sensor_test, tc_info);
+		if (err != 0) {
+			printf("create sensor test thread error: %s/n",
 			       strerror(err));
 			return -1;
 		}
@@ -535,6 +558,8 @@ int start_test_pthread(struct testcase_info *tc_info)
 int init_manual_test_item(struct testcase_info *tc_info)
 {
 	int err = 0;
+	printf("start_manual_test_item : %d, %s \r\n", tc_info->y,
+	       tc_info->base_info->name);
 
 	manual_p_y += 1;
 	tc_info->y = manual_p_y;
@@ -554,6 +579,7 @@ int start_auto_test_item(struct testcase_info *tc_info)
 {
 	printf("start_auto_test_item : %d, %s \r\n", tc_info->y,
 	       tc_info->base_info->name);
+
 	start_test_pthread(tc_info);
 
 	return 0;
@@ -717,16 +743,17 @@ int main(int argc, char **argv)
 	ui_print_init();
 	gui_loadResources();
 
-	w = gr_fb_width() >> 1;
+	w = gr_fb_width();
 
-	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 9), 0, 0, 255, 0, 255, "%s\n",
-			 PCBA_VERSION_NAME);
-	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 3), 1, 255, 255, 0, 255,
+	ui_print_xy_rgba((((w >> 1) - strlen(PCBA_VERSION_NAME)*CHAR_WIDTH/2)
+		/CHAR_WIDTH), 0, 0, 255, 0, 255, "%s\n", PCBA_VERSION_NAME);
+	ui_print_xy_rgba(((w >> 2) / CHAR_WIDTH - 4), 1, 255, 255, 0, 255,
 			 "%s\n", PCBA_MANUAL_TEST);
-	drawline_4(255, 255, 0, 255, 0, (1 * CHAR_HEIGHT - CHAR_HEIGHT / 4), w,
-		   CHAR_HEIGHT, 3);
+	drawline_4(255, 255, 0, 255, 0, (1 * CHAR_HEIGHT - CHAR_HEIGHT / 4),
+		w/2, CHAR_HEIGHT, 3);
 
-	cur_p_y = (gr_fb_height() / CHAR_HEIGHT) - 1;
+	/*cur_p_y = (gr_fb_height() / CHAR_HEIGHT) - 1;*/
+
 	INIT_LIST_HEAD(&manual_test_list_head);
 	INIT_LIST_HEAD(&auto_test_list_head);
 	script_buf = parse_script(SCRIPT_NAME);
@@ -757,11 +784,14 @@ int main(int argc, char **argv)
 		    list_entry(pos, struct testcase_info, list);
 		init_manual_test_item(tc_info);
 	}
+	manual_p_y += 1;
 
-	ui_print_xy_rgba(((w >> 1) / CHAR_WIDTH - 3), manual_p_y + 1, 255, 255,
+	cur_p_y = manual_p_y+1;   /*for auto add items*/
+
+	ui_print_xy_rgba(((w >> 2) / CHAR_WIDTH - 4), manual_p_y, 255, 255,
 			 0, 255, "%s\n", PCBA_AUTO_TEST);
 	drawline_4(255, 255, 0, 255, 0,
-		   (CHAR_HEIGHT * (manual_p_y + 1) - CHAR_HEIGHT / 4), w,
+		   (CHAR_HEIGHT * (manual_p_y) - CHAR_HEIGHT / 4), w/2,
 		   CHAR_HEIGHT, 3);
 
 	printf("\n\nauto testcase:\n");

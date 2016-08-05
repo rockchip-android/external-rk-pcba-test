@@ -22,14 +22,26 @@ enum { INSTALL_SUCCESS, INSTALL_ERROR, INSTALL_CORRUPT };
 
 // These are just the defines for the non-const internal variables
 #include "variables.h"
+
+#if (defined ROTATE_SCREEN_90) || (defined ROTATE_SCREEN_270)
+#define MAX_COLS 66
+#define MAX_ROWS 96
+#else
 #define MAX_COLS 96
 #define MAX_ROWS 66
-
+#endif
 
 #define  kMaxTiles  50
 
+#if (defined ROTATE_SCREEN_90) || (defined ROTATE_SCREEN_270)
+#define MENU_MAX_COLS 500
+#define MENU_MAX_ROWS 50
+#else
 #define MENU_MAX_COLS 50
 #define MENU_MAX_ROWS 500
+#endif
+
+
 
 #ifdef RK3288_PCBA
 #define CHAR_WIDTH 30
@@ -49,6 +61,18 @@ void ui_print_init(void);
 void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char * fmt,...);
 void ui_display_sync(int t_col,int t_row,int r,int g,int b,int a,const char* fmt,...);
 void FillColor(int r,int g,int b,int a,int left,int top,int width,int height);
+
+struct display_info {
+	int col;
+	int row;
+	int r;
+	int g;
+	int b;
+	int a;
+	char string[128];
+};
+
+void ui_print_xy_rgba_multi(struct display_info *info, int count);
 
 extern int notError;
 

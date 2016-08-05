@@ -57,14 +57,15 @@ fi
 cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/system/bin/
 cp -rf $PCBA_PATH/sbin/* $PRODUCT_OUT/recovery/root/sbin/
 
-if [ -e "$PRODUCT_OUT/system/bin/sh" ] ; then
-cp $PRODUCT_OUT/system/bin/sh $PRODUCT_OUT/recovery/root/system/bin/
-fi
+
 if [ -e "$PRODUCT_OUT/system/bin/toolbox" ] ; then
 cp $PRODUCT_OUT/system/bin/toolbox $PRODUCT_OUT/recovery/root/system/bin/
 fi
 if [ -e "$PRODUCT_OUT/system/bin/linker" ] ; then
 cp $PRODUCT_OUT/system/bin/linker $PRODUCT_OUT/recovery/root/system/bin/
+fi
+if [ -e "$PRODUCT_OUT/recovery/root/sbin/sh" ] ; then
+cp $PRODUCT_OUT/recovery/root/sbin/sh $PRODUCT_OUT/recovery/root/system/bin/
 fi
 if [ -e "$PRODUCT_OUT/obj/lib/libselinux.so" ] ; then
 cp $PRODUCT_OUT/obj/lib/libselinux.so $PRODUCT_OUT/recovery/root/system/lib/
@@ -173,4 +174,29 @@ if [ $BT_BLUEDROID = "true" ] ; then
     if [ -e "$PRODUCT_OUT/system/etc/bluetooth/" ] ; then
     cp $PRODUCT_OUT/system/etc/bluetooth/ $PRODUCT_OUT/recovery/root/system/etc/ -a
     fi
+fi
+
+# for sensor test
+if [ -e "$PRODUCT_OUT/system/bin/akmd" ] ; then
+cp $PRODUCT_OUT/system/bin/akmd $PRODUCT_OUT/recovery/root/system/bin/
+fi
+if [ -e "$PRODUCT_OUT/system/bin/sensor_test" ] ; then
+cp $PRODUCT_OUT/system/bin/sensor_test $PRODUCT_OUT/recovery/root/system/bin/
+fi
+if [ -e "$PRODUCT_OUT/system/lib/libmllite.so" ] ; then
+cp $PRODUCT_OUT/system/lib/libmllite.so $PRODUCT_OUT/recovery/root/system/lib/
+fi
+if [ -e "$PRODUCT_OUT/system/lib/libmplmpu.so" ] ; then
+cp $PRODUCT_OUT/system/lib/libmplmpu.so $PRODUCT_OUT/recovery/root/system/lib/
+fi
+if [ -e "$PRODUCT_OUT/system/lib/libinvensense_hal.so" ] ; then
+cp $PRODUCT_OUT/system/lib/libinvensense_hal.so $PRODUCT_OUT/recovery/root/system/lib/
+fi
+if [ -e "$PRODUCT_OUT/system/lib/modules/inv-mpu-iio.ko" ] ; then
+mkdir -p $PRODUCT_OUT/recovery/root/system/lib/modules
+cp $PRODUCT_OUT/system/lib/modules/inv-mpu-iio.ko $PRODUCT_OUT/recovery/root/system/lib/modules/
+fi
+if [ -e "$PRODUCT_OUT/root/drmboot.ko" ] ; then
+mkdir -p $PRODUCT_OUT/recovery/root/system/lib/modules
+cp $PRODUCT_OUT/root/drmboot.ko $PRODUCT_OUT/recovery/root/system/lib/modules/
 fi

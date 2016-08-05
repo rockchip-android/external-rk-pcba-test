@@ -201,11 +201,20 @@ int BatteryPathInit()
  {
  	char Voltagebuf[20];
 	char Statusbuf[20];
+	char Capacity[20];
+	char Present[20];
+	char ACOnline[20];
+	char USBOnline[20];
+	char usb_status[20];
+
 	int ret;
 	int result;
+	int result_tmp;
+	int yello_color = 255;
 	int curprint;
 	char *strbatstatus;
 	char *strbatVoltage;
+
 	struct testcase_info *tc_info = (struct testcase_info*)argv;
 
 	/*remind ddr test*/
@@ -225,49 +234,131 @@ int BatteryPathInit()
 		return argv;
  	}
 
-	for(;;)
+	memset(Present, 0, sizeof(Present));
+	ret = readFromFile(gPaths.batteryPresentPath,
+		Present, sizeof(Present));
+	if ((ret < 0) || (Present[0] == '0'))
+		goto err;
+
+	memset(Voltagebuf, 0, sizeof(Voltagebuf));
+	ret = readFromFile(gPaths.batteryVoltagePath,
+		Voltagebuf, sizeof(Voltagebuf));
+	if (ret < 0 || (atoi(Voltagebuf) < 0))
+		goto err;
+
+	memset(Capacity, 0, sizeof(Capacity));
+	ret = readFromFile(gPaths.batteryCapacityPath,
+		Capacity, sizeof(Capacity));
+	if (ret < 0 || (atoi(Capacity) < 0))
+		goto err;
+
+	memset(Statusbuf, 0, sizeof(Statusbuf));
+	ret = readFromFile(gPaths.batteryStatusPath,
+		Statusbuf, sizeof(Statusbuf));
+	if ((ret < 0) || (getBatteryStatus(Statusbuf) < 0))
+		goto err;
+	result = getBatteryStatus(Statusbuf);
+
+	memset(ACOnline, 0, sizeof(ACOnline));
+	ret = readFromFile(gPaths.acOnlinePath, ACOnline, sizeof(ACOnline));
+	if (ret < 0)
+		goto err;
+
+	memset(USBOnline, 0, sizeof(USBOnline));
+	ret = readFromFile(gPaths.usbOnlinePath,
+		USBOnline, sizeof(USBOnline));
+	if (ret < 0)
+		goto err;
+
+	result_tmp = !(atoi(ACOnline) || atoi(USBOnline));
+	usleep(200);
+
+	for (;;)
 	{
-		memset(Voltagebuf,0,sizeof(Voltagebuf));
+		memset(ACOnline, 0, sizeof(ACOnline));
+		ret = readFromFile(gPaths.acOnlinePath,
+			ACOnline, sizeof(ACOnline));
+		if (ret < 0)
+			goto err;
 
-		ret=readFromFile(gPaths.batteryVoltagePath,Voltagebuf,sizeof(Voltagebuf));
-		
+		memset(USBOnline, 0, sizeof(USBOnline));
+		ret = readFromFile(gPaths.usbOnlinePath,
+			USBOnline, sizeof(USBOnline));
 		if(ret<0)
-			break;
-		
-		memset(Statusbuf,0,sizeof(Statusbuf));
-		ret=readFromFile(gPaths.batteryStatusPath,Statusbuf,sizeof(Statusbuf));
-		if((ret<0)||(getBatteryStatus(Statusbuf)<0))
-			break;
+			goto err;
+		if ((atoi(ACOnline) || atoi(USBOnline)) != result_tmp) {
+			if (atoi(ACOnline) || atoi(USBOnline)) {
+				memcpy(usb_status, PCBA_AC_ONLINE,
+					sizeof(PCBA_AC_ONLINE));
+			} else {
+				memcpy(usb_status, PCBA_AC_OFFLINE,
+					sizeof(PCBA_AC_OFFLINE));
+			}
+			memset(Statusbuf, 0, sizeof(Statusbuf));
+			ret = readFromFile(gPaths.batteryStatusPath,
+				Statusbuf, sizeof(Statusbuf));
+			if ((ret < 0) || (getBatteryStatus(Statusbuf) < 0))
+				break;
+			result = getBatteryStatus(Statusbuf);
 
-		result=getBatteryStatus(Statusbuf);
-		if(result==BATTERY_STATUS_CHARGING){
-			ui_display_sync(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
-			PCBA_BATTERY,PCBA_BATTERY_CHARGE,PCBA_BATTERY_VOLTAGE, atoi(Voltagebuf)/1000);
-			tc_info->result = 0;
-			return argv;
+			memset(Voltagebuf, 0, sizeof(Voltagebuf));
+			ret = readFromFile(gPaths.batteryVoltagePath,
+				Voltagebuf, sizeof(Voltagebuf));
+			if (ret < 0 || (atoi(Voltagebuf) < 0))
+				goto err;
+
+			memset(Capacity, 0, sizeof(Capacity));
+			ret = readFromFile(gPaths.batteryCapacityPath,
+				Capacity, sizeof(Capacity));
+			if (ret < 0 || (atoi(Capacity) < 0))
+				goto err;
+
+			if (result == BATTERY_STATUS_CHARGING) {
+				ui_display_sync(0, tc_info->y,
+					yello_color, 255, 0, 255,
+					"%s:[%s] { %s,%s:%.1fV,%s:%d }\n",
+					PCBA_BATTERY, usb_status,
+					PCBA_BATTERY_CHARGE,
+					PCBA_BATTERY_VOLTAGE,
+					(double)(atoi(Voltagebuf))/1000/1000,
+					PCBA_BATTERY_CAPACITY, atoi(Capacity));
+				tc_info->result = 0;
+				/*return argv;*/
+			} else if (result == BATTERY_STATUS_FULL) {
+				ui_display_sync(0, tc_info->y,
+					yello_color, 255, 0, 255,
+					"%s:[%s] { %s,%s:%.1fV,%s:%d }\n",
+					PCBA_BATTERY, usb_status,
+					PCBA_BATTERY_FULLCHARGE,
+					PCBA_BATTERY_VOLTAGE,
+					(double)(atoi(Voltagebuf))/1000/1000,
+					PCBA_BATTERY_CAPACITY, atoi(Capacity));
+				tc_info->result = 0;
+				/*return argv;*/
+			} else {
+				ui_display_sync(0, tc_info->y,
+					yello_color, 255, 0, 255,
+					"%s:[%s] { %s,%s:%.1fV,%s:%d }\n",
+					PCBA_BATTERY, usb_status,
+					PCBA_BATTERY_DISCHARGE,
+					PCBA_BATTERY_VOLTAGE,
+					(double)(atoi(Voltagebuf))/1000/1000,
+					PCBA_BATTERY_CAPACITY, atoi(Capacity));
+				tc_info->result = 0;
+				/*return argv;*/
+			}
+			yello_color = 0;
+			result_tmp = (atoi(ACOnline) || atoi(USBOnline));
 		}
-		else if(result==BATTERY_STATUS_FULL){
-			ui_display_sync(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
-			PCBA_BATTERY,PCBA_BATTERY_FULLCHARGE,PCBA_BATTERY_VOLTAGE,atoi(Voltagebuf)/1000);
-			tc_info->result = 0;
-			return argv;
-		}else{
-			ui_display_sync(0,tc_info->y,0,255,0,255,"%s:[%s] (%s:%d)\n",\
-			PCBA_BATTERY,PCBA_BATTERY_DISCHARGE,PCBA_BATTERY_VOLTAGE,atoi(Voltagebuf)/1000);
-			tc_info->result = 0;
-			return argv;
-		}
-		
-		
-					
+
 		//ui_print_xy_rgba(0,g_msg->y,0,0,255,255,"gsensor x:%f y:%f z:%f\n",g_x,g_y,g_z);
 		#ifndef SOFIA3GR_PCBA
-		sleep(1);
+		usleep(200);
 		#else
-		sleep(1);
+		usleep(200);
 		#endif
 	}
-
+err:
     ui_print_xy_rgba(0,tc_info->y,255,0,0,255,"%s:[%s]\n",PCBA_BATTERY,PCBA_FAILED);
 	tc_info->result = -1;
 	return argv;

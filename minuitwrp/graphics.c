@@ -62,7 +62,6 @@
 
 const unsigned cw_en=10;
 // #define PRINT_SCREENINFO 1 // Enables printing of screen info to log
-
  
 #define SCREEN_FILE  "/sys/class/graphics/fb0/screen_info"
 unsigned int xres,yres;
@@ -315,11 +314,17 @@ static int get_framebuffer(GGLSurface *fb)
 
 static void get_memory_surface(GGLSurface* ms) {
   ms->version = sizeof(*ms);
-  ms->width = vi.xres;
-  ms->height = vi.yres;
-  ms->stride = vi.xres_virtual;
-  ms->data = malloc(vi.xres_virtual * vi.yres * PIXEL_SIZE);
-  ms->format = PIXEL_FORMAT;
+#if (defined ROTATE_SCREEN_90) || (defined ROTATE_SCREEN_270)
+	ms->width = vi.yres;
+	ms->height = vi.xres;
+	ms->stride = vi.yres;
+#else     /* rotate 0 or 180*/
+	ms->width = vi.xres;
+	ms->height = vi.yres;
+	ms->stride = vi.xres_virtual;
+#endif
+	ms->data = malloc(vi.xres_virtual * vi.yres * PIXEL_SIZE);
+	ms->format = PIXEL_FORMAT;
 }
 
 static void set_active_framebuffer(unsigned n)
@@ -331,11 +336,57 @@ static void set_active_framebuffer(unsigned n)
     if (ioctl(gr_fb_fd, FBIOPUT_VSCREENINFO, &vi) < 0) {
         perror("active fb swap failed");
     }
-    if (ioctl(gr_fb_fd,RK_FBIOSET_CONFIG_DONE, NULL) < 0) {
-        perror("set config done failed");
-    }
-
+    /* if (ioctl(gr_fb_fd,RK_FBIOSET_CONFIG_DONE, NULL) < 0) {
+        // perror("set config done failed");
+    }*/
 }
+
+
+#ifdef ROTATE_SCREEN_90
+void rotate_90_memcpy(char *desc,  char *src)
+{
+	int i, j, n1, n2;
+
+	for (i = 0; i < vi.yres; i++) {
+		for (j = 0; j < vi.xres; j++) {
+			n1 = i*vi.xres+j;
+			n2 = j*vi.yres+vi.yres-i-1;
+			/* for PIXEL_SIZE == 2byt*/
+			desc[n1*PIXEL_SIZE] = src[n2*PIXEL_SIZE];
+			desc[n1*PIXEL_SIZE+1] = src[n2*PIXEL_SIZE+1];
+		}
+	}
+}
+#elif defined ROTATE_SCREEN_180
+void rotate_180_memcpy(char *desc,  char *src)
+{
+	unsigned int i;
+	unsigned int length = vi.xres * vi.yres;
+
+	for (i = 0; i < length; i++) {
+		/* for PIXEL_SIZE == 2byt*/
+		desc[i*PIXEL_SIZE] = src[(length - i-1)*PIXEL_SIZE];
+		desc[i*PIXEL_SIZE+1] = src[(length - i-1)*PIXEL_SIZE+1];
+	}
+}
+
+#elif defined ROTATE_SCREEN_270
+void rotate_270_memcpy(char *desc,  char *src)
+{
+	unsigned int i, j, n1, n2;
+	/*printf("========vi.xres=%d,  vi.yres=%d======\n",vi.xres,vi.yres);
+		//vi.xres=1080,vi.yres=1920*/
+	for (i = 0; i < vi.yres; i++) {
+		for (j = 0; j < vi.xres; j++) {
+			n1 = i*vi.xres+j;
+			n2 = (vi.xres-j-1)*vi.yres+i;
+			/* for PIXEL_SIZE == 2byt*/
+			desc[n1*PIXEL_SIZE] = src[n2*PIXEL_SIZE];
+			desc[n1*PIXEL_SIZE+1] = src[n2*PIXEL_SIZE+1];
+		}
+	}
+}
+#endif
 
 void gr_flip(void)
 {
@@ -354,11 +405,28 @@ void gr_flip(void)
     }
 #endif
 
+/********************** Rotate Screen 90, 180, 270 degree ******************/
+#ifdef ROTATE_SCREEN_90
+
+	rotate_90_memcpy(gr_framebuffer[gr_active_fb].data,
+		gr_mem_surface.data);
+
+#elif defined ROTATE_SCREEN_180
+
+	rotate_180_memcpy(gr_framebuffer[gr_active_fb].data,
+		gr_mem_surface.data);
+
+#elif defined ROTATE_SCREEN_270
+
+	rotate_270_memcpy(gr_framebuffer[gr_active_fb].data,
+		gr_mem_surface.data);
+
+#else  /*screen do not rotate*/
     /* copy data from the in-memory surface to the buffer we're about
      * to make active. */
     memcpy(gr_framebuffer[gr_active_fb].data, gr_mem_surface.data,
            vi.xres_virtual * vi.yres * PIXEL_SIZE);
-
+#endif
     /* inform the display driver */
     set_active_framebuffer(gr_active_fb);
 }
@@ -870,12 +938,20 @@ void gr_exit(void)
 
 int gr_fb_width(void)
 {
+#if (defined ROTATE_SCREEN_90) || (defined ROTATE_SCREEN_270)
+	return gr_framebuffer[0].height;
+#else
     return gr_framebuffer[0].width;
+#endif
 }
 
 int gr_fb_height(void)
 {
-    return gr_framebuffer[0].height;
+#if (defined ROTATE_SCREEN_90) || (defined ROTATE_SCREEN_270)
+	return gr_framebuffer[0].width;
+#else
+	return gr_framebuffer[0].height;
+#endif
 }
 
 gr_pixel *gr_fb_data(void)

@@ -9,6 +9,23 @@ LOCAL_C_INCLUDES +=\
     external/zlib\
 	external/jpeg
 
+# ========  rotate screen 0, 90, 180, 270  degree ===============
+#
+ifeq ($(strip $(ROTATE_SCREEN)), 90)
+$(info ***screen rotate 90 degree***)
+LOCAL_CFLAGS += -DROTATE_SCREEN_90
+endif
+ifeq ($(strip $(ROTATE_SCREEN)), 180)
+$(info ***screen rotate 180 degree***)
+LOCAL_CFLAGS += -DROTATE_SCREEN_180
+endif
+ifeq ($(strip $(ROTATE_SCREEN)), 270)
+$(info ***screen rotate 270 degree***)
+LOCAL_CFLAGS += -DROTATE_SCREEN_270
+endif
+
+
+
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)), sofia3gr)
 LOCAL_CFLAGS += -DSOFIA3GR_PCBA -DDB_DEBUG
 

@@ -37,6 +37,7 @@
 
 
 
+
 #define PROGRESSBAR_INDETERMINATE_STATES 6
 #define PROGRESSBAR_INDETERMINATE_FPS 15
 #define _EVENT_LOGGING 1
@@ -49,7 +50,9 @@ typedef struct{
 	int b;
 	int a;
 } textInfo; 
+
 textInfo itemsInfo[MAX_ROWS];
+
 typedef struct{ 
 	   int left;
 	   int top;
@@ -110,6 +113,7 @@ static int gPagesIdentical = 0;
 
 // Log text overlay, displayed when a magic key is pressed
 static char text[MAX_ROWS][MAX_COLS];
+
 static int text_cols = 0, text_rows = 0;
 static int text_col = 0, text_row = 0, text_top = 0;
 static int show_text = 1;
@@ -291,10 +295,11 @@ static void draw_screen_locked(void)
 		//gr_color(upc.r, upc.g, upc.b, upc.a); //called by at least ui_print
 		//gr_color(itemsInfo[i].r, itemsInfo[i].g, itemsInfo[i].b, itemsInfo[i].a);
 		k = 0;
-		for (; k < text_rows; ++k) {
-		    //draw_text_line(k, text[(k+text_top) % text_rows]);
-		    gr_color(itemsInfo[k].r, itemsInfo[k].g, itemsInfo[k].b, itemsInfo[k].a);
-		    draw_text_line((itemsInfo[k].t_col + 1)*CHAR_WIDTH + 1,(itemsInfo[k].t_row)*CHAR_HEIGHT ,text[k]);
+		for (; k < text_row; ++k) {
+			gr_color(itemsInfo[k].r, itemsInfo[k].g, itemsInfo[k].b,
+				itemsInfo[k].a);
+			draw_text_line((itemsInfo[k].t_col + 1)*CHAR_WIDTH + 1,
+				(itemsInfo[k].t_row)*CHAR_HEIGHT, text[k]);
 		}
 		int t = 0;
 		for(t = 0;t < tiles_count;t++){
@@ -938,41 +943,100 @@ void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char* fm
 	vsnprintf(buf, 512, fmt, ap);
 	va_end(ap);
 
-	//fputs(buf, stdout);
+	/*fputs(buf, stdout);*/
 
-    // This can get called before ui_init(), so be careful.
+    /*This can get called before ui_init(), so be careful.*/
     int temp_row = t_row;
     pthread_mutex_lock(&gUpdateMutex);
     t_col+=2; 
+
+	/*1080P screen : text_rows is:18 , text_cols is: 64*/
     if (text_rows > 0 && text_cols > 0) 
     {
 		char *ptr;
 		for (ptr = buf; *ptr != '\0'; ++ptr)
 		{
-		    if (*ptr == '\n' || text_col >= text_cols)
-		    { 
+		    /*if (*ptr == '\n' || text_col >= text_cols)*/
+		    if (*ptr == '\n' || text_col >= text_cols*2) {
 				text[temp_row][text_col] = '\0';
 				text_col = 0;
-				itemsInfo[temp_row].t_col = t_col;
-				itemsInfo[temp_row].t_row = temp_row;
+
+				if (temp_row < text_rows) {
+					itemsInfo[temp_row].t_col = t_col;
+					itemsInfo[temp_row].t_row = temp_row;
+				} else {
+					itemsInfo[temp_row].t_col =
+						t_col+text_cols/2;
+					itemsInfo[temp_row].t_row =
+						(temp_row+2)%text_rows;
+				}
 				itemsInfo[temp_row].r = r;
 				itemsInfo[temp_row].g = g;
 				itemsInfo[temp_row].b = b;
-				itemsInfo[temp_row].a = a;				
-				temp_row = (temp_row + 1) % text_rows;
-				if(temp_row > text_row)
-				{
-			            text_row = temp_row;
-				}
-		        //if (temp_row == text_top) text_top = (text_top + 1) % text_rows;
+				itemsInfo[temp_row].a = a;
+
+				temp_row = temp_row + 1;
+				if (temp_row >= (2*text_rows))
+					temp_row = 0;
+				if (temp_row > text_row)
+					text_row = temp_row;
 		    }
 		    if (*ptr != '\n')
-		    	text[temp_row][text_col++] = *ptr;
+				text[temp_row][text_col++] = *ptr;
 		}
 	        //text[text_row][text_col] = '\0';
 	        update_screen_locked();
     }
     pthread_mutex_unlock(&gUpdateMutex);
+}
+
+void ui_print_xy_rgba_multi(struct display_info *info, int count)
+{
+	int i = 0;
+
+	/*This can get called before ui_init(), so be careful.*/
+	pthread_mutex_lock(&gUpdateMutex);
+	if (text_rows > 0 && text_cols > 0)	{
+		for (i = 0; i < count; i++) {
+			int temp_row = info[i].row;
+			int t_col = info[i].col+2;
+			char *buf = info[i].string;
+			char *ptr;
+
+			for (ptr = buf; *ptr != '\0'; ++ptr) {
+				if (*ptr == '\n' || text_col >= text_cols*2) {
+					text[temp_row][text_col] = '\0';
+					text_col = 0;
+					if (temp_row < text_rows) {
+						itemsInfo[temp_row].t_col =
+							t_col;
+						itemsInfo[temp_row].t_row =
+							temp_row;
+					} else {
+						itemsInfo[temp_row].t_col =
+							t_col+text_cols/2;
+						itemsInfo[temp_row].t_row =
+							(temp_row+2)%text_rows;
+					}
+					itemsInfo[temp_row].r = info[i].r;
+					itemsInfo[temp_row].g = info[i].g;
+					itemsInfo[temp_row].b = info[i].b;
+					itemsInfo[temp_row].a = info[i].a;
+
+					temp_row = temp_row + 1;
+					if (temp_row >= (2*text_rows))
+						temp_row = 0;
+					if (temp_row > text_row)
+						text_row = temp_row;
+				}
+			    if (*ptr != '\n')
+					text[temp_row][text_col++] = *ptr;
+			}
+			/*text[text_row][text_col] = '\0';*/
+		}
+	    update_screen_locked();
+	}
+	pthread_mutex_unlock(&gUpdateMutex);
 }
 
 void ui_display_sync(int t_col,int t_row,int r,int g,int b,int a,const char* fmt, ...)

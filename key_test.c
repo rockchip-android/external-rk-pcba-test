@@ -11,6 +11,9 @@
 #include "language.h"
 #define test_bit(bit, array)    (array[bit/8] & (1<<(bit%8)))
 
+#include <unistd.h>
+#include "screen_test.h"
+
 uint8_t keybitmask[(KEY_MAX + 1) / 8];
 struct key key_code[KEY_MAX];
 uint8_t key_cnt = 0;		/*key counter */
@@ -24,12 +27,12 @@ int set_gkey(unsigned int code)
 {
 	int i;
 	static n;
-
 	for (i = 0; i < key_cnt; i++) {
 		if (code == key_code[i].code) {
 			ui_print_xy_rgba(0, tc_info->y, 0, 255, 0, 255,
-					 "%s:[%s]\n",
-					 PCBA_KEY, key_code[i].name);
+				"%s:[%s]\n", PCBA_KEY,
+				key_code[i].name);
+			screenTest_key_detect(code);
 			break;
 		}
 	}
