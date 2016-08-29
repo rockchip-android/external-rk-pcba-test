@@ -99,17 +99,20 @@ int set_system_time(struct timeval *tv)
 	int ret;
 	int fd;
 
-	fd = open("/dev/alarm", O_RDWR);
+	fd = open("/dev/rtc0", O_RDWR);
 	if (fd < 0) {
-		printf("open /dev/alarm failed:%s\n", strerror(errno));
+		printf("open /dev/rtc0 failed:%s\n", strerror(errno));
 		return -1;
 	}
-	ret = ioctl(fd, ANDROID_ALARM_SET_RTC, tv);
+	ret = ioctl(fd, RTC_SET_TIME, tv);
+	//ret = ioctl(fd, ANDROID_ALARM_SET_RTC, tv);
 	if (ret < 0) {
 		printf("set rtc failed:%s\n", strerror(errno));
 		return -1;
 	}
-
+  
+  close(fd);
+  
 	return 0;
 }
 
@@ -125,6 +128,7 @@ void *rtc_test(void *argc)
 	time_t t;
 	struct tm *p;
 	struct timespec ts;
+	struct rtc_time rtc;  
 
 	/* remind ddr test */
 	if (tc_info->y <= 0)
@@ -152,7 +156,8 @@ void *rtc_test(void *argc)
 	tv.tv_sec = mktime(&tm);
 	tv.tv_usec = 0;
 	printf("set rtc time :%lu\n", tv.tv_sec);
-	ret = set_system_time(&tv);
+	//ret = set_system_time(&tv);
+	ret = set_system_time(&tm);
 	if (ret < 0) {
 		printf("test rtc failed:set_system_time failed\n");
 		ret = -1;
