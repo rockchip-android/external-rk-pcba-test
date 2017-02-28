@@ -7,7 +7,7 @@ LOCAL_SRC_FILES := events.c resources.c graphics.c
 LOCAL_C_INCLUDES +=\
     external/libpng\
     external/zlib\
-	external/jpeg
+    external/libjpeg-turbo
 
 # ========  rotate screen 0, 90, 180, 270  degree ===============
 #
@@ -78,5 +78,7 @@ ifneq ($(BOARD_USE_CUSTOM_RECOVERY_FONT),)
 endif
 
 LOCAL_MODULE := libminuitwrp
+
+LOCAL_C_INCLUDES += system/core/libpixelflinger/include
 
 include $(BUILD_STATIC_LIBRARY)

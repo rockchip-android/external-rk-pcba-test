@@ -51,7 +51,7 @@ LOCAL_CFLAGS += -DSOFIA3GR_PCBA
 endif
 
 DEVICE_RESOLUTION := 800x480
-LOCAL_C_INCLUDES += bionic external/stlport/stlport $(commands_recovery_local_path)/gui/devices/$(DEVICE_RESOLUTION)
+LOCAL_C_INCLUDES += bionic external/stlport/stlport $(commands_recovery_local_path)/gui/devices/$(DEVICE_RESOLUTION) system/core/libpixelflinger/include
 
 include $(BUILD_STATIC_LIBRARY)
 

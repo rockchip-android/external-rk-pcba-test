@@ -696,7 +696,7 @@ static void createFstabEntry(FILE* fp, struct dInfo* mnt)
         return;
     }
 
-	if (mnt->alt != NULL && stat(mnt->blk, &st) != 0 && stat(mnt->alt, &st) == 0) {
+	if (stat(mnt->blk, &st) != 0 && stat(mnt->alt, &st) == 0) {
 		char switch_block[100];
 
 		LOGI("Switching '%s' to alternate '%s'\n", mnt->blk, mnt->alt);
