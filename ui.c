@@ -26,7 +26,13 @@
 
 #include "common.h"
 #include "tw_reboot.h"
+
+#ifdef BOARD_USE_DRM
+#include "minui_pcba/minui.h"
+#else
 #include "minuitwrp/minui.h"
+#endif
+
 #include "recovery_ui.h"
 #include "themes.h"
 #include "data.h"
@@ -210,7 +216,11 @@ static void  draw_text_line(int left, int top, const char* t) {
 	//LOGI("%s>>left:%d>>top:%d\n",__func__,left,top);
   if (t[0] != '\0') {
     //gr_text(0, row*CHAR_HEIGHT+1, t);
+#if defined(BOARD_USE_DRM)
+    gr_text(left,top , t,0);
+#else
     gr_text(left,top , t);
+#endif
   }
 }
 

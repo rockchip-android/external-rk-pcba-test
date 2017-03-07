@@ -210,6 +210,9 @@ endif
 ifeq ($(TW_FORCE_CPUINFO_FOR_DEVICE_ID), true)
 LOCAL_CFLAGS += -DTW_FORCE_CPUINFO_FOR_DEVICE_ID
 endif
+ifeq ($(strip $(BOARD_USE_DRM)), true)
+LOCAL_CFLAGS += -DBOARD_USE_DRM
+endif
 
 # This binary is in the recovery ramdisk, which is otherwise a copy of root.
 # It gets copied there in config/Makefile.  LOCAL_MODULE_TAGS suppresses
@@ -228,8 +231,11 @@ LOCAL_STATIC_LIBRARIES += libmtdutils liblog
 LOCAL_C_INCLUDES += system/core/libpixelflinger/include
 
 include $(BUILD_EXECUTABLE)
-
+ifeq ($(strip $(BOARD_USE_DRM)), true)
+include $(commands_recovery_local_path)/minui_pcba/Android.mk
+else
 include $(commands_recovery_local_path)/minuitwrp/Android.mk
+endif
 include $(commands_recovery_local_path)/libjpegtwrp/Android.mk
 include $(commands_recovery_local_path)/minziptwrp/Android.mk
 include $(commands_recovery_local_path)/libbluetooth/Android.mk

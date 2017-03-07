@@ -5,7 +5,12 @@
 #include "test_case.h"
 #include "common.h"
 #include "language.h"
-#include "./minuitwrp/minui.h"
+
+#ifdef BOARD_USE_DRM
+#include "minui_pcba/minui.h"
+#else
+#include "minuitwrp/minui.h"
+#endif
 
 #include <linux/input.h>
 #include "script.h"

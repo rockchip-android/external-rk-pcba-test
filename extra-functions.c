@@ -45,7 +45,13 @@
 #include "extra-functions.h"
 #include "cutils/properties.h"
 //#include "install.h"
+
+#ifdef BOARD_USE_DRM
+#include "minui_pcba/minui.h"
+#else
 #include "minuitwrp/minui.h"
+#endif
+
 #include "minziptwrp/DirUtil.h"
 #include "minziptwrp/Zip.h"
 #include "recovery_ui.h"

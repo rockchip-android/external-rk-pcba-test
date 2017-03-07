@@ -15,7 +15,12 @@
 #include <inttypes.h>
 #include <errno.h>
 
-#include "./minuitwrp/minui.h"
+#ifdef BOARD_USE_DRM
+#include "minui_pcba/minui.h"
+#else
+#include "minuitwrp/minui.h"
+#endif
+
 #include "recovery_ui.h"
 #include "rtc_test.h"
 #include "screen_test.h"
