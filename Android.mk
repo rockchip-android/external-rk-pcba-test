@@ -25,7 +25,6 @@ include $(CLEAR_VARS)
 
 commands_recovery_local_path := $(LOCAL_PATH)
 
-TARGET_RECOVERY_GUI := true
 BOARD_HAS_NO_REAL_SDCARD := true
 TW_INTERNAL_STORAGE_PATH := "/mnt/sdcard"
 TW_INTERNAL_STORAGE_MOUNT_POINT := "/mnt/sdcard"
@@ -114,7 +113,6 @@ LOCAL_SRC_FILES += \
     alsa_mixer.c \
     alsa_pcm.c \
     codec_test.c \
-    camera_test.c
 endif # ($(strip $(TARGET_BOARD_PLATFORM)), rk312x)
 endif # ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 
@@ -221,11 +219,6 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES :=
 LOCAL_SHARED_LIBRARIES := 
 
-ifeq ($(TARGET_RECOVERY_GUI),true)
-LOCAL_STATIC_LIBRARIES += libtwgui
-else
-LOCAL_SRC_FILES += gui_stub.c
-endif
 LOCAL_STATIC_LIBRARIES += libm
 LOCAL_STATIC_LIBRARIES += libmincrypt
 LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp libbluetooth
@@ -237,7 +230,6 @@ LOCAL_C_INCLUDES += system/core/libpixelflinger/include
 include $(BUILD_EXECUTABLE)
 
 include $(commands_recovery_local_path)/minuitwrp/Android.mk
-include $(commands_recovery_local_path)/gui/Android.mk
 include $(commands_recovery_local_path)/libjpegtwrp/Android.mk
 include $(commands_recovery_local_path)/minziptwrp/Android.mk
 include $(commands_recovery_local_path)/libbluetooth/Android.mk

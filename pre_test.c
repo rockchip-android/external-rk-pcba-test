@@ -28,7 +28,6 @@
 #include "sdcard_test.h"
 #include "udisk_test.h"
 #include "common.h"
-#include "gui/gui.h"
 #include "extra-functions.h"
 #include "data.h"
 #include "script.h"
@@ -54,8 +53,6 @@
 #include "rk3288-camera/camera_test.h"
 #elif defined RK312X_PCBA
 #include "rk312x-camera/camera_test.h"
-#else
-#include "camera_test.h"
 #endif
 
 #include "lightsensor_test.h"
@@ -136,13 +133,6 @@ struct fm_msg *vibrator_msg;
 pthread_t falshlight_tid;
 char *falshlight_res;
 struct fm_msg *falshlight_msg;
-
-pthread_t camera_tid;
-char *camera_res;
-struct camera_msg *camera_msg;
-int camera_err = -1;
-
-pthread_t camera1_tid;
 
 pthread_t wlan_tid;
 char *wlan_res;
@@ -405,17 +395,6 @@ int start_test_pthread(struct testcase_info *tc_info)
 			return -1;
 		}
 	}
-#ifndef RK3288_PCBA
-	else if (!strcmp(tc_info->base_info->name, "camera")) {
-		tc_info->dev_id = 0;
-		err = pthread_create(&camera_tid, NULL, camera_test, tc_info);
-		if (err != 0) {
-			printf("create camera test thread error: %s/n",
-			       strerror(err));
-			return -1;
-		}
-	}
-#endif
 	else if (!strcmp(tc_info->base_info->name, "wifi")) {
 		err = pthread_create(&wlan_tid, NULL, wlan_test, tc_info);
 		if (err != 0) {
@@ -736,12 +715,11 @@ int main(int argc, char **argv)
 	freopen("/dev/ttyS2", "a", stderr);
 	setbuf(stderr, NULL);
 #endif
-	if (gui_init()) {
-		ui_init();
-		ui_set_background(BACKGROUND_ICON_INSTALLING);
-	}
+	
+	ui_init();
+	ui_set_background(BACKGROUND_ICON_INSTALLING);
+	
 	ui_print_init();
-	gui_loadResources();
 
 	w = gr_fb_width();
 
@@ -801,7 +779,6 @@ int main(int argc, char **argv)
 		start_auto_test_item(tc_info);
 	}
 
-	gui_start();
 	start_input_thread();
 
 	printf("pcba test over!\n");
