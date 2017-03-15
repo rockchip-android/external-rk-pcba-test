@@ -15,11 +15,7 @@
 #include <inttypes.h>
 #include <errno.h>
 
-#ifdef BOARD_USE_DRM
 #include "minui_pcba/minui.h"
-#else
-#include "minuitwrp/minui.h"
-#endif
 
 #include "recovery_ui.h"
 #include "rtc_test.h"
@@ -720,20 +716,19 @@ int main(int argc, char **argv)
 	freopen("/dev/ttyS2", "a", stderr);
 	setbuf(stderr, NULL);
 #endif
-	
 	ui_init();
 	ui_set_background(BACKGROUND_ICON_INSTALLING);
-	
 	ui_print_init();
-
 	w = gr_fb_width();
-
 	ui_print_xy_rgba((((w >> 1) - strlen(PCBA_VERSION_NAME)*CHAR_WIDTH/2)
 		/CHAR_WIDTH), 0, 0, 255, 0, 255, "%s\n", PCBA_VERSION_NAME);
+	printf("Now in Pre_test %d\n",__LINE__);
 	ui_print_xy_rgba(((w >> 2) / CHAR_WIDTH - 4), 1, 255, 255, 0, 255,
 			 "%s\n", PCBA_MANUAL_TEST);
-	drawline_4(255, 255, 0, 255, 0, (1 * CHAR_HEIGHT - CHAR_HEIGHT / 4),
-		w/2, CHAR_HEIGHT, 3);
+	printf("Now in Pre_test %d\n",__LINE__);
+	drawline_4(255, 255, 0, 255, 0, (1 * CHAR_HEIGHT - (CHAR_HEIGHT>>2)),
+		w>>1, CHAR_HEIGHT, 3);
+	printf("Now in Pre_test %d\n",__LINE__);
 
 	/*cur_p_y = (gr_fb_height() / CHAR_HEIGHT) - 1;*/
 
@@ -774,7 +769,7 @@ int main(int argc, char **argv)
 	ui_print_xy_rgba(((w >> 2) / CHAR_WIDTH - 4), manual_p_y, 255, 255,
 			 0, 255, "%s\n", PCBA_AUTO_TEST);
 	drawline_4(255, 255, 0, 255, 0,
-		   (CHAR_HEIGHT * (manual_p_y) - CHAR_HEIGHT / 4), w/2,
+		   (CHAR_HEIGHT * (manual_p_y) - (CHAR_HEIGHT>>2)), w>>1,
 		   CHAR_HEIGHT, 3);
 
 	printf("\n\nauto testcase:\n");

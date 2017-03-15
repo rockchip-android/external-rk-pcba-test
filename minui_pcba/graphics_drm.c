@@ -30,6 +30,7 @@
 
 #include "minui.h"
 #include "graphics.h"
+#include <pixelflinger/pixelflinger.h>
 
 #define ARRAY_SIZE(A) (sizeof(A)/sizeof(*(A)))
 
@@ -117,6 +118,7 @@ static int drm_format_to_bpp(uint32_t format) {
         case DRM_FORMAT_RGBX8888:
         case DRM_FORMAT_BGRX8888:
         case DRM_FORMAT_XBGR8888:
+        case DRM_FORMAT_ARGB8888:
         case DRM_FORMAT_XRGB8888:
             return 32;
         case DRM_FORMAT_RGB565:
@@ -131,6 +133,7 @@ static struct drm_surface *drm_create_surface(int width, int height) {
     struct drm_surface *surface;
     struct drm_mode_create_dumb create_dumb;
     uint32_t format;
+    __u32 base_format;
     int ret;
 
     surface = (struct drm_surface*)calloc(1, sizeof(*surface));
@@ -141,12 +144,24 @@ static struct drm_surface *drm_create_surface(int width, int height) {
 
 #if defined(RECOVERY_ABGR)
     format = DRM_FORMAT_RGBA8888;
+    base_format = GGL_PIXEL_FORMAT_RGBA_8888;
+    printf("setting DRM_FORMAT_RGBA8888 and GGL_PIXEL_FORMAT_RGBA_8888\n");
 #elif defined(RECOVERY_BGRA)
     format = DRM_FORMAT_ARGB8888;
+    base_format = GGL_PIXEL_FORMAT_BGRA_8888;
+    printf("setting DRM_FORMAT_ARGB8888 and GGL_PIXEL_FORMAT_BGRA_8888, GGL_PIXEL_FORMAT may not match!\n");
+#elif defined(RECOVERY_RGBA)
+    format = DRM_FORMAT_ABGR8888;
+    base_format = GGL_PIXEL_FORMAT_BGRA_8888;
+    printf("setting DRM_FORMAT_ABGR8888 and GGL_PIXEL_FORMAT_BGRA_8888, GGL_PIXEL_FORMAT may not match!\n");
 #elif defined(RECOVERY_RGBX)
     format = DRM_FORMAT_XBGR8888;
+    base_format = GGL_PIXEL_FORMAT_BGRA_8888;
+    printf("setting DRM_FORMAT_XBGR8888 and GGL_PIXEL_FORMAT_BGRA_8888, GGL_PIXEL_FORMAT may not match!\n");
 #else
     format = DRM_FORMAT_RGB565;
+    base_format = GGL_PIXEL_FORMAT_BGRA_8888;
+    printf("setting DRM_FORMAT_RGB565 and GGL_PIXEL_FORMAT_RGB_565\n");
 #endif
 
     memset(&create_dumb, 0, sizeof(create_dumb));
@@ -192,6 +207,7 @@ static struct drm_surface *drm_create_surface(int width, int height) {
     surface->base.width = width;
     surface->base.row_bytes = create_dumb.pitch;
     surface->base.pixel_bytes = create_dumb.bpp / 8;
+    surface->base.format = base_format;
 #if defined(TARGET_ARCH_64)
     surface->base.data = (unsigned char*)
                          mmap64(NULL,

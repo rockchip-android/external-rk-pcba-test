@@ -27,11 +27,7 @@
 #include "common.h"
 #include "tw_reboot.h"
 
-#ifdef BOARD_USE_DRM
 #include "minui_pcba/minui.h"
-#else
-#include "minuitwrp/minui.h"
-#endif
 
 #include "recovery_ui.h"
 #include "themes.h"
@@ -70,8 +66,21 @@ typedef struct{
 	   int a;
 } FillColorTile;
 FillColorTile  tiles[kMaxTiles];
-int tiles_count;
+int tiles_count = 0;
 
+typedef struct{ 
+	   int x0;
+	   int y0;
+	   int x1;
+	   int y1;
+	   int linewidth;
+	   int r;
+	   int g;
+	   int b;
+	   int a;
+} LineInfo;
+LineInfo  lines[kMaxTiles];
+int lines_count = 0;
 
 void gui_print(const char *fmt, ...);
 void gui_print_overwrite(const char *fmt, ...);
@@ -213,14 +222,8 @@ static void draw_progress_locked()
 }
 
 static void  draw_text_line(int left, int top, const char* t) {
-	//LOGI("%s>>left:%d>>top:%d\n",__func__,left,top);
   if (t[0] != '\0') {
-    //gr_text(0, row*CHAR_HEIGHT+1, t);
-#if defined(BOARD_USE_DRM)
     gr_text(left,top , t,0);
-#else
-    gr_text(left,top , t);
-#endif
   }
 }
 
@@ -244,77 +247,22 @@ static void draw_screen_locked(void)
 		gr_color(0, 0, 0, 160);
 		gr_fill(0, 0, gr_fb_width(), gr_fb_height());
 
-		int i = 0, j = 0;
-		int k = menu_top + 1; //counter for bottom horizontal text line location
-		if (show_menu)
-		{
-			LOGI("text_rows: %i\n", text_rows);
-			//LOGI("menu_items: %i\n", menu_items);
-			//LOGI("menu_top: %i\n", menu_top);
-			LOGI("menu_show_start: %i\n", menu_show_start);
-			//menu line item selection highlight draws
-			gr_color(mihc.r, mihc.g, mihc.b, mihc.a);
-			gr_fill(0, (menu_top + menu_sel - menu_show_start+1) * CHAR_HEIGHT,
-			        gr_fb_width(), CHAR_HEIGHT+1);
-
-			//draw semi-static headers
-			for (i = 0; i < menu_top; ++i) {
-			    gr_color(htc.r, htc.g, htc.b, htc.a);
-			   // draw_text_line(i, menu[i]);
-			    //LOGI("Semi-static headers internal counter i: %i\n", i);
-			}
-
-			//LOGI("Drawing horizontal start bar at k and k = %i\n", k);
-			gr_color(mhebc.r, mhebc.g, mhebc.b, mhebc.a);
-			//draws horizontal line at bottom of the menu
-			gr_fill(0, (k-1)*CHAR_HEIGHT+CHAR_HEIGHT/2-1,
-			        gr_fb_width(), 2);
-
-			//adjust counter for current position of selection and menu display starting point
-			if (menu_items - menu_show_start + menu_top >= text_rows){
-			    j = text_rows - menu_top;
-			    //LOGI("j = text_rows - mneu_top and j = %i\n", j);
-			} else {
-			    j = menu_items - menu_show_start;
-			    //LOGI("j = mneu_items - menu_show_start and j = %i\n", j);
-			}
-		    //LOGI("outside draw menu items for loop and i goes until limit. limit-menu_show_start + menu_top + j = %i\n", menu_show_start + menu_top + j);
-		    //draw menu items dynamically based on current menu starting position, menu selection point and headers
-		     for (i = menu_show_start + menu_top; i < (menu_show_start + menu_top + j); ++i) {
-		        //LOGI("inside draw menu items for loop and i = %i\n", i);
-		        if (i == menu_top + menu_sel) {
-		            gr_color(miwhc.r, miwhc.g, miwhc.b, miwhc.a);
-		            //LOGI("draw_text_line -menu_item_when_highlighted_color- at i + 1= %i\n", i+1);
-		           // draw_text_line(i - menu_show_start +1, menu[i]);
-		        } else {
-		            gr_color(mtc.r, mtc.g, mtc.b, mtc.a);
-		            //LOGI("draw_text_line -menu_item_color- at i + 1= %i\n", i+1);
-		          //  draw_text_line(i - menu_show_start +1, menu[i]);
-		        }
-		        //LOGI("inside draw menu items for loop and k = %i\n", k);
-		        k++;
-		    }
-			//LOGI("drawing horizontal end bar at k and k = %i\n", k);
-			gr_color(mhebc.r, mhebc.g, mhebc.b, mhebc.a);
-			//draws horizontal line at bottom of the menu
-			gr_fill(0, k*CHAR_HEIGHT+CHAR_HEIGHT/2-1,
-			        gr_fb_width(), 2);
-		}
-
-		k++; //keep ui_print below menu items display
-		//gr_color(upc.r, upc.g, upc.b, upc.a); //called by at least ui_print
-		//gr_color(itemsInfo[i].r, itemsInfo[i].g, itemsInfo[i].b, itemsInfo[i].a);
-		k = 0;
-		for (; k < text_row; ++k) {
+		int k = 0;
+		for (k = 0; k < text_row; ++k) {
 			gr_color(itemsInfo[k].r, itemsInfo[k].g, itemsInfo[k].b,
 				itemsInfo[k].a);
 			draw_text_line((itemsInfo[k].t_col + 1)*CHAR_WIDTH + 1,
 				(itemsInfo[k].t_row)*CHAR_HEIGHT, text[k]);
 		}
-		int t = 0;
-		for(t = 0;t < tiles_count;t++){
-        	gr_color(tiles[t].r, tiles[t].g, tiles[t].b, tiles[t].a);
-        	gr_fill(tiles[t].left, tiles[t].top, tiles[t].right, tiles[t].bottom);
+
+		for(k = 0; k < lines_count;k++){
+        	gr_color(lines[k].r, lines[k].g, lines[k].b, lines[k].a);
+        	gr_line(lines[k].x0, lines[k].y0, lines[k].x1, lines[k].y1,lines[k].linewidth);
+		}
+
+		for(k = 0; k < tiles_count;k++){
+			gr_color(tiles[k].r, tiles[k].g, tiles[k].b, tiles[k].a);
+			gr_fill(tiles[k].left, tiles[k].top, tiles[k].right, tiles[k].bottom);
 		}
 	}
 }
@@ -707,16 +655,11 @@ void ui_print_init(void)  //add by yxj
 	text_rows = gr_fb_height() / CHAR_HEIGHT;
 	if (text_rows > MAX_ROWS)
 		text_rows = MAX_ROWS;
-	
 	text_top = 1;
-
-#ifdef SOFIA3GR_PCBA
-	text_cols = MAX_COLS - 1;
-#else
     text_cols = gr_fb_width() / CHAR_WIDTH;
 	if (text_cols > MAX_COLS - 1) 
 		text_cols = MAX_COLS - 1;
-#endif
+
 	
 	set_theme("0"); //set r g b a 
 	//LOGI("text_col:%d>>text_row:%d>>text_cols:%d>>text_rows:%d\n",text_col,
@@ -762,35 +705,12 @@ void ui_init(void)
     text_rows = gr_fb_height() / CHAR_HEIGHT;
     if (text_rows > MAX_ROWS) text_rows = MAX_ROWS;
     text_top = 1;
-
-#ifdef SOFIA3GR_PCBA
-	text_cols = MAX_COLS - 1;
-#else
     text_cols = gr_fb_width() / CHAR_WIDTH;
     if (text_cols > MAX_COLS - 1) text_cols = MAX_COLS - 1;
-#endif
-
-    int i;
-	#if 0
-    for (i = 0; BITMAPS[i].name != NULL; ++i) {
-        int result = res_create_surface(BITMAPS[i].name, BITMAPS[i].surface);
-        if (result < 0) {
-            if (result == -2) {
-                LOGI("Bitmap %s missing header\n", BITMAPS[i].name);
-            } else {
-                //LOGE("Missing bitmap %s\n(Code %d)\n", BITMAPS[i].name, result);
-            }
-            *BITMAPS[i].surface = NULL;
-        }
-    }
-	#endif
-
-#ifndef SOFIA3GR_PCBA
 
     pthread_t t;
     pthread_create(&t, NULL, progress_thread, NULL);
     pthread_create(&t, NULL, input_thread, NULL);
-#endif
 
     gUiInitialized = 1;
 }
@@ -879,72 +799,34 @@ void FillColor(int r,int g,int b,int a,int left,int top,int width,int height)
 	pthread_mutex_unlock(&gUpdateMutex);
 }
 
-void drawline(int r,int g,int b,int a,int left,int top,int width,int height)
+void drawline(int r,int g,int b,int a,int x0,int y0,int x1,int y1,int linewidth)
 {
-	tiles_count += 1;
-	if(tiles_count > kMaxTiles)
+	lines_count += 1;
+	if(lines_count > kMaxTiles)
 	{
-		tiles_count = kMaxTiles;
+		lines_count = kMaxTiles;
 	}
-	tiles[tiles_count-1].left = left;
-	tiles[tiles_count-1].top = top;
-	tiles[tiles_count-1].right = width;
-	tiles[tiles_count-1].bottom = height;
-	tiles[tiles_count-1].r = r;
-	tiles[tiles_count-1].g = g;
-	tiles[tiles_count-1].b = b;
-	tiles[tiles_count-1].a = a;
+	lines[lines_count-1].x0 = x0;
+	lines[lines_count-1].y0 = y0;
+	lines[lines_count-1].x1 = x1;
+	lines[lines_count-1].y1 = y1;
+	lines[lines_count-1].linewidth = linewidth;
+	lines[lines_count-1].r = r;
+	lines[lines_count-1].g = g;
+	lines[lines_count-1].b = b;
+	lines[lines_count-1].a = a;
+}
+void drawline_4(int r,int g,int b,int a,int left,int top,int width,int height,int linewidth)
+{
+	drawline(r,g,b,a,left,top,left+width,top,linewidth);
+	drawline(r,g,b,a,left+width,top,left+width,top+height,linewidth);
+	drawline(r,g,b,a,left+width,top+height,left,top+height,linewidth);
+	drawline(r,g,b,a,left,top+height,left,top,linewidth);
 	pthread_mutex_lock(&gUpdateMutex);
 	update_screen_locked();
 	pthread_mutex_unlock(&gUpdateMutex);
 }
-void drawline_4(int r,int g,int b,int a,int left,int top,int width,int height,int linewidth)
-{
-	drawline(r,g,b,a,left,top,width,linewidth);
-	drawline(r,g,b,a,left,(top+height-linewidth),width,linewidth);
-	drawline(r,g,b,a,left,top,linewidth,height);
-	drawline(r,g,b,a,(left+width-linewidth),top,linewidth,height);
-}
 
-
-#if 0
-void ui_print(const char *fmt, ...)
-{
-    char buf[512];
-    va_list ap;
-    va_start(ap, fmt);
-    vsnprintf(buf, 512, fmt, ap);
-    va_end(ap);
-
-    fputs(buf, stdout);
-
-   // gui_print("%s", buf);
-	//printf("%s",buf);
-    // This can get called before ui_init(), so be careful.
-    pthread_mutex_lock(&gUpdateMutex);
-    if (text_rows > 0 && text_cols > 0)
-	{
-        char *ptr;
-        for (ptr = buf; *ptr != '\0'; ++ptr)
-		{
-            if (*ptr == '\n' || text_col >= text_cols) 
-			{
-                text[text_row][text_col] = '\0';
-                text_col = 0;
-                text_row = (text_row + 1) % text_rows;
-                if (text_row == text_top) text_top = (text_top + 1) % text_rows;
-            }
-            if (*ptr != '\n')
-				text[text_row][text_col++] = *ptr;
-        }
-        text[text_row][text_col] = '\0';
-        update_screen_locked();
-    }
-    pthread_mutex_unlock(&gUpdateMutex);
-}
-#else
-void ui_print(const char *fmt, ...) {return ;}
-#endif
 void ui_print_xy_rgba(int t_col,int t_row,int r,int g,int b,int a,const char* fmt, ...)
 {
 	char buf[512];

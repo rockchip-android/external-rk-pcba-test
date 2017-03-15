@@ -33,6 +33,7 @@ typedef struct {
     int row_bytes;
     int pixel_bytes;
     unsigned char* data;
+    __u32 format;
 } GRSurface;
 
 typedef GRSurface* gr_surface;
@@ -48,8 +49,13 @@ void gr_fb_blank(bool blank);
 
 void gr_clear();  // clear entire surface to current color
 void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-void gr_fill(int x1, int y1, int x2, int y2);
+void gr_clip(int x, int y, int w, int h);
+void gr_noclip();
+void gr_fill(int x, int y, int w, int h);
+void gr_line(int x0, int y0, int x1, int y1, int width);
+
 void gr_text(int x, int y, const char *s, int bold);
+gr_surface gr_render_circle(int radius, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void gr_texticon(int x, int y, gr_surface icon);
 int gr_measure(const char *s);
 void gr_font_size(int *x, int *y);
@@ -58,6 +64,8 @@ unsigned int gr_get_font_cwidth(void);
 void gr_blit(gr_surface source, int sx, int sy, int w, int h, int dx, int dy);
 unsigned int gr_get_width(gr_surface surface);
 unsigned int gr_get_height(gr_surface surface);
+int gr_get_surface(gr_surface* surface);
+int gr_free_surface(gr_surface surface);
 
 // input event structure, include <linux/input.h> for the definition.
 // see http://www.mjmwired.net/kernel/Documentation/input/ for info.

@@ -224,18 +224,15 @@ LOCAL_SHARED_LIBRARIES :=
 
 LOCAL_STATIC_LIBRARIES += libm
 LOCAL_STATIC_LIBRARIES += libmincrypt
-LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_static libpng libjpegtwrp libbluetooth
+LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_twrp libpng libjpegtwrp libbluetooth
 LOCAL_STATIC_LIBRARIES += libz libc libcutils libutils
 LOCAL_STATIC_LIBRARIES += libmtdutils liblog
 
 LOCAL_C_INCLUDES += system/core/libpixelflinger/include
 
 include $(BUILD_EXECUTABLE)
-ifeq ($(strip $(BOARD_USE_DRM)), true)
 include $(commands_recovery_local_path)/minui_pcba/Android.mk
-else
-include $(commands_recovery_local_path)/minuitwrp/Android.mk
-endif
+include $(commands_recovery_local_path)/libpixelflinger/Android.mk
 include $(commands_recovery_local_path)/libjpegtwrp/Android.mk
 include $(commands_recovery_local_path)/minziptwrp/Android.mk
 include $(commands_recovery_local_path)/libbluetooth/Android.mk
