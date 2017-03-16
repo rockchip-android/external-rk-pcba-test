@@ -1,8 +1,9 @@
 #!/bin/bash
-echo res.sh $1 $2 $3
+echo res.sh $1 $2 $3 $4
 TARGET_PRODUCT=$1
 PRODUCT_OUT=$2
 TARGET_BOARD_PLATFORM=$3
+TARGET_ARCH=$4
 TARGET_COMMON=common
 PCBA_PATH=external/rk-pcba-test
 BT_BLUEDROID=true
@@ -67,113 +68,224 @@ fi
 if [ -e "$PRODUCT_OUT/recovery/root/sbin/sh" ] ; then
 cp $PRODUCT_OUT/recovery/root/sbin/sh $PRODUCT_OUT/recovery/root/system/bin/
 fi
-if [ -e "$PRODUCT_OUT/obj/lib/libselinux.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/libselinux.so $PRODUCT_OUT/recovery/root/system/lib/
-fi
-if [ -e "$PRODUCT_OUT/obj/lib/libusbhost.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/libusbhost.so $PRODUCT_OUT/recovery/root/system/lib/
-fi
-if [ -e "$PRODUCT_OUT/obj/lib/libc.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/libc.so $PRODUCT_OUT/recovery/root/system/lib/
-fi
-if [ -e "$PRODUCT_OUT/obj/lib/libcutils.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/libcutils.so $PRODUCT_OUT/recovery/root/system/lib/
-fi
-if [ -e "$PRODUCT_OUT/obj/lib/liblog.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/liblog.so $PRODUCT_OUT/recovery/root/system/lib/
-fi
-if [ -e "$PRODUCT_OUT/obj/lib/libm.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/libm.so $PRODUCT_OUT/recovery/root/system/lib/
-fi
-if [ -e "$PRODUCT_OUT/obj/lib/libstdc++.so" ] ; then
-cp $PRODUCT_OUT/obj/lib/libstdc++.so $PRODUCT_OUT/recovery/root/system/lib/
+if [ $TARGET_ARCH = "arm64" ] ; then
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/libselinux.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/libselinux.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/libusbhost.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/libusbhost.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/libc.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/libc.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/libcutils.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/libcutils.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/liblog.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/liblog.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/libm.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/libm.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj_arm/lib/libstdc++.so" ] ; then
+    cp $PRODUCT_OUT/obj_arm/lib/libstdc++.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+else
+    if [ -e "$PRODUCT_OUT/obj/lib/libselinux.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libselinux.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libusbhost.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libusbhost.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libc.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libc.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libcutils.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libcutils.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/liblog.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/liblog.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libm.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libm.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
+    if [ -e "$PRODUCT_OUT/obj/lib/libstdc++.so" ] ; then
+    cp $PRODUCT_OUT/obj/lib/libstdc++.so $PRODUCT_OUT/recovery/root/system/lib/
+    fi
 fi
 
 if [ $BT_BLUEDROID = "true" ] ; then
-    if [ -e "$PRODUCT_OUT/obj/lib/bluetooth.default.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/bluetooth.default.so $PRODUCT_OUT/recovery/root/system/lib/hw/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbluetooth_mtk.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbluetooth_mtk.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-hci.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-hci.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-utils.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-utils.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/vendor/lib/libbt-vendor.so" ] ; then
-    cp $PRODUCT_OUT/obj/vendor/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor_uart.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-vendor_uart.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor_usb.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbt-vendor_usb.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libcorkscrew.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libcorkscrew.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libgccdemangle.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libgccdemangle.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libhardware_legacy.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libhardware_legacy.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libhardware.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libhardware.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libnetutils.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libnetutils.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libpower.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libpower.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libutils.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libutils.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libwpa_client.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libwpa_client.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libz.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libz.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libbacktrace.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libbacktrace.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libstlport.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libstlport.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libunwind.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libunwind.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libcrypto.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libcrypto.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libdl.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libdl.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libunwind-ptrace.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libunwind-ptrace.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/obj/lib/libc++.so" ] ; then
-    cp $PRODUCT_OUT/obj/lib/libc++.so $PRODUCT_OUT/recovery/root/system/lib/
-    fi
-    if [ -e "$PRODUCT_OUT/system/bin/bdt" ] ; then
-    cp $PRODUCT_OUT/system/bin/bdt $PRODUCT_OUT/recovery/root/system/bin/
-    fi 
-    if [ -e "$PRODUCT_OUT/system/etc/bluetooth/" ] ; then
-    cp $PRODUCT_OUT/system/etc/bluetooth/ $PRODUCT_OUT/recovery/root/system/etc/ -a
-    fi
+	if [ $TARGET_ARCH = "arm64" ] ; then
+	    if [ -e "$PRODUCT_OUT/obj_arm/lib/bluetooth.default.so" ] ; then
+	    cp $PRODUCT_OUT/obj_arm/lib/bluetooth.default.so $PRODUCT_OUT/recovery/root/system/lib/hw/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbluetooth_mtk.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbluetooth_mtk.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-hci.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-hci.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-utils.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-utils.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/vendor/lib/libbt-vendor.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/vendor/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-vendor.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-vendor-rtl8723bu.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-vendor-rtl8723bs.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-vendor-rtl8723bs.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-vendor_uart.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-vendor_uart.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbt-vendor_usb.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbt-vendor_usb.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libcorkscrew.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libcorkscrew.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libgccdemangle.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libgccdemangle.so $PRODUCT_OUT/recovery/root/system/lib/
+		fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libhardware_legacy.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libhardware_legacy.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libhardware.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libhardware.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libnetutils.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libnetutils.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libpower.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libpower.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libutils.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libutils.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libwpa_client.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libwpa_client.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libz.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libz.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libbacktrace.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libbacktrace.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libstlport.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libstlport.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libunwind.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libunwind.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libcrypto.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libcrypto.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libdl.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libdl.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libunwind-ptrace.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libunwind-ptrace.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj_arm/lib/libc++.so" ] ; then
+        cp $PRODUCT_OUT/obj_arm/lib/libc++.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/system/bin/bdt" ] ; then
+        cp $PRODUCT_OUT/system/bin/bdt $PRODUCT_OUT/recovery/root/system/bin/
+        fi
+        if [ -e "$PRODUCT_OUT/system/etc/bluetooth/" ] ; then
+        cp $PRODUCT_OUT/system/etc/bluetooth/ $PRODUCT_OUT/recovery/root/system/etc/ -a
+        fi
+	else
+	if [ -e "$PRODUCT_OUT/obj/lib/bluetooth.default.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/bluetooth.default.so $PRODUCT_OUT/recovery/root/system/lib/hw/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbluetooth_mtk.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbluetooth_mtk.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-hci.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-hci.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-utils.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-utils.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/vendor/lib/libbt-vendor.so" ] ; then
+        cp $PRODUCT_OUT/obj/vendor/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-vendor.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bu.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bs.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-vendor-rtl8723bs.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor_uart.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-vendor_uart.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbt-vendor_usb.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbt-vendor_usb.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libcorkscrew.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libcorkscrew.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libgccdemangle.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libgccdemangle.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libhardware_legacy.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libhardware_legacy.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libhardware.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libhardware.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libnetutils.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libnetutils.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libpower.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libpower.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libutils.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libutils.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libwpa_client.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libwpa_client.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libz.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libz.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libbacktrace.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libbacktrace.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libstlport.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libstlport.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libunwind.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libunwind.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libcrypto.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libcrypto.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libdl.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libdl.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libunwind-ptrace.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libunwind-ptrace.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/obj/lib/libc++.so" ] ; then
+        cp $PRODUCT_OUT/obj/lib/libc++.so $PRODUCT_OUT/recovery/root/system/lib/
+        fi
+        if [ -e "$PRODUCT_OUT/system/bin/bdt" ] ; then
+        cp $PRODUCT_OUT/system/bin/bdt $PRODUCT_OUT/recovery/root/system/bin/
+        fi
+	if [ -e "$PRODUCT_OUT/system/etc/bluetooth/" ] ; then
+        cp $PRODUCT_OUT/system/etc/bluetooth/ $PRODUCT_OUT/recovery/root/system/etc/ -a
+        fi
+	fi
 fi
 
 # for sensor test
@@ -199,4 +311,7 @@ fi
 if [ -e "$PRODUCT_OUT/root/drmboot.ko" ] ; then
 mkdir -p $PRODUCT_OUT/recovery/root/system/lib/modules
 cp $PRODUCT_OUT/root/drmboot.ko $PRODUCT_OUT/recovery/root/system/lib/modules/
+fi
+if [ -e "$PRODUCT_OUT/system/lib/libbase.so" ] ; then
+cp $PRODUCT_OUT/system/lib/libbase.so $PRODUCT_OUT/recovery/root/system/lib/
 fi

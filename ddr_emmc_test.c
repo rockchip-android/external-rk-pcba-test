@@ -10,11 +10,11 @@
 
 #ifdef RK3399_PCBA
 
-#define EMMCPATH "/sys/bus/mmc/devices/mmc1:0001/block/mmcblk0/size"
+#define EMMCPATH "/sys/bus/mmc/devices/mmc1:0001/block/mmcblk1/size"
 #define READ_DDR_COMMAND "cat /proc/zoneinfo | busybox grep present | \
-				busybox awk '{print $2}'"			
+				busybox awk '{print $2}'"
 #else
-	
+
 #define EMMCPATH "/sys/bus/mmc/devices/mmc0:0001/block/mmcblk0/size"
 #define READ_DDR_COMMAND "cat /proc/zoneinfo | busybox grep present | \
 				busybox awk 'BEGIN{a=0}{a+=$2}END{print a}'"

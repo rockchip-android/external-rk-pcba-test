@@ -168,7 +168,8 @@ void* rec_play_test_1(void *argv)
 		return 0;
 	}
 
-	route_set_controls(MAIN_MIC_CAPTURE_ROUTE);
+	//route_set_controls(MAIN_MIC_CAPTURE_ROUTE);
+	route_set_controls(HANDS_FREE_MIC_CAPTURE_ROUTE);
 	printf("###############################################\n");
 	while (!pcm_read(pcmIn, data, bufsize)) {
 
