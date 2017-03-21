@@ -194,8 +194,80 @@ if [ $BT_BLUEDROID = "true" ] ; then
         if [ -e "$PRODUCT_OUT/obj_arm/lib/libc++.so" ] ; then
         cp $PRODUCT_OUT/obj_arm/lib/libc++.so $PRODUCT_OUT/recovery/root/system/lib/
         fi
-        if [ -e "$PRODUCT_OUT/system/bin/bdt" ] ; then
-        cp $PRODUCT_OUT/system/bin/bdt $PRODUCT_OUT/recovery/root/system/bin/
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libaudioutils.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libaudioutils.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libinder.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libinder.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libcamera_client.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libcamera_client.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libcamera_metadata.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libcamera_metadata.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libchrome.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libchrome.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libEGL.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libEGL.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libevent.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libevent.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libexpat.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libexpat.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libGLESv.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libGLESv.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libgui.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libgui.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libicui18n.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libicui18n.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libicuuc.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libicuuc.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/liblzma.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/liblzma.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libmedia.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libmedia.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libnbaio.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libnbaio.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libpowermanager.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libpowermanager.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libprotobuf-cpp-full.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libprotobuf-cpp-full.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libsonivox.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libsonivox.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libspeexresampler.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libspeexresampler.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libstagefright_foundation.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libstagefright_foundation.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libsync.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libsync.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libui.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libui.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libbinder.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libbinder.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj_arm/lib/libGLESv2.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libGLESv2.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+        if [ -e "$PRODUCT_OUT/obj_arm/EXECUTABLES/bdt_intermediates/bdt" ] ; then
+        cp $PRODUCT_OUT/obj_arm/EXECUTABLES/bdt_intermediates/bdt $PRODUCT_OUT/recovery/root/system/bin/
         fi
         if [ -e "$PRODUCT_OUT/system/etc/bluetooth/" ] ; then
         cp $PRODUCT_OUT/system/etc/bluetooth/ $PRODUCT_OUT/recovery/root/system/etc/ -a
