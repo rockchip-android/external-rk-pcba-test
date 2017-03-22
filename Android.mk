@@ -236,3 +236,4 @@ include $(commands_recovery_local_path)/libpixelflinger/Android.mk
 include $(commands_recovery_local_path)/libjpegtwrp/Android.mk
 include $(commands_recovery_local_path)/minziptwrp/Android.mk
 include $(commands_recovery_local_path)/libbluetooth/Android.mk
+include $(commands_recovery_local_path)/bluedroidtest/Android.mk
