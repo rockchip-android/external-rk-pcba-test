@@ -266,6 +266,12 @@ if [ $BT_BLUEDROID = "true" ] ; then
 	if [ -e "$PRODUCT_OUT/obj_arm/lib/libGLESv2.so" ] ; then
 	cp $PRODUCT_OUT/obj_arm/lib/libGLESv2.so $PRODUCT_OUT/recovery/root/system/lib/
 	fi
+	if [ -e "$PRODUCT_OUT/obj/lib/libnativehelper.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libnativehelper.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
+	if [ -e "$PRODUCT_OUT/obj/lib/libnativeloader.so" ] ; then
+	cp $PRODUCT_OUT/obj_arm/lib/libnativeloader.so $PRODUCT_OUT/recovery/root/system/lib/
+	fi
         if [ -e "$PRODUCT_OUT/obj_arm/EXECUTABLES/bdt_intermediates/bdt" ] ; then
         cp $PRODUCT_OUT/obj_arm/EXECUTABLES/bdt_intermediates/bdt $PRODUCT_OUT/recovery/root/system/bin/
         fi
