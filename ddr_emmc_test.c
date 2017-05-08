@@ -8,7 +8,7 @@
 #include "language.h"
 #include "ddr_emmc_test.h"
 
-#ifdef RK3399_PCBA
+#if defined(RK3399_PCBA) || defined(RK3368_PCBA)
 
 #define EMMCPATH "/sys/bus/mmc/devices/mmc1:0001/block/mmcblk1/size"
 #define READ_DDR_COMMAND "cat /proc/zoneinfo | busybox grep present | \
