@@ -4,7 +4,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := codec_test
 LOCAL_FORCE_STATIC_EXECUTABLE := true
 LOCAL_C_INCLUDES += \
-    bionic external/stlport/stlport \
+    bionic \
+    external/stlport/stlport \
     $(LOCAL_PATH)/Language \
     external/libpng/
 
@@ -20,17 +21,18 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES := libc libcutils liblog
 include $(BUILD_EXECUTABLE)
 
+commands_recovery_local_path := $(LOCAL_PATH)
+
 # =====================================================
 include $(CLEAR_VARS)
 
-commands_recovery_local_path := $(LOCAL_PATH)
 
 BOARD_HAS_NO_REAL_SDCARD := true
 TW_INTERNAL_STORAGE_PATH := "/mnt/sdcard"
 TW_INTERNAL_STORAGE_MOUNT_POINT := "/mnt/sdcard"
 LOCAL_MULTILIB := 32
 LOCAL_MODULE := pcba_core
-LOCAL_FORCE_STATIC_EXECUTABLE := true
+#LOCAL_FORCE_STATIC_EXECUTABLE := true
 LOCAL_MODULE_PATH := $(TARGET_RECOVERY_ROOT_OUT)/sbin
 LOCAL_C_INCLUDES += \
     bionic \
@@ -109,10 +111,22 @@ LOCAL_SRC_FILES += \
     codec_test.c \
     rk312x-camera/camera_test.c
 else
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)), rk3368)
+LOCAL_CFLAGS += -DRK3368_PCBA
 LOCAL_SRC_FILES += \
     alsa_mixer.c \
     alsa_pcm.c \
     codec_test.c \
+    rk3368-camera/camera_test.c \
+    rk3368-camera/OV8858_MIPI.c \
+    rk3368-camera/GC2155_CIF.c \
+    rk3368-camera/GC2145_CIF.c
+else
+LOCAL_SRC_FILES += \
+    alsa_mixer.c \
+    alsa_pcm.c \
+    codec_test.c
+endif # ($(strip $(TARGET_BOARD_PLATFORM)), rk3368)
 endif # ($(strip $(TARGET_BOARD_PLATFORM)), rk312x)
 endif # ($(strip $(TARGET_BOARD_PLATFORM)), rk3288)
 
@@ -220,12 +234,12 @@ endif
 # TODO: Build the ramdisk image in a more principled way.
 LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES :=
-LOCAL_SHARED_LIBRARIES := 
+LOCAL_SHARED_LIBRARIES :=
 
+LOCAL_SHARED_LIBRARIES += libz libc libcutils libutils libion
 LOCAL_STATIC_LIBRARIES += libm
 LOCAL_STATIC_LIBRARIES += libmincrypt
 LOCAL_STATIC_LIBRARIES += libminuitwrp libpixelflinger_twrp libpng libjpegtwrp libbluetooth
-LOCAL_STATIC_LIBRARIES += libz libc libcutils libutils
 LOCAL_STATIC_LIBRARIES += libmtdutils liblog
 
 LOCAL_C_INCLUDES += system/core/libpixelflinger/include

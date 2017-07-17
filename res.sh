@@ -393,3 +393,8 @@ fi
 if [ -e "$PRODUCT_OUT/system/lib/libbase.so" ] ; then
 cp $PRODUCT_OUT/system/lib/libbase.so $PRODUCT_OUT/recovery/root/system/lib/
 fi
+
+#for camera test
+if [ -e "$PRODUCT_OUT/system/lib/libion.so" ] ; then
+cp $PRODUCT_OUT/system/lib/libion.so $PRODUCT_OUT/recovery/root/system/lib/
+fi

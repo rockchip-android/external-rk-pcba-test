@@ -54,6 +54,8 @@
 #include "rk3288-camera/camera_test.h"
 #elif defined RK312X_PCBA
 #include "rk312x-camera/camera_test.h"
+#elif defined RK3368_PCBA
+#include "rk3368-camera/camera_test.h"
 #endif
 
 #include "lightsensor_test.h"
@@ -134,6 +136,11 @@ struct fm_msg *vibrator_msg;
 pthread_t falshlight_tid;
 char *falshlight_res;
 struct fm_msg *falshlight_msg;
+
+pthread_t camera_tid;
+char *camera_res;
+struct camera_msg *camera_msg;
+int camera_err = -1;
 
 pthread_t wlan_tid;
 char *wlan_res;
@@ -395,7 +402,15 @@ int start_test_pthread(struct testcase_info *tc_info)
 			       strerror(err));
 			return -1;
 		}
-	}
+	} else if (!strcmp(tc_info->base_info->name, "camera")) {
+		tc_info->dev_id = 0;
+		err = pthread_create(&camera_tid, NULL, camera_test, tc_info);
+		if (err != 0) {
+		       printf("create camera test thread error: %s/n",
+		              strerror(err));
+		       return -1;
+		}
+    	}
 	else if (!strcmp(tc_info->base_info->name, "wifi")) {
 		err = pthread_create(&wlan_tid, NULL, wlan_test, tc_info);
 		if (err != 0) {
@@ -710,12 +725,12 @@ int main(int argc, char **argv)
 	freopen("/dev/ttyFIQ0", "a", stderr);
 	setbuf(stderr, NULL);
 
-#ifdef RK3368_PCBA
+/*#ifdef RK3368_PCBA
 	freopen("/dev/ttyS2", "a", stdout);
 	setbuf(stdout, NULL);
 	freopen("/dev/ttyS2", "a", stderr);
 	setbuf(stderr, NULL);
-#endif
+#endif*/
 	ui_init();
 	ui_set_background(BACKGROUND_ICON_INSTALLING);
 	ui_print_init();
