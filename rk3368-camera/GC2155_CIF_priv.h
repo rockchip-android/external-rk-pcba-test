@@ -3,18 +3,15 @@
 /*
 *              CAMSYS_TEST DRIVER VERSION NOTE
 *
-*v0.1.0 : gc2155 driver ok, can preview.
+*v0.1.0 : GC2155 driver ok, can preview.
 *
 */
 #define Camsys_Teset_Driver_Version		"Camsys_Test_GC2155_v(0x0,0,1.0)"
-
-#define IMAGE_W							800
-#define IMAGE_H							600
-#define SENSOR_NAME						"GC2155"
-#define MIPI_LANE_NUM					2
+#include "camera_test.h"
 
 int Gc2155_sensor_reg_init(int camsys_fd,unsigned int *i2cbase);
 int Gc2155_sensor_streamon(int camsys_fd,unsigned int on);
-void Gc2155_getResolution(int *width, int *height);
+int Gc2155_get_SensorInfo(rk_camera_info_t *rk_camera_info);
+
 #endif
 

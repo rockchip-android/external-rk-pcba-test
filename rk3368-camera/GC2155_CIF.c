@@ -5,7 +5,6 @@
 
 
 #include "GC2155_CIF_priv.h"
-#include "camsys_head.h"
 
 //==================================
 //sensor setting
@@ -16,16 +15,14 @@
 #define REG_SOFTWARE_RST				0xFE
 #define REG_SOFTWARE_RST_DATA			0x80
 #define I2C_NR_ADR_BYTES                1
-#define I2C_NR_DAT_BYTES                1
+#define I2C_NR_DAT_BYTES                0x01
 
 #define REG_CHIP_ID_H					0xF0
-#define REG_CHIP_ID_M					0xF1
 #define REG_CHIP_ID_L					0xF1
 
 //=================================
 #define SENSOR_I2C_NUM					3
 #define SENSOR_I2C_RATE					100000
-
 struct rk_sensor_reg {
 	unsigned char reg;
 	unsigned char val;
@@ -816,7 +813,7 @@ int Gc2155_sensor_streamon(int camsys_fd,unsigned int on)
     i2cinfo.bus_num = SENSOR_I2C_NUM;
     i2cinfo.slave_addr = SENSOR_I2C_ADDR;
     i2cinfo.reg_addr = REG_STREAM_ON;
-    i2cinfo.reg_size = I2C_NR_ADR_BYTES; 
+    i2cinfo.reg_size = 2;
     i2cinfo.val = on;
     i2cinfo.val_size = I2C_NR_DAT_BYTES;
     i2cinfo.i2cbuf_directly = 0;
@@ -831,10 +828,43 @@ int Gc2155_sensor_streamon(int camsys_fd,unsigned int on)
     return err;
 }
 
-void Gc2155_getResolution(int * width,int * height)
+int Gc2155_get_SensorInfo(rk_camera_info_t *rk_camera_info)
 {
-	*width = 800;
-	*height = 600;
+	//rk_camera_info_t rk_camera_info;
+
+
+	rk_camera_info->phy_type		= CamSys_Phy_Cif; //cif:CamSys_Phy_Cif mipi:CamSys_Phy_Mipi
+	rk_camera_info->lane_num		= 2; //values:1,2,4
+	rk_camera_info->bit_rate		= 328; //lane_num(1):720, lane_num(2):328, lane_num(4):408
+	rk_camera_info->phy_index		= 0x1; //Rx/Tx:0x1 Rx:0x0
+	rk_camera_info->mipi_img_data_sel = 0x2c; //cif:0x2c mipi:0x2b
+	rk_camera_info->cif_num			= 0;
+	rk_camera_info->fmt				= CamSys_Fmt_Raw_12b;
+	rk_camera_info->cifio			= CamSys_SensorBit0_CifBit4;
+
+	rk_camera_info->width			= 800;
+	rk_camera_info->height			= 600;
+
+    // 321:  000: raw picture
+    //       001: ccir656
+    //       010: ccir601
+    //       011: bayer rgb
+    //       100: data mode
+	rk_camera_info->Mode			= CCIR601;
+	rk_camera_info->YCSequence		= CbYCrY;		   
+	rk_camera_info->Conv422 		= Y0Cb0Y1Cr1;
+	rk_camera_info->BPat			= BGBGGRGR ;
+	rk_camera_info->HPol			= HPOL_HIGH;
+	rk_camera_info->VPol			= VPOL_LOW;
+	rk_camera_info->Edge			= SAMPLEEDGE_POS;
+	//rk_camera_info->SmiaMode		= ISI_SMIA_OFF;
+	//rk_camera_info->MipiMode		= ISI_MIPI_OFF;
+	//rk_camera_info->SensorOutputMode = ISI_SENSOR_OUTPUT_MODE_YUV;
+	rk_camera_info->dev_id = CAMSYS_DEVID_SENSOR_1B; //back:CAMSYS_DEVID_SENSOR_1A front:CAMSYS_DEVID_SENSOR_1B
+
+	strlcpy((char*)rk_camera_info->sensorname, "GC2155",sizeof(rk_camera_info->sensorname));
+	strlcpy((char*)rk_camera_info->version, "0x1.0.0",sizeof(rk_camera_info->version));
+	return 0;
 }
 
 
