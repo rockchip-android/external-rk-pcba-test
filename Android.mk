@@ -120,7 +120,8 @@ LOCAL_SRC_FILES += \
     rk3368-camera/camera_test.c \
     rk3368-camera/OV8858_MIPI.c \
     rk3368-camera/GC2155_CIF.c \
-    rk3368-camera/GC2145_CIF.c
+    rk3368-camera/GC2145_CIF.c \
+    rk3368-camera/GC0329_CIF.c
 else
 LOCAL_SRC_FILES += \
     alsa_mixer.c \

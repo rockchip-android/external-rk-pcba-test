@@ -6,6 +6,7 @@
 #include "OV8858_MIPI_priv.h"
 #include "GC2155_CIF_priv.h"
 #include "GC2145_CIF_priv.h"
+#include "GC0329_CIF_priv.h"
 
 #define VIDEO_DEV_NAME   "/dev/video0"
 #define PMEM_DEV_NAME    "/dev/pmem_cam"
@@ -493,6 +494,10 @@ int extdev_init(int camsys_fd,unsigned int *i2cbase)
 
     if (!strcmp(BACK_SENSOR_NAME, "ov8858"))
 		err = Ov8858_sensor_reg_init(camsys_fd,i2cbase);
+	else  if (!strcmp(BACK_SENSOR_NAME, "gc2155"))
+		err = Gc2155_sensor_reg_init(camsys_fd,i2cbase);
+	else if (!strcmp(BACK_SENSOR_NAME, "gc2145"))
+	    	err = Gc2145_sensor_reg_init(camsys_fd,i2cbase);
 	else
 		printf(" %s sensor_reg_init fail", BACK_SENSOR_NAME);
 
@@ -584,6 +589,8 @@ int extdev_init_front(int camsys_fd,unsigned int *i2cbase)
 		err = Gc2155_sensor_reg_init(camsys_fd,i2cbase);
 	else if (!strcmp(FRONT_SENSOR_NAME, "gc2145"))
 	    err = Gc2145_sensor_reg_init(camsys_fd,i2cbase);
+	else if (!strcmp(FRONT_SENSOR_NAME, "gc0329"))
+	    err = Gc0329_sensor_reg_init(camsys_fd,i2cbase);
 	else
 		printf(" %s sensor_reg_init fail", FRONT_SENSOR_NAME);
 
@@ -826,6 +833,10 @@ int startCameraTest(){
 
 	if (!strcmp(BACK_SENSOR_NAME, "ov8858"))
 		Ov8858_get_SensorInfo(&camera_test_info);
+	else if (!strcmp(BACK_SENSOR_NAME, "gc2155"))
+		Gc2155_get_SensorInfo(&camera_test_info);
+	else if (!strcmp(BACK_SENSOR_NAME, "gc2145"))
+	    	Gc2145_get_SensorInfo(&camera_test_info);
 	else
 		printf("%s get_SensorInfo fail\n", BACK_SENSOR_NAME);
 	printf("Camera %s phy_type:%d image_w_h:%dx%d\n", BACK_SENSOR_NAME,
@@ -925,6 +936,10 @@ int startCameraTest(){
 
 	if (!strcmp(BACK_SENSOR_NAME, "ov8858"))
 		err = Ov8858_sensor_streamon(camsys_fd,1);
+	else if (!strcmp(BACK_SENSOR_NAME, "gc2155"))
+		err1 = Gc2155_sensor_streamon(camsys_fd,1);
+	else if (!strcmp(BACK_SENSOR_NAME, "gc2145"))
+		err1 = Gc2145_sensor_streamon(camsys_fd,1);
 	else
 		printf("%s sensor streamon not ok\n", BACK_SENSOR_NAME);
 	printf("%s %d  hcc\n",__FUNCTION__,__LINE__);  
@@ -1045,6 +1060,8 @@ Next:
 			Gc2155_get_SensorInfo(&camera_test_info);
 		else if (!strcmp(FRONT_SENSOR_NAME, "gc2145"))
 			Gc2145_get_SensorInfo(&camera_test_info);
+		else if (!strcmp(FRONT_SENSOR_NAME, "gc0329"))
+			Gc0329_get_SensorInfo(&camera_test_info);
 		else
 			printf("%s get_SensorInfo fail\n", FRONT_SENSOR_NAME);
 		printf("Camera %s phy_type:%d image_w_h:%dx%d\n", FRONT_SENSOR_NAME,
@@ -1145,6 +1162,8 @@ Next:
 			err1 = Gc2155_sensor_streamon(camsys_fd,1);
 		else if (!strcmp(FRONT_SENSOR_NAME, "gc2145"))
 			err1 = Gc2145_sensor_streamon(camsys_fd,1);
+		else if (!strcmp(FRONT_SENSOR_NAME, "gc0329"))
+			err1 = Gc0329_sensor_streamon(camsys_fd,1);
 		else
 			printf("%s snesor streamon fail\n", FRONT_SENSOR_NAME);
 		printf("%s %d  hcc\n",__FUNCTION__,__LINE__);  
