@@ -319,7 +319,8 @@ static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
     int modes;
     /* Look for LVDS/eDP/DSI connectors. Those are the main screens. */
     unsigned kConnectorPriority[] = {
-        DRM_MODE_CONNECTOR_LVDS,
+        DRM_MODE_CONNECTOR_HDMIA,
+	DRM_MODE_CONNECTOR_LVDS,
         DRM_MODE_CONNECTOR_eDP,
         DRM_MODE_CONNECTOR_DSI,
     };

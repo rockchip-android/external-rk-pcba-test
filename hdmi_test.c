@@ -158,7 +158,7 @@ void* hdmi_test(void* argv)
 			if(hpdstate == HDMI_INSERT) {
 				// Test FB
 				LOG("[%s] start test screen\n", __FUNCTION__);
-				screen_test(NULL);
+				//screen_test(NULL);
 				// Test audio
 				LOG("[%s] start test audio\n", __FUNCTION__);
 				hdmi_audio_test(sound);
